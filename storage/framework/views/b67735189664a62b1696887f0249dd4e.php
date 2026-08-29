@@ -124,15 +124,17 @@
                 <div class="brand-icon" style="width: 34px; height: 34px; font-size: 16px;">M</div>
                 <div>
                     <div style="font-weight: 800; font-size: 16px; color: #FFFFFF;">MIRANSH Admin</div>
-                    <div style="font-size: 11px; color: #94A3B8;">Web Content Manager</div>
+                    <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
                 </div>
             </div>
 
             <ul class="sidebar-menu">
-                <li><button class="sidebar-item-btn active" onclick="switchAdminTab('company', this)">🏢 会社情報・CEO写真</button></li>
+                <li><button class="sidebar-item-btn active" onclick="switchAdminTab('company', this)">🏢 会社情報・CEO設定</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('about', this)">📖 About (会社紹介)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('services', this)">💼 事業内容 (Services)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this)">📰 採用事例 (Stories)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('faqs', this)">❓ FAQ・よくある質問 (<?php echo e(count($faqs)); ?>)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('ai', this)">🐟 Sakana AI 設定・テスト</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this)">📬 お問い合わせ (<?php echo e(count($inquiries)); ?>)</button></li>
             </ul>
 
@@ -150,8 +152,8 @@
         <main class="admin-main">
             <div class="admin-topbar">
                 <div>
-                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム</h1>
-                    <p style="font-size: 14px; color: #64748B;">ホームページ上の全テキスト・写真・事業内容・採用事例をリアルタイムに更新できます。</p>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム (Laravel)</h1>
+                    <p style="font-size: 14px; color: #64748B;">ホームページ上の全テキスト・写真・事業内容・採用事例・FAQ・Sakana AIをリアルタイムに更新できます。</p>
                 </div>
             </div>
 
@@ -166,12 +168,24 @@
             <div id="pane-company" class="tab-pane active">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        会社基本情報・代表写真・ヒーロー設定
+                        会社基本情報・代表者（CEO）設定・ヒーロー設定
                     </h2>
 
                     <form action="<?php echo e(route('admin.company.update')); ?>" method="POST">
                         <?php echo csrf_field(); ?>
-                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）写真・代表メッセージ</h3>
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）バイリンガル氏名・役職・写真</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">代表者 日本語氏名 (CEO Japanese Name)</label>
+                                <input type="text" name="ceo_name_ja" class="form-input" value="<?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表者 英語氏名 (CEO English Name)</label>
+                                <input type="text" name="ceo_name_en" class="form-input" value="<?php echo e($company->ceo_name_en ?? 'Giri Ram Krishna'); ?>" required>
+                            </div>
+                        </div>
+
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">代表者 役職 (日本語)</label>
@@ -185,13 +199,13 @@
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">代表者 氏名</label>
-                                <input type="text" name="ceo_name" class="form-input" value="<?php echo e($company->ceo_name ?? 'ギリ ラム クリシュナ (Giri Ram Krishna)'); ?>">
+                                <label class="form-label">代表者 顔写真 画像URL</label>
+                                <input type="text" name="ceo_image" class="form-input" value="<?php echo e($company->ceo_image ?? '/images/ceo_portrait.jpg'); ?>">
+                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/ceo_portrait.jpg</code></div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">代表者 顔写真 画像URL</label>
-                                <input type="text" name="ceo_image" class="form-input" value="<?php echo e($company->ceo_image ?? '/images/abc.jpeg'); ?>">
-                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/abc.jpeg</code></div>
+                                <label class="form-label">代表者 統合表示名 (後方互換)</label>
+                                <input type="text" name="ceo_name" class="form-input" value="<?php echo e($company->ceo_name ?? 'ギリ ラム クリシュナ (Giri Ram Krishna)'); ?>">
                             </div>
                         </div>
 
@@ -220,123 +234,157 @@
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">ヒーロー メインキャッチ (日本語)</label>
+                                <label class="form-label">キャッチコピー (日本語)</label>
                                 <input type="text" name="hero_title_ja" class="form-input" value="<?php echo e($company->hero_title_ja); ?>">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">ヒーロー アクセント文字 (日本語)</label>
+                                <label class="form-label">強調ワード (日本語)</label>
                                 <input type="text" name="hero_title_accent_ja" class="form-input" value="<?php echo e($company->hero_title_accent_ja); ?>">
                             </div>
                         </div>
 
-                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">3. 会社概要・登記情報</h3>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">キャッチコピー (英語)</label>
+                                <input type="text" name="hero_title_en" class="form-input" value="<?php echo e($company->hero_title_en); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">強調ワード (英語)</label>
+                                <input type="text" name="hero_title_accent_en" class="form-input" value="<?php echo e($company->hero_title_accent_en); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">リード文 (日本語)</label>
+                                <textarea name="hero_desc_ja" class="form-textarea" rows="3"><?php echo e($company->hero_desc_ja); ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">リード文 (英語)</label>
+                                <textarea name="hero_desc_en" class="form-textarea" rows="3"><?php echo e($company->hero_desc_en); ?></textarea>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">3. 会社概要テーブル情報</h3>
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">会社名 (日本語)</label>
-                                <input type="text" name="name_ja" class="form-input" value="<?php echo e($company->name_ja); ?>">
+                                <input type="text" name="name_ja" class="form-input" value="<?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?>">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">会社名 (英語)</label>
-                                <input type="text" name="name_en" class="form-input" value="<?php echo e($company->name_en); ?>">
+                                <input type="text" name="name_en" class="form-input" value="<?php echo e($company->name_en ?? 'MIRANSH LLC'); ?>">
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">法人番号 (13桁)</label>
+                                <label class="form-label">法人番号</label>
                                 <input type="text" name="corporate_number" class="form-input" value="<?php echo e($company->corporate_number ?? '5012403006691'); ?>">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">設立・法人番号指定日 (日本語)</label>
-                                <input type="text" name="established_ja" class="form-input" value="<?php echo e($company->established_ja); ?>">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">本店所在地 (日本語)</label>
-                                <input type="text" name="address_ja" class="form-input" value="<?php echo e($company->address_ja); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">本店所在地 (英語)</label>
-                                <input type="text" name="address_en" class="form-input" value="<?php echo e($company->address_en); ?>">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">電話番号</label>
                                 <input type="text" name="phone" class="form-input" value="<?php echo e($company->phone ?? '042-409-8256'); ?>">
                             </div>
+                        </div>
+
+                        <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">代表メールアドレス</label>
+                                <label class="form-label">メールアドレス</label>
                                 <input type="email" name="email" class="form-input" value="<?php echo e($company->email ?? 'info@miransh.jp'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">本店住所 (日本語)</label>
+                                <input type="text" name="address_ja" class="form-input" value="<?php echo e($company->address_ja); ?>">
                             </div>
                         </div>
 
-                        <div style="margin-top: 24px;">
-                            <button type="submit" class="btn-primary">保存して反映する (Save Changes)</button>
+                        <div class="form-group">
+                            <label class="form-label">本店住所 (英語)</label>
+                            <input type="text" name="address_en" class="form-input" value="<?php echo e($company->address_en); ?>">
                         </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">事業内容 (日本語)</label>
+                                <textarea name="business_ja" class="form-textarea" rows="3"><?php echo e($company->business_ja); ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">事業内容 (英語)</label>
+                                <textarea name="business_en" class="form-textarea" rows="3"><?php echo e($company->business_en); ?></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="margin-top: 16px;">会社情報・CEO設定を保存する</button>
                     </form>
                 </div>
             </div>
 
-            <!-- TAB 2: ABOUT US -->
+            <!-- TAB 2: ABOUT SECTION -->
             <div id="pane-about" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        About (会社紹介セクション) 設定
+                        About Us (会社紹介・理念) 設定
                     </h2>
 
                     <form action="<?php echo e(route('admin.about.update')); ?>" method="POST">
                         <?php echo csrf_field(); ?>
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">見出し (日本語)</label>
+                                <label class="form-label">セクション見出し (日本語)</label>
                                 <input type="text" name="heading_ja" class="form-input" value="<?php echo e($about->heading_ja); ?>">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">見出し (英語)</label>
+                                <label class="form-label">セクション見出し (英語)</label>
                                 <input type="text" name="heading_en" class="form-input" value="<?php echo e($about->heading_en); ?>">
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">紹介文 1 (日本語)</label>
-                                <textarea name="desc1_ja" class="form-textarea" rows="4"><?php echo e($about->desc1_ja); ?></textarea>
+                                <label class="form-label">サブヘッド (日本語)</label>
+                                <textarea name="subheading_ja" class="form-textarea" rows="2"><?php echo e($about->subheading_ja); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">紹介文 1 (英語)</label>
-                                <textarea name="desc1_en" class="form-textarea" rows="4"><?php echo e($about->desc1_en); ?></textarea>
+                                <label class="form-label">サブヘッド (英語)</label>
+                                <textarea name="subheading_en" class="form-textarea" rows="2"><?php echo e($about->subheading_en); ?></textarea>
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">紹介文 2 (日本語)</label>
+                                <label class="form-label">紹介本文 段落1 (日本語)</label>
+                                <textarea name="desc1_ja" class="form-textarea" rows="5"><?php echo e($about->desc1_ja); ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">紹介本文 段落1 (英語)</label>
+                                <textarea name="desc1_en" class="form-textarea" rows="5"><?php echo e($about->desc1_en); ?></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">紹介本文 段落2 (日本語)</label>
                                 <textarea name="desc2_ja" class="form-textarea" rows="4"><?php echo e($about->desc2_ja); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">紹介文 2 (英語)</label>
+                                <label class="form-label">紹介本文 段落2 (英語)</label>
                                 <textarea name="desc2_en" class="form-textarea" rows="4"><?php echo e($about->desc2_en); ?></textarea>
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">代表メッセージ引用 (日本語)</label>
-                                <input type="text" name="quote_ja" class="form-input" value="<?php echo e($about->quote_ja); ?>">
+                                <label class="form-label">理念・コミットメント引用文 (日本語)</label>
+                                <textarea name="quote_ja" class="form-textarea" rows="3"><?php echo e($about->quote_ja); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">代表メッセージ引用 (英語)</label>
-                                <input type="text" name="quote_en" class="form-input" value="<?php echo e($about->quote_en); ?>">
+                                <label class="form-label">理念・コミットメント引用文 (英語)</label>
+                                <textarea name="quote_en" class="form-textarea" rows="3"><?php echo e($about->quote_en); ?></textarea>
                             </div>
                         </div>
 
-                        <div style="margin-top: 24px;">
-                            <button type="submit" class="btn-primary">Aboutセクションを更新 (Save About)</button>
-                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 16px;">About 情報を保存する</button>
                     </form>
                 </div>
             </div>
@@ -344,215 +392,219 @@
             <!-- TAB 3: SERVICES -->
             <div id="pane-services" class="tab-pane">
                 <div class="admin-card">
-                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        事業内容一覧 (Services Manager)
-                    </h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
+                            事業内容・サービス一覧 (<?php echo e(count($services)); ?>件)
+                        </h2>
+                    </div>
 
-                    <table class="table-custom" style="margin-bottom: 32px;">
+                    <table class="table-custom">
                         <thead>
                             <tr>
-                                <th>No.</th>
+                                <th style="width: 60px;">アイコン</th>
                                 <th>事業名 (日本語 / 英語)</th>
                                 <th>概要</th>
-                                <th>詳細ページ</th>
-                                <th>操作</th>
+                                <th style="width: 120px;">操作</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><span class="badge-status"><?php echo e($s->number_label); ?></span></td>
+                                <td style="font-size: 24px; text-align: center;"><?php echo e($service->icon ?? '💼'); ?></td>
                                 <td>
-                                    <strong><?php echo e($s->title_ja); ?></strong><br>
-                                    <span style="font-size: 12px; color: #64748B;"><?php echo e($s->title_en); ?></span>
+                                    <strong><?php echo e($service->title_ja); ?></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><?php echo e($service->title_en); ?></span>
                                 </td>
-                                <td style="font-size: 13px; color: #475569; max-width: 280px;">
-                                    <?php echo e(Str::limit($s->desc_ja, 70)); ?>
+                                <td style="font-size: 13px; color: #475569;">
+                                    <?php echo e(Str::limit($service->description_ja, 90)); ?>
 
                                 </td>
                                 <td>
-                                    <a href="/services/<?php echo e($s->id); ?>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 13px;">
-                                        ↗ 詳細表示
-                                    </a>
-                                </td>
-                                <td>
-                                    <button type="button" onclick="editServiceModal(<?php echo e(json_encode($s)); ?>)" class="btn-outline-white" style="color: #0F172A; border-color: #CBD5E1; padding: 6px 12px; font-size: 12px;">
-                                        編集
-                                    </button>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="<?php echo e(route('services.detail', $service->id)); ?>" target="_blank" class="badge-status" style="text-decoration: none;">表示 ↗</a>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
-
-                    <!-- Add New Service -->
-                    <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">➕ 新規事業・サービスを追加</h3>
-                    <form action="<?php echo e(route('admin.services.store')); ?>" method="POST">
-                        <?php echo csrf_field(); ?>
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">事業番号 (例: 05)</label>
-                                <input type="text" name="number_label" class="form-input" placeholder="05">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">アイコン (users, award, heart-handshake, globe)</label>
-                                <input type="text" name="icon" class="form-input" value="users">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">事業名 (日本語)</label>
-                                <input type="text" name="title_ja" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">事業名 (英語)</label>
-                                <input type="text" name="title_en" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">概要説明 (日本語)</label>
-                                <textarea name="desc_ja" class="form-textarea" rows="2" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">概要説明 (英語)</label>
-                                <textarea name="desc_en" class="form-textarea" rows="2" required></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">主なサポート項目 (1行に1項目・日本語)</label>
-                                <textarea name="items_ja" class="form-textarea" rows="3" placeholder="項目1&#10;項目2&#10;項目3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">主なサポート項目 (1行に1項目・英語)</label>
-                                <textarea name="items_en" class="form-textarea" rows="3" placeholder="Item 1&#10;Item 2&#10;Item 3"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">実施の流れ・ステップ (1行に1ステップ・日本語)</label>
-                                <textarea name="workflow_steps_ja" class="form-textarea" rows="3" placeholder="1. ヒアリング&#10;2. 募集&#10;3. 面接"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">実施の流れ・ステップ (1行に1ステップ・英語)</label>
-                                <textarea name="workflow_steps_en" class="form-textarea" rows="3" placeholder="1. Needs Assessment&#10;2. Sourcing&#10;3. Interview"></textarea>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-primary">新しい事業を追加 (Publish Service)</button>
-                    </form>
                 </div>
             </div>
 
             <!-- TAB 4: STORIES -->
             <div id="pane-stories" class="tab-pane">
                 <div class="admin-card">
-                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        採用事例・ニュース管理 (Stories & Case Studies)
-                    </h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
+                            採用事例・お知らせ一覧 (<?php echo e(count($stories)); ?>件)
+                        </h2>
+                    </div>
 
-                    <table class="table-custom" style="margin-bottom: 32px;">
+                    <table class="table-custom">
                         <thead>
                             <tr>
-                                <th>画像</th>
+                                <th>タイトル (日本語 / 英語)</th>
                                 <th>カテゴリ</th>
-                                <th>タイトル (日本語)</th>
-                                <th>日付</th>
-                                <th>詳細</th>
+                                <th>公開日</th>
+                                <th style="width: 120px;">操作</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $__currentLoopData = $stories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $st): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php $__currentLoopData = $stories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $story): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td style="width: 70px;">
-                                    <img src="<?php echo e($st->image); ?>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                </td>
-                                <td><span class="badge-status"><?php echo e($st->category_ja); ?></span></td>
                                 <td>
-                                    <strong><?php echo e($st->title_ja); ?></strong><br>
-                                    <span style="font-size: 12px; color: #64748B;"><?php echo e($st->title_en); ?></span>
+                                    <strong><?php echo e($story->title_ja); ?></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><?php echo e($story->title_en); ?></span>
                                 </td>
-                                <td style="font-size: 12px; color: #64748B;"><?php echo e($st->published_date); ?></td>
+                                <td><span class="badge-status"><?php echo e($story->category_ja); ?></span></td>
+                                <td style="font-size: 13px; color: #64748B;"><?php echo e($story->published_date); ?></td>
                                 <td>
-                                    <a href="/stories/<?php echo e($st->id); ?>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 13px;">
-                                        ↗ 記事確認
-                                    </a>
+                                    <a href="<?php echo e(route('stories.detail', $story->id)); ?>" target="_blank" class="badge-status" style="text-decoration: none;">記事確認 ↗</a>
                                 </td>
                             </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
-
-                    <!-- Add Story Form -->
-                    <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">➕ 新規事例・記事の投稿</h3>
-                    <form action="<?php echo e(route('admin.stories.store')); ?>" method="POST">
-                        <?php echo csrf_field(); ?>
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">カテゴリ (日本語)</label>
-                                <input type="text" name="category_ja" class="form-input" value="介護分野・特定技能">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">カテゴリ (英語)</label>
-                                <input type="text" name="category_en" class="form-input" value="Caregiving / SSW">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">タイトル (日本語)</label>
-                                <input type="text" name="title_ja" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">タイトル (英語)</label>
-                                <input type="text" name="title_en" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">概要要約 (日本語)</label>
-                                <textarea name="summary_ja" class="form-textarea" rows="2" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">概要要約 (英語)</label>
-                                <textarea name="summary_en" class="form-textarea" rows="2" required></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">記事本文 (日本語)</label>
-                                <textarea name="content_ja" class="form-textarea" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">記事本文 (英語)</label>
-                                <textarea name="content_en" class="form-textarea" rows="5"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">アイキャッチ画像URL</label>
-                                <input type="text" name="image" class="form-input" value="/images/story1.jpg">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" name="published_date" class="form-input" value="<?php echo e(date('Y.m.d')); ?>">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-primary">記事を公開 (Publish Story)</button>
-                    </form>
                 </div>
             </div>
 
-            <!-- TAB 5: INQUIRIES -->
+            <!-- TAB 5: FAQS (よくある質問) -->
+            <div id="pane-faqs" class="tab-pane">
+                <div class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
+                            FAQ・よくある質問 管理 (<?php echo e(count($faqs)); ?>件)
+                        </h2>
+                        <button type="button" class="btn-primary" onclick="openFaqCreateModal()" style="font-size: 13px; padding: 8px 16px;">+ 新規FAQを追加</button>
+                    </div>
+
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th style="width: 130px;">カテゴリ</th>
+                                <th>質問 (Question)</th>
+                                <th>回答 (Answer)</th>
+                                <th style="width: 100px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $__currentLoopData = $faqs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $faq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr>
+                                <td>
+                                    <span class="badge-status"><?php echo e($faq->category_ja); ?></span>
+                                </td>
+                                <td>
+                                    <strong><?php echo e($faq->question_ja); ?></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><?php echo e($faq->question_en); ?></span>
+                                </td>
+                                <td style="font-size: 13px; color: #475569; max-width: 320px;">
+                                    <?php echo e(Str::limit($faq->answer_ja, 110)); ?>
+
+                                </td>
+                                <td>
+                                    <form action="<?php echo e(route('admin.faqs.delete', $faq->id)); ?>" method="POST" onsubmit="return confirm('このFAQを削除してもよろしいですか？')">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" style="background: none; border: none; color: #EF4444; font-size: 13px; font-weight: 600; cursor: pointer;">削除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add FAQ Modal -->
+                <div id="faqCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;">新規FAQの追加</h3>
+                            <button type="button" onclick="closeFaqCreateModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+                        </div>
+                        <form action="<?php echo e(route('admin.faqs.store')); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">カテゴリ (日本語)</label>
+                                    <input type="text" name="category_ja" class="form-input" value="特定技能・在留資格" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">カテゴリ (英語)</label>
+                                    <input type="text" name="category_en" class="form-input" value="Specified Skilled Worker (SSW)" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">質問内容 (日本語)</label>
+                                <input type="text" name="question_ja" class="form-input" placeholder="例: 介護の特定技能1号の受入れ要件は何ですか？" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">質問内容 (英語)</label>
+                                <input type="text" name="question_en" class="form-input" placeholder="e.g. What are the requirements for Nursing Care SSW?">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">回答内容 (日本語)</label>
+                                <textarea name="answer_ja" class="form-textarea" rows="4" required placeholder="わかりやすく丁寧な回答を入力してください"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">回答内容 (英語)</label>
+                                <textarea name="answer_en" class="form-textarea" rows="4" placeholder="English translation of the answer"></textarea>
+                            </div>
+                            <div style="margin-top: 20px; display: flex; gap: 12px;">
+                                <button type="submit" class="btn-primary">FAQを保存する</button>
+                                <button type="button" onclick="closeFaqCreateModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">キャンセル</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: SAKANA AI CONFIGURATION & DIAGNOSTICS -->
+            <div id="pane-ai" class="tab-pane">
+                <div class="admin-card">
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        🐟 Sakana AI (Namazu / Fugu) 連携ステータス & 接続テスト
+                    </h2>
+
+                    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+                        <div style="font-weight: 700; color: #166534; font-size: 15px; margin-bottom: 6px;">
+                            ✓ Sakana AI API & フォールバックナレッジエンジン稼働中 (Operational)
+                        </div>
+                        <div style="font-size: 13px; color: #14532D; line-height: 1.6;">
+                            MIRANSHウェブサイト上の浮動AIコンサルタントは、Sakana AI の最新モデル（<code>sakana-namazu</code> / <code>fugu</code>）およびMIRANSH独自ナレッジベースと直接連携しています。
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Sakana AI Base URL</label>
+                            <input type="text" id="ai-baseUrl" class="form-input" value="<?php echo e(env('SAKANA_AI_BASE_URL', 'https://api.sakana.ai/v1')); ?>" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">アクティブモデル (Active Model)</label>
+                            <select id="ai-model" class="form-select">
+                                <option value="sakana-namazu" selected>sakana-namazu (日本語特化・推論モデル)</option>
+                                <option value="fugu">fugu (マルチエージェント推論モデル)</option>
+                                <option value="fugu-ultra">fugu-ultra (超高精度エージェント)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label class="form-label">API Key (現在設定中のキー: <code>fish_5417ad43...3eb84e</code>)</label>
+                        <input type="password" id="ai-apiKey" class="form-input" placeholder="新しいAPIキーを入力して上書きテストが可能です">
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <button type="button" class="btn-primary" onclick="testSakanaConnection()" id="btn-test-ai">
+                            ⚡ API 接続テストを実行
+                        </button>
+                    </div>
+
+                    <div id="ai-test-results" style="display: none; background: #0F172A; color: #F8FAFC; border-radius: 8px; padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.6;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: INQUIRIES -->
             <div id="pane-inquiries" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
@@ -601,43 +653,6 @@
         </main>
     </div>
 
-    <!-- Edit Service Modal -->
-    <div id="serviceEditModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;" id="editModalTitle">事業内容の編集</h3>
-                <button type="button" onclick="closeServiceModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
-            </div>
-            <form id="serviceEditForm" method="POST">
-                <?php echo csrf_field(); ?>
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label">事業名 (日本語)</label>
-                        <input type="text" name="title_ja" id="edit_title_ja" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">事業名 (英語)</label>
-                        <input type="text" name="title_en" id="edit_title_en" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label">概要 (日本語)</label>
-                        <textarea name="desc_ja" id="edit_desc_ja" class="form-textarea" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">概要 (英語)</label>
-                        <textarea name="desc_en" id="edit_desc_en" class="form-textarea" rows="3" required></textarea>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; display: flex; gap: 12px;">
-                    <button type="submit" class="btn-primary">変更を保存</button>
-                    <button type="button" onclick="closeServiceModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">キャンセル</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         function switchAdminTab(tabName, btnElement) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
@@ -650,24 +665,50 @@
             window.location.hash = tabName;
         }
 
-        function editServiceModal(service) {
-            document.getElementById('serviceEditForm').action = '/admin/services/' + service.id;
-            document.getElementById('edit_title_ja').value = service.title_ja || '';
-            document.getElementById('edit_title_en').value = service.title_en || '';
-            document.getElementById('edit_desc_ja').value = service.desc_ja || '';
-            document.getElementById('edit_desc_en').value = service.desc_en || '';
-            document.getElementById('serviceEditModal').style.display = 'flex';
+        function openFaqCreateModal() {
+            document.getElementById('faqCreateModal').style.display = 'flex';
         }
 
-        function closeServiceModal() {
-            document.getElementById('serviceEditModal').style.display = 'none';
+        function closeFaqCreateModal() {
+            document.getElementById('faqCreateModal').style.display = 'none';
+        }
+
+        async function testSakanaConnection() {
+            const btn = document.getElementById('btn-test-ai');
+            const resultBox = document.getElementById('ai-test-results');
+            const apiKey = document.getElementById('ai-apiKey').value.trim();
+            const model = document.getElementById('ai-model').value;
+
+            btn.disabled = true;
+            btn.innerText = 'テスト実行中...';
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = 'Connecting to Sakana AI endpoint at https://api.sakana.ai/v1 ...';
+
+            try {
+                const res = await fetch('<?php echo e(route("admin.sakana.test")); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                    },
+                    body: JSON.stringify({ apiKey, model })
+                });
+
+                const data = await res.json();
+                resultBox.innerHTML = `<pre style="white-space: pre-wrap; margin: 0;">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (err) {
+                resultBox.innerHTML = `<span style="color: #EF4444;">Error: ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '⚡ API 接続テストを実行';
+            }
         }
 
         (function() {
             const hash = window.location.hash.replace('#', '').replace('-tab', '');
-            if (['company', 'about', 'services', 'stories', 'inquiries'].includes(hash)) {
+            if (['company', 'about', 'services', 'stories', 'faqs', 'ai', 'inquiries'].includes(hash)) {
                 const btn = document.querySelector(`[onclick*="${hash}"]`);
-                switchAdminTab(hash, btn);
+                if (btn) switchAdminTab(hash, btn);
             }
         })();
     </script>
