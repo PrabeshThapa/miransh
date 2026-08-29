@@ -37,8 +37,10 @@ export const DEFAULT_COMPANY_INFO = {
   business_en: 'Overseas Recruitment & Placement / Specified Skilled Worker (SSW) Support / Onboarding & Immigration Assistance / Living & Workplace Integration Support',
   business_ja: '外国人材採用・採用支援 / 特定技能人材支援 / 入国・入社サポート / 外国人材の生活・就労サポート',
   ceo_name: 'ギリ ラム クリシュナ (Giri Ram Krishna)',
-  ceo_role_en: 'Representative Member',
-  ceo_role_ja: '代表社員',
+  ceo_name_ja: 'ギリ ラム クリシュナ',
+  ceo_name_en: 'Giri Ram Krishna',
+  ceo_role_en: 'Representative Member / CEO',
+  ceo_role_ja: '代表社員 (CEO)',
   ceo_image: '/images/ceo_portrait.jpg',
   ceo_message_en: 'MIRANSH LLC aspires to be the premier bridge connecting ambitious global talent with trusted Japanese enterprises.\n\nWe deliver talent solutions that ensure candidates work with safety and security, while employers experience tangible value and satisfaction from their hiring decisions.\n\nMoving forward, we will continue expanding our recruitment network in Nepal and beyond, actively addressing labor shortages in Japan while supporting the meaningful career development of international professionals.',
   ceo_message_ja: 'MIRANSH合同会社は、「日本で働きたい外国人」と「信頼できる人材を必要とする日本企業」をつなぐ架け橋となることを目指しています。\n\n外国人材が日本で安心して働き、企業様にとっても「採用してよかった」と思っていただけるような、高品質な人材サービスを提供してまいります。\n\n今後はネパールを中心とした海外人材ネットワークをさらに強化し、日本企業の人材不足解消と外国人材のキャリア形成に貢献していきます。',
@@ -301,10 +303,94 @@ export const DEFAULT_STORIES = [
   }
 ];
 
+export const DEFAULT_FAQS = [
+  {
+    id: 1,
+    category_ja: '特定技能・在留資格',
+    category_en: 'Specified Skilled Worker (SSW)',
+    question_ja: '特定技能外国人を受け入れるための基本的な要件や試験は何ですか？',
+    question_en: 'What are the fundamental requirements and exams for hiring Specified Skilled Workers (SSW)?',
+    answer_ja: '特定技能1号の在留資格を取得するには、①各特定産業分野の「技能測定試験」および②「日本語能力試験（JLPT N4以上または国際交流基金日本語基礎テスト JFT-Basic）」の両方に合格している必要があります。MIRANSHでは、試験合格済みの即戦力候補者をネパール現地提携校等から厳選してご紹介いたします。',
+    answer_en: 'To obtain a Status of Residence for Specified Skilled Worker (i), candidates must pass: 1) The relevant sector skill assessment exam, and 2) A Japanese proficiency test (JLPT N4 or higher, or JFT-Basic). MIRANSH sources pre-qualified candidates who have already passed both exams through our accredited educational partners in Nepal.',
+    sort_order: 1
+  },
+  {
+    id: 2,
+    category_ja: 'ネパール人材・語学力',
+    category_en: 'Nepali Talent & Language',
+    question_ja: 'ネパール人スタッフの特徴や職場での適性、日本語力はどうですか？',
+    question_en: 'What are the characteristics, workplace suitability, and Japanese language proficiency of Nepali talent?',
+    answer_ja: 'ネパール人材は親日家が多く、真面目で温厚、敬語や礼儀作法を重んじる文化背景を持っています。文法構造が日本語と類似しているため日本語の習得が非常に早く、特に介護現場ではお年寄りに対して優しく気配りのできるコミュニケーションが高く評価されています。N3〜N2レベルの即戦力層も多数在籍しています。',
+    answer_en: 'Nepali professionals are known for their warm disposition, strong work ethic, politeness, and high respect for Japanese cultural values. Because Nepali and Japanese share similar SOV grammatical structures, candidates acquire spoken and written Japanese rapidly. They are especially praised in elderly care and hospitality for their kindness and patience.',
+    sort_order: 2
+  },
+  {
+    id: 3,
+    category_ja: '介護分野の採用',
+    category_en: 'Caregiving Sector',
+    question_ja: '介護分野での特定技能人材の採用において、どのような業務を担当できますか？',
+    question_en: 'What tasks can Specified Skilled Workers in the Caregiving (Nursing Care) sector perform?',
+    answer_ja: '食事介助、入浴介助、排泄介助、移動・移乗介助などの身体介護に加え、レクリエーションの企画・運営、配膳・清掃などの付随業務を担当できます。入社後実務経験3年を経て日本の「介護福祉士（国家資格）」の取得を目指すキャリアパスも整備されており、長期就労と人材定着が期待できます。',
+    answer_en: 'SSW caregiving staff perform physical care (assistance with meals, bathing, excretion, and mobility) as well as accompanying recreational activities, functional training assistance, and facility operations. They can also work towards passing the national certified care worker (Kaigofukushishi) exam after 3 years for indefinite long-term career progression.',
+    sort_order: 3
+  },
+  {
+    id: 4,
+    category_ja: '費用・契約・スケジュール',
+    category_en: 'Recruitment Timeline & Process',
+    question_ja: '求人依頼から内定、日本入国・就労開始までどのくらいの期間がかかりますか？',
+    question_en: 'How long does the process take from initial job order to arrival in Japan and starting work?',
+    answer_ja: '求人要件のヒアリングから候補者選定・面接・内定まで約2〜4週間、その後出入国在留管理局への在留資格認定証明書（COE）交付申請から査証発給・渡航準備まで約3〜4ヶ月、合計でおよそ3〜5ヶ月が標準的なスケジュールとなります。急募のご相談や国内転職者のご紹介も柔軟に対応いたします。',
+    answer_en: 'The standard timeline is typically 3 to 5 months total: 2-4 weeks for requirements briefing, candidate screening, interviews, and official job offer; followed by 3-4 months for immigration Certificate of Eligibility (COE) processing, visa issuance, and arrival coordination. Accelerated placement for candidates currently in Japan is also available.',
+    sort_order: 4
+  },
+  {
+    id: 5,
+    category_ja: '入国・生活支援・定着',
+    category_en: 'Onboarding & Living Support',
+    question_ja: '入国後の住居手配や市区町村での住民登録、銀行口座開設などもサポートしてもらえますか？',
+    question_en: 'Do you provide support for airport pickup, apartment leasing, city hall registration, and bank setup?',
+    answer_ja: 'はい、MIRANSHが空港でのお出迎えから社宅・アパートの賃貸契約サポート、市区町村窓口での転入届・マイナンバー手続き、銀行口座の開設、携帯電話の契約、生活ルール・ゴミ出しマナーの指導まで、専任スタッフがすべてワンストップで伴走いたします。企業様の手間を最小限に抑えます。',
+    answer_en: 'Yes. MIRANSH provides full turnkey support, including airport reception, furnished apartment assistance, resident registration at city hall, Individual Number (My Number) procedures, bank account opening, SIM card/phone setup, and neighborhood orientation to ensure a smooth, worry-free start.',
+    sort_order: 5
+  },
+  {
+    id: 6,
+    category_ja: '入国・生活支援・定着',
+    category_en: 'Onboarding & Living Support',
+    question_ja: '入社後に職場で言葉の壁や生活トラブルが発生した場合のフォロー体制はありますか？',
+    question_en: 'What follow-up and emergency consultation systems are in place after the candidate starts working?',
+    answer_ja: 'MIRANSHでは入社後も定期的な面談（月次チェックイン）を実施し、業務上の課題や生活面の不安をヒアリングします。ネパール語・英語・日本語のバイリンガルスタッフが常駐しており、緊急時の連絡体制や職場コミュニケーションの仲介通訳も万全の体制でサポートいたします。',
+    answer_en: 'We conduct regular monthly check-ins and structured one-on-one counseling. Our bilingual team (Japanese, Nepali, English) maintains an active hotline to assist with any workplace communication mediation, medical consultations, or lifestyle adjustments, preventing misunderstandings before they occur.',
+    sort_order: 6
+  },
+  {
+    id: 7,
+    category_ja: '費用・契約・スケジュール',
+    category_en: 'Fees & Commercial Terms',
+    question_ja: '人材紹介の料金体系や初期費用について教えてください。',
+    question_en: 'What is the fee structure and commercial terms for recruitment services?',
+    answer_ja: 'MIRANSHの人材紹介は「完全成功報酬型」となっており、候補者の内定・日本入国・初日出社が確定するまで紹介手数料は発生いたしません。ご相談やお見積り、候補者のプロフィール閲覧やオンライン面接のセッティングはすべて無料です。早期退職時の返金規定（リファンドポリシー）も完備しています。',
+    answer_en: 'Our overseas recruitment operates on a contingency-success basis—no placement fees are charged until the candidate successfully receives their visa and commences employment. Consultations, candidate profile evaluations, and web interviews are entirely free. We also include clear prorated refund guarantees for early departures.',
+    sort_order: 7
+  },
+  {
+    id: 8,
+    category_ja: '特定技能・在留資格',
+    category_en: 'Consultation & First-time Hiring',
+    question_ja: '初めて外国人材を採用する企業ですが、制度の説明や社内受け入れ体制の相談は可能ですか？',
+    question_en: 'We are considering hiring foreign staff for the first time. Can you provide guidance on institutional compliance?',
+    answer_ja: '大歓迎です。初めて外国人材を受け入れる企業様向けに、特定技能制度の全体像、労働基準法や雇用保険の適用ルール、社内マニュアルの作成ポイント、受入れ事例を分かりやすくご案内する個別オンライン相談会（全国対応）を無料で開催しております。お気軽にお問い合わせください。',
+    answer_en: 'Absolutely. We specialize in assisting first-time employers with comprehensive orientations on immigration legal frameworks, labor compliance, workplace manual preparation, and best practices from our proven placement track record. Free online video consultations are available nationwide across Japan.',
+    sort_order: 8
+  }
+];
+
 let fallbackCompanyInfo = { ...DEFAULT_COMPANY_INFO };
 let fallbackAbout = { ...DEFAULT_ABOUT };
 let fallbackServices = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
 let fallbackStories = JSON.parse(JSON.stringify(DEFAULT_STORIES));
+let fallbackFaqs = JSON.parse(JSON.stringify(DEFAULT_FAQS));
 let fallbackInquiries = [];
 
 let pool = null;
@@ -461,6 +547,21 @@ export async function initDatabase() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS \`faqs\` (
+        \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+        \`category_ja\` VARCHAR(100),
+        \`category_en\` VARCHAR(100),
+        \`question_ja\` TEXT NOT NULL,
+        \`question_en\` TEXT NOT NULL,
+        \`answer_ja\` LONGTEXT NOT NULL,
+        \`answer_en\` LONGTEXT NOT NULL,
+        \`sort_order\` INT DEFAULT 0,
+        \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
     conn.release();
     isConnected = true;
     return true;
@@ -601,12 +702,98 @@ export async function addInquiry(data) {
   return newInquiry;
 }
 
+export async function getFaqs() {
+  if (isConnected) {
+    try {
+      const [rows] = await getPool().query('SELECT * FROM faqs ORDER BY sort_order ASC, id ASC');
+      if (rows && rows.length > 0) return rows;
+    } catch (err) {
+      console.error('[MySQL Error] getFaqs:', err.message);
+    }
+  }
+  return fallbackFaqs;
+}
+
+export async function getFaqById(id) {
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      const [rows] = await getPool().query('SELECT * FROM faqs WHERE id = ? LIMIT 1', [numId]);
+      if (rows && rows.length > 0) return rows[0];
+    } catch (err) {
+      console.error('[MySQL Error] getFaqById:', err.message);
+    }
+  }
+  return fallbackFaqs.find(f => f.id === numId) || null;
+}
+
+export async function addFaq(data) {
+  const newFaq = {
+    id: Date.now(),
+    category_ja: data.category_ja || '特定技能・在留資格',
+    category_en: data.category_en || 'Specified Skilled Worker',
+    question_ja: data.question_ja || '',
+    question_en: data.question_en || '',
+    answer_ja: data.answer_ja || '',
+    answer_en: data.answer_en || '',
+    sort_order: parseInt(data.sort_order || fallbackFaqs.length + 1, 10)
+  };
+
+  if (isConnected) {
+    try {
+      const [res] = await getPool().query(`
+        INSERT INTO faqs (category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [newFaq.category_ja, newFaq.category_en, newFaq.question_ja, newFaq.question_en, newFaq.answer_ja, newFaq.answer_en, newFaq.sort_order]);
+      newFaq.id = res.insertId;
+    } catch (err) {
+      console.error('[MySQL Error] addFaq:', err.message);
+    }
+  }
+  fallbackFaqs.push(newFaq);
+  return newFaq;
+}
+
+export async function updateFaq(id, data) {
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      await getPool().query(`
+        UPDATE faqs
+        SET category_ja = ?, category_en = ?, question_ja = ?, question_en = ?, answer_ja = ?, answer_en = ?, sort_order = ?
+        WHERE id = ?
+      `, [data.category_ja, data.category_en, data.question_ja, data.question_en, data.answer_ja, data.answer_en, data.sort_order, numId]);
+    } catch (err) {
+      console.error('[MySQL Error] updateFaq:', err.message);
+    }
+  }
+  const index = fallbackFaqs.findIndex(f => f.id === numId);
+  if (index !== -1) {
+    fallbackFaqs[index] = { ...fallbackFaqs[index], ...data };
+  }
+  return fallbackFaqs;
+}
+
+export async function deleteFaq(id) {
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      await getPool().query('DELETE FROM faqs WHERE id = ?', [numId]);
+    } catch (err) {
+      console.error('[MySQL Error] deleteFaq:', err.message);
+    }
+  }
+  fallbackFaqs = fallbackFaqs.filter(f => f.id !== numId);
+  return true;
+}
+
 export async function getAllData() {
-  const [company, about, services, stories, inquiries] = await Promise.all([
+  const [company, about, services, stories, faqs, inquiries] = await Promise.all([
     getCompanyInfo(),
     getAboutSection(),
     getServices(),
     getStories(),
+    getFaqs(),
     getInquiries()
   ]);
 
@@ -615,6 +802,7 @@ export async function getAllData() {
     about,
     services,
     stories,
+    faqs,
     inquiries,
     dbStatus: {
       connected: isConnected,

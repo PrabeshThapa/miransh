@@ -19,8 +19,13 @@
                 </a>
 
                 <a href="#company">
-                    <span class="lang-en">Company Profile</span>
+                    <span class="lang-en">Company</span>
                     <span class="lang-ja">会社概要</span>
+                </a>
+
+                <a href="#faq">
+                    <span class="lang-en">FAQ</span>
+                    <span class="lang-ja">よくある質問</span>
                 </a>
 
                 <a href="#contact">

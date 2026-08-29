@@ -14,6 +14,11 @@ import {
   getServiceById,
   getStories,
   getStoryById,
+  getFaqs,
+  getFaqById,
+  addFaq,
+  updateFaq,
+  deleteFaq,
   getInquiries,
   addInquiry,
   updateCompanyInfo,
@@ -165,6 +170,7 @@ app.get('/', async (req, res) => {
       about: data.about,
       services: data.services,
       stories: data.stories,
+      faqs: data.faqs,
       query: req.query
     });
   } catch (err) {
@@ -293,6 +299,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
       about: data.about,
       services: data.services,
       stories: data.stories,
+      faqs: data.faqs,
       inquiries: data.inquiries,
       dbStatus: data.dbStatus,
       mediaList,
@@ -573,6 +580,55 @@ app.post('/admin/stories/:id/delete', requireAdmin, async (req, res) => {
     };
   }
   res.redirect('/admin#stories-tab');
+});
+
+// 10.1 Admin FAQs CRUD
+app.post('/admin/faqs', requireAdmin, async (req, res) => {
+  try {
+    await addFaq(req.body);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'よくある質問（FAQ）を追加しました。(FAQ Item Added!)'
+    };
+  } catch (err) {
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to add FAQ: ' + err.message
+    };
+  }
+  res.redirect('/admin#faqs-tab');
+});
+
+app.post('/admin/faqs/:id', requireAdmin, async (req, res) => {
+  try {
+    await updateFaq(req.params.id, req.body);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'よくある質問（FAQ）を更新しました。(FAQ Item Updated!)'
+    };
+  } catch (err) {
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to update FAQ: ' + err.message
+    };
+  }
+  res.redirect('/admin#faqs-tab');
+});
+
+app.post('/admin/faqs/:id/delete', requireAdmin, async (req, res) => {
+  try {
+    await deleteFaq(req.params.id);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'よくある質問（FAQ）を削除しました。(FAQ Item Deleted!)'
+    };
+  } catch (err) {
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to delete FAQ: ' + err.message
+    };
+  }
+  res.redirect('/admin#faqs-tab');
 });
 
 // =========================================================================
