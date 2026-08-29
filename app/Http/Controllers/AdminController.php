@@ -8,6 +8,7 @@ use App\Models\CompanyInfo;
 use App\Models\About;
 use App\Models\Service;
 use App\Models\Story;
+use App\Models\Faq;
 use App\Models\Inquiry;
 use App\Models\User;
 
@@ -64,7 +65,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Admin Dashboard with tabs for Company Info, Services, About, Stories, Inquiries
+     * Admin Dashboard with tabs for Company Info, Services, About, Stories, FAQs, Inquiries, AI
      */
     public function dashboard(Request $request)
     {
@@ -76,10 +77,11 @@ class AdminController extends Controller
         $about = About::first() ?? new About();
         $services = Service::orderBy('sort_order', 'asc')->get();
         $stories = Story::orderBy('sort_order', 'asc')->get();
+        $faqs = Faq::orderBy('sort_order', 'asc')->get();
         $inquiries = Inquiry::orderBy('created_at', 'desc')->get();
         $activeTab = $request->query('tab', 'company');
 
-        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'inquiries', 'activeTab'));
+        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab'));
     }
 
     /**
@@ -294,5 +296,85 @@ class AdminController extends Controller
         $story->delete();
 
         return redirect()->route('admin.dashboard', ['tab' => 'stories'])->with('success', 'Story deleted successfully.');
+    }
+
+    /**
+     * Store new FAQ
+     */
+    public function storeFaq(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $request->validate([
+            'question_ja' => 'required',
+            'answer_ja' => 'required',
+        ]);
+
+        $faq = new Faq();
+        $faq->category_ja = $request->category_ja ?? '特定技能・在留資格';
+        $faq->category_en = $request->category_en ?? 'Specified Skilled Worker (SSW)';
+        $faq->question_ja = $request->question_ja;
+        $faq->question_en = $request->question_en ?? $request->question_ja;
+        $faq->answer_ja = $request->answer_ja;
+        $faq->answer_en = $request->answer_en ?? $request->answer_ja;
+        $faq->sort_order = (int) ($request->sort_order ?? 0);
+        $faq->save();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ question created successfully!');
+    }
+
+    /**
+     * Update existing FAQ
+     */
+    public function updateFaq(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $faq = Faq::findOrFail($id);
+        $faq->category_ja = $request->category_ja ?? $faq->category_ja;
+        $faq->category_en = $request->category_en ?? $faq->category_en;
+        $faq->question_ja = $request->question_ja;
+        $faq->question_en = $request->question_en ?? $request->question_ja;
+        $faq->answer_ja = $request->answer_ja;
+        $faq->answer_en = $request->answer_en ?? $request->answer_ja;
+        $faq->sort_order = (int) ($request->sort_order ?? 0);
+        $faq->save();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ updated successfully!');
+    }
+
+    /**
+     * Delete FAQ
+     */
+    public function deleteFaq($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $faq = Faq::findOrFail($id);
+        $faq->delete();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ deleted successfully.');
+    }
+
+    /**
+     * Update Inquiry Status (read/replied)
+     */
+    public function updateInquiryStatus(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $inquiry = Inquiry::findOrFail($id);
+        $inquiry->status = $request->status ?? 'read';
+        $inquiry->save();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'inquiries'])->with('success', 'Inquiry marked as ' . $inquiry->status);
     }
 }

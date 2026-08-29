@@ -7,6 +7,7 @@ use App\Models\CompanyInfo;
 use App\Models\About;
 use App\Models\Service;
 use App\Models\Story;
+use App\Models\Faq;
 use App\Models\Inquiry;
 
 class HomeController extends Controller
@@ -36,8 +37,10 @@ class HomeController extends Controller
             'business_en' => 'Overseas Recruitment & Placement / Specified Skilled Worker (SSW) Support / Onboarding & Immigration Assistance / Living & Workplace Integration Support',
             'business_ja' => '外国人材採用・採用支援 / 特定技能人材支援 / 入国・入社サポート / 外国人材の生活・就労サポート',
             'ceo_name' => 'ギリ ラム クリシュナ (Giri Ram Krishna)',
-            'ceo_role_en' => 'Representative Member',
-            'ceo_role_ja' => '代表社員',
+            'ceo_name_ja' => 'ギリ ラム クリシュナ',
+            'ceo_name_en' => 'Giri Ram Krishna',
+            'ceo_role_en' => 'Representative Member / CEO',
+            'ceo_role_ja' => '代表社員 (CEO)',
             'ceo_image' => '/images/ceo_portrait.jpg',
             'ceo_message_en' => "MIRANSH LLC aspires to be the premier bridge connecting ambitious global talent with trusted Japanese enterprises.\n\nWe deliver talent solutions that ensure candidates work with safety and security, while employers experience tangible value and satisfaction from their hiring decisions.\n\nMoving forward, we will continue expanding our recruitment network in Nepal and beyond, actively addressing labor shortages in Japan while supporting the meaningful career development of international professionals.",
             'ceo_message_ja' => "MIRANSH合同会社は、「日本で働きたい外国人」と「信頼できる人材を必要とする日本企業」をつなぐ架け橋となることを目指しています。\n\n外国人材が日本で安心して働き、企業様にとっても「採用してよかった」と思っていただけるような、高品質な人材サービスを提供してまいります。\n\n今後はネパールを中心とした海外人材ネットワークをさらに強化し、日本企業の人材不足解消と外国人材のキャリア形成に貢献していきます。",
@@ -75,8 +78,9 @@ class HomeController extends Controller
 
         $services = Service::orderBy('sort_order', 'asc')->get();
         $stories = Story::orderBy('sort_order', 'asc')->get();
+        $faqs = Faq::orderBy('sort_order', 'asc')->get();
 
-        return view('home', compact('company', 'about', 'services', 'stories'));
+        return view('home', compact('company', 'about', 'services', 'stories', 'faqs'));
     }
 
     /**

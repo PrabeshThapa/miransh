@@ -31,9 +31,11 @@ return new class extends Migration
             $table->string('email')->default('info@miransh.jp');
             $table->text('business_en');
             $table->text('business_ja');
-            $table->string('ceo_name')->default('Giri Ram Krishna (ギリ ラム クリシュナ)');
-            $table->string('ceo_role_en')->default('Representative Member');
-            $table->string('ceo_role_ja')->default('代表社員');
+            $table->string('ceo_name')->default('ギリ ラム クリシュナ (Giri Ram Krishna)');
+            $table->string('ceo_name_ja')->default('ギリ ラム クリシュナ');
+            $table->string('ceo_name_en')->default('Giri Ram Krishna');
+            $table->string('ceo_role_en')->default('Representative Member / CEO');
+            $table->string('ceo_role_ja')->default('代表社員 (CEO)');
             $table->string('ceo_image')->default('/images/ceo_portrait.jpg');
             $table->text('ceo_message_en')->nullable();
             $table->text('ceo_message_ja')->nullable();

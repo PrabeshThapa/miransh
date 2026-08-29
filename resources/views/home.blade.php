@@ -33,6 +33,7 @@
                 <li><a href="#strengths" class="nav-link"><span class="lang-ja">当社の強み</span><span class="lang-en">Strengths</span></a></li>
                 <li><a href="#industries" class="nav-link"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
                 <li><a href="#stories" class="nav-link"><span class="lang-ja">採用事例</span><span class="lang-en">Stories</span></a></li>
+                <li><a href="#faq" class="nav-link"><span class="lang-ja">FAQ</span><span class="lang-en">FAQ</span></a></li>
                 <li><a href="#company" class="nav-link"><span class="lang-ja">会社概要</span><span class="lang-en">Profile</span></a></li>
                 <li><a href="#vision" class="nav-link"><span class="lang-ja">代表挨拶</span><span class="lang-en">Message</span></a></li>
             </ul>
@@ -200,82 +201,35 @@
     <section id="services" class="section">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge"><span class="lang-ja">事業内容</span><span class="lang-en">Core Services</span></span>
+                <span class="section-badge"><span class="lang-ja">事業案内</span><span class="lang-en">Core Services</span></span>
                 <h2 class="section-title">
-                    <span class="lang-ja">企業のニーズに寄り添うトータル人材ソリューション</span>
-                    <span class="lang-en">Comprehensive Solutions for Enterprises & Global Talent</span>
+                    <span class="lang-ja">MIRANSHが提供する4つの包括的サービス</span>
+                    <span class="lang-en">Four Comprehensive Recruitment & Support Solutions</span>
                 </h2>
                 <p class="section-subtitle">
-                    <span class="lang-ja">採用計画の立案から、入国時のビザ申請、職場定着、日々の生活支援まで、専門チームが一貫してサポートいたします。</span>
-                    <span class="lang-en">From strategic talent sourcing and visa processing to workplace integration and retention counseling.</span>
+                    <span class="lang-ja">採用計画の策定からビザ申請、入国・入社手続き、その後の職場定着まで、ワンストップで支援いたします。</span>
+                    <span class="lang-en">From initial candidate matching and immigration procedures to long-term workplace follow-up, we deliver end-to-end recruitment lifecycle solutions.</span>
                 </p>
             </div>
 
             <div class="services-grid">
-                @foreach ($services as $service)
+                @foreach($services as $service)
                 <div class="service-card">
-                    <div class="service-card-header">
-                        <span class="service-num-badge">{{ $service->number_label ?? '01' }}</span>
-                        <div class="service-icon-box">
-                            @if ($service->icon === 'users')
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                            @elseif ($service->icon === 'award')
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-                            @elseif ($service->icon === 'heart-handshake')
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                            @else
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            @endif
-                        </div>
+                    <div class="service-card-icon">
+                        <span style="font-size: 26px;">{{ $service->icon ?? '💼' }}</span>
                     </div>
-
-                    <div class="service-card-body">
-                        <h3 class="service-title">
-                            <span class="lang-ja">{{ $service->title_ja }}</span>
-                            <span class="lang-en">{{ $service->title_en }}</span>
-                        </h3>
-                        @if ($service->subtitle_ja || $service->subtitle_en)
-                        <div class="service-subtitle">
-                            <span class="lang-ja">{{ $service->subtitle_ja }}</span>
-                            <span class="lang-en">{{ $service->subtitle_en }}</span>
-                        </div>
-                        @endif
-
-                        <p class="service-desc">
-                            <span class="lang-ja">{{ $service->desc_ja }}</span>
-                            <span class="lang-en">{{ $service->desc_en }}</span>
-                        </p>
-
-                        @if (!empty($service->items_ja))
-                        <ul class="service-items-list lang-ja">
-                            @foreach ($service->items_ja as $item)
-                            <li class="service-item-li">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span>{{ $item }}</span>
-                            </li>
-                            @endforeach
-                        </ul>
-                        @endif
-
-                        @if (!empty($service->items_en))
-                        <ul class="service-items-list lang-en">
-                            @foreach ($service->items_en as $item)
-                            <li class="service-item-li">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span>{{ $item }}</span>
-                            </li>
-                            @endforeach
-                        </ul>
-                        @endif
-
-                        <div class="service-card-footer">
-                            <a href="/services/{{ $service->id }}" class="btn-service-detail">
-                                <span class="lang-ja">詳細・サポート手順を見る</span>
-                                <span class="lang-en">View Service Details & Workflow</span>
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        </div>
-                    </div>
+                    <h3 class="service-card-title">
+                        <span class="lang-ja">{{ $service->title_ja }}</span>
+                        <span class="lang-en">{{ $service->title_en }}</span>
+                    </h3>
+                    <p class="service-card-desc">
+                        <span class="lang-ja">{{ $service->description_ja }}</span>
+                        <span class="lang-en">{{ $service->description_en }}</span>
+                    </p>
+                    <a href="{{ route('services.detail', $service->id) }}" class="service-read-more">
+                        <span class="lang-ja">詳しく見る →</span>
+                        <span class="lang-en">Learn More →</span>
+                    </a>
                 </div>
                 @endforeach
             </div>
@@ -286,170 +240,85 @@
     <section id="strengths" class="section section-bg-light">
         <div class="container">
             <div class="strengths-callout">
-                <span class="section-badge" style="background: rgba(255,255,255,0.15); color: #FCD34D;">
-                    <span class="lang-ja">MIRANSHの強み</span>
-                    <span class="lang-en">Our Strengths</span>
+                <span class="section-badge" style="background: rgba(255, 255, 255, 0.15); color: #FCD34D;">
+                    <span class="lang-ja">MIRANSHの強み</span><span class="lang-en">Why Choose MIRANSH</span>
                 </span>
-                <h2 class="strengths-tagline">
+                <h2 class="strengths-callout-title">
                     <span class="lang-ja">{{ $company->strengths_tagline_ja ?? '人材紹介だけで終わらない、手厚い継続サポート' }}</span>
                     <span class="lang-en">{{ $company->strengths_tagline_en ?? 'Beyond Recruitment — Continuous, High-Touch Support' }}</span>
                 </h2>
-                <p class="strengths-lead">
+                <p class="strengths-callout-desc">
                     <span class="lang-ja">{{ $company->strengths_desc_ja }}</span>
                     <span class="lang-en">{{ $company->strengths_desc_en }}</span>
                 </p>
 
                 <div class="strengths-pillars-grid">
-                    <div class="strength-pillar-card">
-                        <div class="strength-pillar-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        </div>
-                        <h4 class="strength-pillar-title"><span class="lang-ja">多言語対応・生活相談</span><span class="lang-en">Multilingual Counseling</span></h4>
-                        <p class="strength-pillar-desc"><span class="lang-ja">ネパール語・英語・日本語による母国語サポートで、候補者の不安を解消。</span><span class="lang-en">Direct mother-tongue assistance in Nepali, English & Japanese.</span></p>
+                    <div class="pillar-card">
+                        <div class="pillar-num">01</div>
+                        <h4 class="pillar-title"><span class="lang-ja">ネパール現地直接連携</span><span class="lang-en">Direct Academic Network in Nepal</span></h4>
+                        <p class="pillar-desc"><span class="lang-ja">現地提携校と連携し、日本語能力・専門技能の基礎を備えた優秀な候補者を厳選してご紹介。</span><span class="lang-en">Direct partnership with leading academies ensures highly motivated, pre-screened, and vetted talent.</span></p>
                     </div>
-
-                    <div class="strength-pillar-card">
-                        <div class="strength-pillar-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                        </div>
-                        <h4 class="strength-pillar-title"><span class="lang-ja">在留資格・手続の徹底</span><span class="lang-en">Visa & Legal Accuracy</span></h4>
-                        <p class="strength-pillar-desc"><span class="lang-ja">特定技能の入管申請書類作成から入国準備まで、ミスなく迅速に進めます。</span><span class="lang-en">Thorough document preparation for Status of Residence / SSW with full compliance.</span></p>
+                    <div class="pillar-card">
+                        <div class="pillar-num">02</div>
+                        <h4 class="pillar-title"><span class="lang-ja">特定技能・介護分野に特化</span><span class="lang-en">SSW Caregiving Specialization</span></h4>
+                        <p class="pillar-desc"><span class="lang-ja">深刻な人手不足が続く介護施設様へ、試験合格済みの即戦力人材をスムーズにマッチング。</span><span class="lang-en">Targeted caregiving pipelines matching exam-certified candidates directly to healthcare facilities.</span></p>
                     </div>
-
-                    <div class="strength-pillar-card">
-                        <div class="strength-pillar-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        </div>
-                        <h4 class="strength-pillar-title"><span class="lang-ja">現地提携校との連携</span><span class="lang-en">Direct Academic Network</span></h4>
-                        <p class="strength-pillar-desc"><span class="lang-ja">ネパール優良校と直結し、意欲が高く日本語を学んだ優秀層を厳選。</span><span class="lang-en">Direct alliances with leading colleges in Nepal for screened, highly motivated talent.</span></p>
-                    </div>
-
-                    <div class="strength-pillar-card">
-                        <div class="strength-pillar-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                        </div>
-                        <h4 class="strength-pillar-title"><span class="lang-ja">入社後の職場定着支援</span><span class="lang-en">Post-Hire Retention</span></h4>
-                        <p class="strength-pillar-desc"><span class="lang-ja">定期的なヒアリングと企業様との連携により、早期離職を防ぎます。</span><span class="lang-en">Continuous liaison with employers and monthly check-ins to ensure lasting tenure.</span></p>
+                    <div class="pillar-card">
+                        <div class="pillar-num">03</div>
+                        <h4 class="pillar-title"><span class="lang-ja">生活・職場への密着フォロー</span><span class="lang-en">Daily Life & Workplace Mentorship</span></h4>
+                        <p class="pillar-desc"><span class="lang-ja">住居確保、市役所手続きから入社後の定期面談まで、母国語対応も含め親身にサポート。</span><span class="lang-en">Bilingual staff assists with apartment leasing, municipal registration, and ongoing counseling.</span></p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- INDUSTRIES COVERED -->
+    <!-- INDUSTRIES SECTION -->
     <section id="industries" class="section">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge"><span class="lang-ja">対応分野</span><span class="lang-en">Industries We Serve</span></span>
+                <span class="section-badge"><span class="lang-ja">対応分野</span><span class="lang-en">Industries Covered</span></span>
                 <h2 class="section-title">
-                    <span class="lang-ja">対応可能な産業分野</span>
-                    <span class="lang-en">Specialized Industry Sectors</span>
+                    <span class="lang-ja">特定技能・主な対応職種</span>
+                    <span class="lang-en">Specified Skilled Worker (SSW) Sectors</span>
                 </h2>
                 <p class="section-subtitle">
-                    <span class="lang-ja">日本の労働力不足が顕著な特定技能主要分野をはじめ、幅広い業界に対応しています。</span>
-                    <span class="lang-en">Addressing critical labor shortages in key Specified Skilled Worker sectors across Japan.</span>
+                    <span class="lang-ja">介護分野を中核としつつ、人手不足が深刻な各産業分野での受入れをサポートしています。</span>
+                    <span class="lang-en">Focused primarily on nursing care, while actively placing skilled professionals across key industries.</span>
                 </p>
             </div>
 
             <div class="industries-grid">
                 <div class="industry-card">
-                    <div class="industry-emoji-icon">🩺</div>
-                    <h3 class="industry-name"><span class="lang-ja">介護分野</span><span class="lang-en">Nursing Care</span></h3>
-                    <div class="industry-en-tag">Caregiving / SSW</div>
-                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                        <span class="lang-ja">高齢者施設・デイサービス等における身体介助・生活支援。専門用語教育済み。</span>
-                        <span class="lang-en">Elderly welfare facilities & daily care support with specialized medical terminology training.</span>
-                    </p>
+                    <div class="industry-badge-rec"><span class="lang-ja">主力対応分野</span><span class="lang-en">Key Focus</span></div>
+                    <div class="industry-icon">🩺</div>
+                    <h3 class="industry-title"><span class="lang-ja">介護分野 (Nursing Care)</span><span class="lang-en">Nursing & Elderly Care</span></h3>
+                    <p class="industry-desc"><span class="lang-ja">特別養護老人ホーム、デイサービス、介護老人保健施設等での身体介護・生活援助。介護技能評価試験・日本語試験合格者をご紹介。</span><span class="lang-en">Certified candidates for elderly care, assisted living facilities, and daycare centers with verified Japanese proficiency.</span></p>
                 </div>
 
                 <div class="industry-card">
-                    <div class="industry-emoji-icon">🏗️</div>
-                    <h3 class="industry-name"><span class="lang-ja">建設分野</span><span class="lang-en">Construction</span></h3>
-                    <div class="industry-en-tag">Construction & Engineering</div>
-                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                        <span class="lang-ja">型枠・鉄筋・内装仕上げ・土木工事など、現場の即戦力となる体力と熱意ある人材。</span>
-                        <span class="lang-en">Formwork, rebar, interior finishing, and civil engineering with safety training.</span>
-                    </p>
+                    <div class="industry-icon">🏗️</div>
+                    <h3 class="industry-title"><span class="lang-ja">建設分野 (Construction)</span><span class="lang-en">Construction & Engineering</span></h3>
+                    <p class="industry-desc"><span class="lang-ja">型枠施工、鉄筋施工、内装仕上げ、土木など、現場で活躍できる意欲の高い若手人材をご紹介。</span><span class="lang-en">Formwork, rebar placement, interior finishing, and civil works with strong safety ethics.</span></p>
                 </div>
 
                 <div class="industry-card">
-                    <div class="industry-emoji-icon">🧹</div>
-                    <h3 class="industry-name"><span class="lang-ja">ビルクリーニング・清掃</span><span class="lang-en">Building Cleaning</span></h3>
-                    <div class="industry-en-tag">Facility Maintenance</div>
-                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                        <span class="lang-ja">商業施設・オフィスビル・ホテルの環境衛生維持。日本の衛生基準を徹底研修。</span>
-                        <span class="lang-en">Commercial facilities, office buildings, and hotels adhering to Japanese hygiene protocols.</span>
-                    </p>
+                    <div class="industry-icon">🧹</div>
+                    <h3 class="industry-title"><span class="lang-ja">ビルクリーニング (Cleaning)</span><span class="lang-en">Building Maintenance</span></h3>
+                    <p class="industry-desc"><span class="lang-ja">商業施設、オフィスビル、宿泊施設等の清掃衛生管理業務。礼儀と丁寧な作業ができる人材をご提案。</span><span class="lang-en">Commercial, office, and hospital sanitation operations with meticulous attention to detail.</span></p>
                 </div>
 
                 <div class="industry-card">
-                    <div class="industry-emoji-icon">🌐</div>
-                    <h3 class="industry-name"><span class="lang-ja">その他特定技能分野</span><span class="lang-en">Other SSW Sectors</span></h3>
-                    <div class="industry-en-tag">Food, Logistics & Manufacturing</div>
-                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                        <span class="lang-ja">外食業・飲食料品製造業・農業・宿泊業など、特定技能制度対象職種に対応。</span>
-                        <span class="lang-en">Food service, food manufacturing, agriculture, and hospitality under SSW program.</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="industry-note-box">
-                <span class="lang-ja">※ 対応可能な在留資格・職種・国籍については、受入企業の条件に合わせて個別にご相談いただけます。</span>
-                <span class="lang-en">* Eligible visa types, job categories, and qualifications can be tailored based on corporate hiring needs.</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- COMMITMENTS -->
-    <section class="section section-bg-light">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge"><span class="lang-ja">企業様へのお約束</span><span class="lang-en">Our Guiding Principles</span></span>
-                <h2 class="section-title">
-                    <span class="lang-ja">MIRANSHが大切にしている3つの価値</span>
-                    <span class="lang-en">Three Pillars of Our Commitment</span>
-                </h2>
-            </div>
-
-            <div class="commitments-grid">
-                <div class="commitment-card">
-                    <div class="commitment-icon-box">
-                        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    </div>
-                    <h3 class="commitment-title"><span class="lang-ja">信頼 (Trust)</span><span class="lang-en">Trust & Transparency</span></h3>
-                    <p class="commitment-desc">
-                        <span class="lang-ja">法令遵守を徹底し、企業様と外国人材の双方が納得できる透明性の高いマッチングを約束します。</span>
-                        <span class="lang-en">Strict compliance with Japanese labor and immigration laws, ensuring transparent, honest partnerships.</span>
-                    </p>
-                </div>
-
-                <div class="commitment-card">
-                    <div class="commitment-icon-box">
-                        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    </div>
-                    <h3 class="commitment-title"><span class="lang-ja">安心 (Peace of Mind)</span><span class="lang-en">Peace of Mind</span></h3>
-                    <p class="commitment-desc">
-                        <span class="lang-ja">入国手続きから生活面の不安解消まで、母国語サポートを含む手厚いフォローで安心をお届けします。</span>
-                        <span class="lang-en">End-to-end guidance from visa documentation to daily life counseling in the candidate's native tongue.</span>
-                    </p>
-                </div>
-
-                <div class="commitment-card">
-                    <div class="commitment-icon-box">
-                        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    </div>
-                    <h3 class="commitment-title"><span class="lang-ja">長期的な関係 (Partnership)</span><span class="lang-en">Long-Term Growth</span></h3>
-                    <p class="commitment-desc">
-                        <span class="lang-ja">一過性の紹介ではなく、企業様の事業発展と外国人材の日本でのキャリア形成を長く支え続けます。</span>
-                        <span class="lang-en">Fostering lasting bonds that drive sustainable business growth and fulfilling careers in Japan.</span>
-                    </p>
+                    <div class="industry-icon">🍽️</div>
+                    <h3 class="industry-title"><span class="lang-ja">外食業・食品製造 (Food Service)</span><span class="lang-en">Food & Dining Services</span></h3>
+                    <p class="industry-desc"><span class="lang-ja">飲食店での調理・接客・店舗管理、および食品工場での加工製造業務。</span><span class="lang-en">Culinary prep, customer service, and hygienic food production facility placements.</span></p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- STORIES / CASE STUDIES SECTION -->
-    <section id="stories" class="section">
+    <section id="stories" class="section section-bg-light">
         <div class="container">
             <div class="section-header">
                 <span class="section-badge"><span class="lang-ja">採用事例・ニュース</span><span class="lang-en">Stories & News</span></span>
@@ -464,7 +333,7 @@
             </div>
 
             <div class="stories-grid">
-                @foreach ($stories as $story)
+                @foreach($stories as $story)
                 <div class="story-card">
                     <div class="story-card-image">
                         <img src="{{ $story->image ?? '/images/story1.jpg' }}" alt="{{ $story->title_ja }}">
@@ -483,7 +352,7 @@
                             <span class="lang-ja">{{ $story->summary_ja }}</span>
                             <span class="lang-en">{{ $story->summary_en }}</span>
                         </p>
-                        <a href="/stories/{{ $story->id }}" class="story-read-link">
+                        <a href="{{ route('stories.detail', $story->id) }}" class="story-read-link">
                             <span class="lang-ja">記事全文を読む →</span>
                             <span class="lang-en">Read Full Story →</span>
                         </a>
@@ -494,7 +363,55 @@
         </div>
     </section>
 
-    <!-- COMPANY PROFILE & GOOGLE MAP -->
+    <!-- ===================================================
+         FAQ SECTION (よくある質問)
+    =================================================== -->
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><span class="lang-ja">よくある質問</span><span class="lang-en">Frequently Asked Questions</span></span>
+                <h2 class="section-title">
+                    <span class="lang-ja">外国人材採用・在留資格に関するFAQ</span>
+                    <span class="lang-en">SSW Recruitment & Visa FAQs</span>
+                </h2>
+                <p class="section-subtitle">
+                    <span class="lang-ja">企業様からよくいただくご質問とその回答をまとめました。ご不明な点がございましたらお気軽にお問い合わせください。</span>
+                    <span class="lang-en">Find answers to common questions about candidate qualifications, visa procedures, onboarding timelines, and fees.</span>
+                </p>
+            </div>
+
+            <div class="faq-grid">
+                @forelse($faqs as $faq)
+                <div class="faq-card">
+                    <span class="faq-category-tag">
+                        <span class="lang-ja">{{ $faq->category_ja }}</span>
+                        <span class="lang-en">{{ $faq->category_en }}</span>
+                    </span>
+                    <div class="faq-question">
+                        <span class="faq-q-badge">Q</span>
+                        <div>
+                            <span class="lang-ja">{{ $faq->question_ja }}</span>
+                            <span class="lang-en">{{ $faq->question_en }}</span>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="lang-ja">{!! nl2br(e($faq->answer_ja)) !!}</div>
+                        <div class="lang-en">{!! nl2br(e($faq->answer_en)) !!}</div>
+                    </div>
+                </div>
+                @empty
+                <div class="faq-card" style="grid-column: span 2; text-align: center; padding: 40px;">
+                    <p style="color: #64748B;">
+                        <span class="lang-ja">FAQ項目を読み込んでいます...</span>
+                        <span class="lang-en">Loading FAQs...</span>
+                    </p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPANY PROFILE & GOOGLE MAPS EMBED -->
     <section id="company" class="section section-bg-light">
         <div class="container">
             <div class="section-header">
@@ -512,9 +429,9 @@
                             <tr>
                                 <th><span class="lang-ja">会社名</span><span class="lang-en">Company Name</span></th>
                                 <td>
-                                    <strong><span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社（ミランス合同会社）' }}</span></strong>
+                                    <strong><span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span></strong>
                                     <br>
-                                    <span class="lang-en" style="color: var(--text-light);">{{ $company->name_en ?? 'MIRANSH LLC (MIRANSH Godo Kaisha)' }}</span>
+                                    <span class="lang-en" style="color: var(--text-light);">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
                                 </td>
                             </tr>
                             <tr>
@@ -553,8 +470,14 @@
                             <tr>
                                 <th><span class="lang-ja">代表者</span><span class="lang-en">Executive</span></th>
                                 <td>
-                                    <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }}：{{ $company->ceo_name ?? 'ギリ ラム クリシュナ (Giri Ram Krishna)' }}</span>
-                                    <span class="lang-en">{{ $company->ceo_role_en ?? 'Representative Member' }}: {{ $company->ceo_name ?? 'Giri Ram Krishna' }}</span>
+                                    <div class="lang-ja">
+                                        {{ $company->ceo_role_ja ?? '代表社員' }}：<strong>{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</strong>
+                                        <span style="color: #64748B; margin-left: 8px;">({{ $company->ceo_name_en ?? 'Giri Ram Krishna' }})</span>
+                                    </div>
+                                    <div class="lang-en">
+                                        {{ $company->ceo_role_en ?? 'Representative Member' }}: <strong>{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</strong>
+                                        <span style="color: #64748B; margin-left: 8px;">(Japanese: {{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }})</span>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -596,8 +519,11 @@
             <div class="vision-card">
                 <div class="vision-grid">
                     <div class="vision-ceo-card">
-                        <img src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="{{ $company->ceo_name }}" class="vision-ceo-photo">
-                        <h3 class="vision-ceo-name">{{ $company->ceo_name ?? 'ギリ ラム クリシュナ' }}</h3>
+                        <img src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}" class="vision-ceo-photo">
+                        <h3 class="vision-ceo-name">
+                            <span class="lang-ja">{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</span>
+                            <span class="lang-en">{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</span>
+                        </h3>
                         <div class="vision-ceo-role">
                             <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }}</span>
                             <span class="lang-en">{{ $company->ceo_role_en ?? 'Representative Member' }}</span>
@@ -623,8 +549,8 @@
                                     <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
                                 </div>
                                 <div class="vision-sign-name">
-                                    <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }} {{ $company->ceo_name ?? 'ギリ ラム クリシュナ' }}</span>
-                                    <span class="lang-en">{{ $company->ceo_name ?? 'Giri Ram Krishna' }}</span>
+                                    <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }} {{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</span>
+                                    <span class="lang-en">{{ $company->ceo_role_en ?? 'Representative Member' }}: {{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -701,13 +627,13 @@
                         </div>
                         @endif
 
-                        <form action="{{ route('contact.submit') }}" method="POST">
+                        <form id="contact-form" action="{{ route('contact.submit') }}" method="POST">
                             @csrf
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">貴社名 / 法人名</span><span class="lang-en">Company / Organization</span>
                                 </label>
-                                <input type="text" name="company_name" class="form-input" placeholder="例: 株式会社〇〇">
+                                <input type="text" id="input-company" name="company_name" class="form-input" placeholder="例: 株式会社〇〇">
                             </div>
 
                             <div class="form-group">
@@ -715,7 +641,7 @@
                                     <span class="lang-ja">ご担当者様 お名前</span><span class="lang-en">Full Name</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="text" name="name" class="form-input" required placeholder="例: 山田 太郎">
+                                <input type="text" id="input-name" name="name" class="form-input" required placeholder="例: 山田 太郎">
                             </div>
 
                             <div class="form-group">
@@ -723,21 +649,21 @@
                                     <span class="lang-ja">メールアドレス</span><span class="lang-en">Email Address</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="email" name="email" class="form-input" required placeholder="name@company.co.jp">
+                                <input type="email" id="input-email" name="email" class="form-input" required placeholder="name@company.co.jp">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">お電話番号</span><span class="lang-en">Phone Number</span>
                                 </label>
-                                <input type="tel" name="phone" class="form-input" placeholder="03-0000-0000">
+                                <input type="tel" id="input-phone" name="phone" class="form-input" placeholder="03-0000-0000">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">ご相談分野・ご興味のある内容</span><span class="lang-en">Service of Interest</span>
                                 </label>
-                                <select name="service_interest" class="form-select">
+                                <select id="input-service" name="service_interest" class="form-select">
                                     <option value="介護人材の採用支援">特定技能（介護）人材の採用支援</option>
                                     <option value="建設・その他特定技能">建設・その他分野の特定技能人材</option>
                                     <option value="在留資格・ビザ手続き">在留資格（ビザ）手続きの相談</option>
@@ -751,11 +677,11 @@
                                     <span class="lang-ja">ご相談内容・メッセージ</span><span class="lang-en">Inquiry Details</span>
                                     <span class="req">*</span>
                                 </label>
-                                <textarea name="message" class="form-textarea" required placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
+                                <textarea id="input-message" name="message" class="form-textarea" required placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
                             </div>
 
                             <button type="submit" class="btn-submit-contact">
-                                <span class="lang-ja">送信する (Send Inquiry)</span>
+                                <span class="lang-ja">送信する (Submit Inquiry)</span>
                                 <span class="lang-en">Submit Inquiry</span>
                             </button>
                         </form>
@@ -791,6 +717,7 @@
                         <li><a href="#strengths"><span class="lang-ja">当社の強み</span><span class="lang-en">Our Strengths</span></a></li>
                         <li><a href="#industries"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
                         <li><a href="#stories"><span class="lang-ja">採用事例</span><span class="lang-en">Case Studies</span></a></li>
+                        <li><a href="#faq"><span class="lang-ja">FAQ・よくある質問</span><span class="lang-en">FAQ</span></a></li>
                         <li><a href="#company"><span class="lang-ja">会社概要・アクセス</span><span class="lang-en">Profile & Location</span></a></li>
                     </ul>
                 </div>
@@ -819,10 +746,97 @@
         </div>
     </footer>
 
+    <!-- Sakana AI Consultant Floating Button -->
+    <button id="sakana-float-btn" class="sakana-float-btn" onclick="toggleSakanaChat()" title="Sakana AI 採用・在留資格AI相談">
+        <div class="sakana-badge-pulse"></div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.755-1.2L2 22l1.2-5.245A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"></path>
+            <path d="M8 12h.01M12 12h.01M16 12h.01"></path>
+        </svg>
+        <span class="lang-ja">AI 採用・在留資格相談</span>
+        <span class="lang-en">AI Visa & Job Advisor</span>
+    </button>
+
+    <!-- Sakana AI Interactive Chat Modal / Drawer -->
+    <div id="sakana-modal-overlay" class="sakana-modal-overlay" onclick="closeSakanaOnBackdrop(event)">
+        <div class="sakana-chat-window" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="sakana-chat-header">
+                <div class="sakana-chat-header-info">
+                    <div class="sakana-icon-avatar">🐟</div>
+                    <div>
+                        <div class="sakana-chat-title">
+                            <span class="lang-ja">MIRANSH AIコンサルタント</span>
+                            <span class="lang-en">MIRANSH AI Consultant</span>
+                        </div>
+                        <div class="sakana-chat-subtitle">
+                            <span class="sakana-status-dot"></span>
+                            <span>Powered by Sakana AI (Namazu / Fugu)</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="sakana-btn-close" onclick="toggleSakanaChat()" aria-label="Close Chat">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="sakana-quick-prompts">
+                <button class="sakana-chip" onclick="sendQuickPrompt('介護分野での特定技能の採用要件や流れを教えてください')">
+                    <span class="lang-ja">🏥 介護分野の特定技能要件</span>
+                    <span class="lang-en">🏥 Caregiving SSW Requirements</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('ネパール人材の特徴や日本語レベルについて')">
+                    <span class="lang-ja">🇳🇵 ネパール人材の強み</span>
+                    <span class="lang-en">🇳🇵 Nepali Talent Advantages</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('特定技能1号の受入れ費用と入社までのスケジュール')">
+                    <span class="lang-ja">💰 採用費用とスケジュール</span>
+                    <span class="lang-en">💰 Cost & Timeline</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('建設分野の受入れ手続きについて教えてください')">
+                    <span class="lang-ja">🏗️ 建設分野の受入れ</span>
+                    <span class="lang-en">🏗️ Construction Sector</span>
+                </button>
+            </div>
+
+            <!-- Message Area -->
+            <div id="sakana-messages-body" class="sakana-messages-body">
+                <div class="sakana-msg bot">
+                    <div class="sakana-msg-bubble">
+                        <span class="lang-ja">こんにちは！MIRANSH合同会社のAI採用・在留資格アシスタントです（Sakana AI 連携）。<br><br>特定技能（介護・建設・清掃・外食など）の外国人材採用、ネパール提携校ネットワーク、ビザ申請（COE）、受入れ費用など、ご不明な点をいつでもご相談ください。</span>
+                        <span class="lang-en">Hello! I am your AI Recruitment & Visa Consultant for MIRANSH LLC (Powered by Sakana AI).<br><br>Feel free to ask about Specified Skilled Worker (SSW) hiring, our Nepal talent network, visa application (COE), costs, or life support. How can I assist you today?</span>
+                    </div>
+                    <div class="sakana-msg-meta">
+                        <span>MIRANSH AI (Sakana Namazu)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Quick Action -->
+            <div class="sakana-chat-footer-action">
+                <span><span class="lang-ja">個別のご相談や求人票のご依頼</span><span class="lang-en">Direct hiring inquiries:</span></span>
+                <button class="sakana-btn-inquiry-link" onclick="transferChatToInquiry()">
+                    <span class="lang-ja">✉️ 相談内容をフォームに転記</span>
+                    <span class="lang-en">✉️ Fill Contact Form</span>
+                </button>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="sakana-chat-input-wrap">
+                <input type="text" id="sakana-user-input" class="sakana-input-field" placeholder="質問を入力してください (例: 介護の採用要件は？)" onkeydown="handleSakanaKey(event)">
+                <button id="sakana-btn-send" class="sakana-btn-send" onclick="sendSakanaMessage()" aria-label="Send">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Floating Launcher -->
     <a href="{{ route('admin.dashboard') }}" class="admin-float-btn" title="Admin Portal">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span>管理画面 (Admin)</span>
+        <span class="lang-ja">管理画面</span>
+        <span class="lang-en">Admin Portal</span>
     </a>
 
     <!-- Language Switching Engine Script -->
@@ -832,12 +846,12 @@
             const btnJa = document.getElementById('btn-lang-ja');
             const btnEn = document.getElementById('btn-lang-en');
             if (lang === 'en') {
-                btnEn.classList.add('active');
-                btnJa.classList.remove('active');
+                btnEn?.classList.add('active');
+                btnJa?.classList.remove('active');
                 document.documentElement.lang = 'en';
             } else {
-                btnJa.classList.add('active');
-                btnEn.classList.remove('active');
+                btnJa?.classList.add('active');
+                btnEn?.classList.remove('active');
                 document.documentElement.lang = 'ja';
             }
             try {
@@ -853,6 +867,171 @@
                 }
             } catch(e) {}
         })();
+
+        /* ===================================================
+           Sakana AI Chat Interaction Engine
+        =================================================== */
+        const sakanaChatHistory = [];
+
+        function toggleSakanaChat() {
+            const overlay = document.getElementById('sakana-modal-overlay');
+            overlay.classList.toggle('open');
+            if (overlay.classList.contains('open')) {
+                setTimeout(() => {
+                    document.getElementById('sakana-user-input')?.focus();
+                }, 100);
+            }
+        }
+
+        function closeSakanaOnBackdrop(e) {
+            if (e.target.id === 'sakana-modal-overlay') {
+                toggleSakanaChat();
+            }
+        }
+
+        function handleSakanaKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendSakanaMessage();
+            }
+        }
+
+        function sendQuickPrompt(promptText) {
+            const input = document.getElementById('sakana-user-input');
+            input.value = promptText;
+            sendSakanaMessage();
+        }
+
+        async function sendSakanaMessage() {
+            const input = document.getElementById('sakana-user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            const msgBody = document.getElementById('sakana-messages-body');
+            const sendBtn = document.getElementById('sakana-btn-send');
+
+            // Append User Message
+            const userMsgEl = document.createElement('div');
+            userMsgEl.className = 'sakana-msg user';
+            userMsgEl.innerHTML = `
+                <div class="sakana-msg-bubble">${escapeHtml(message)}</div>
+                <div class="sakana-msg-meta"><span>${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+            `;
+            msgBody.appendChild(userMsgEl);
+            msgBody.scrollTop = msgBody.scrollHeight;
+
+            sakanaChatHistory.push({ role: 'user', content: message });
+
+            // Show Typing Indicator
+            const typingEl = document.createElement('div');
+            typingEl.className = 'sakana-typing';
+            typingEl.id = 'sakana-typing-indicator';
+            typingEl.innerHTML = `
+                <div class="sakana-typing-dot"></div>
+                <div class="sakana-typing-dot"></div>
+                <div class="sakana-typing-dot"></div>
+            `;
+            msgBody.appendChild(typingEl);
+            msgBody.scrollTop = msgBody.scrollHeight;
+
+            sendBtn.disabled = true;
+
+            const activeLang = document.body.classList.contains('en') ? 'en' : 'ja';
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        messages: sakanaChatHistory,
+                        language: activeLang
+                    })
+                });
+
+                const data = await response.json();
+                const typing = document.getElementById('sakana-typing-indicator');
+                if (typing) typing.remove();
+
+                const botMsgEl = document.createElement('div');
+                botMsgEl.className = 'sakana-msg bot';
+                
+                const formattedReply = renderMarkdown(data.reply || 'ご質問ありがとうございます。詳細につきましてはMIRANSH担当者よりご案内いたします。');
+                const providerBadge = data.provider || 'Sakana AI (Namazu)';
+
+                botMsgEl.innerHTML = `
+                    <div class="sakana-msg-bubble">${formattedReply}</div>
+                    <div class="sakana-msg-meta">
+                        <span>${providerBadge}</span>
+                        <span>• ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                `;
+                msgBody.appendChild(botMsgEl);
+                msgBody.scrollTop = msgBody.scrollHeight;
+
+                if (data.reply) {
+                    sakanaChatHistory.push({ role: 'assistant', content: data.reply });
+                }
+            } catch (err) {
+                console.error('Sakana Chat Error:', err);
+                const typing = document.getElementById('sakana-typing-indicator');
+                if (typing) typing.remove();
+
+                const botMsgEl = document.createElement('div');
+                botMsgEl.className = 'sakana-msg bot';
+                botMsgEl.innerHTML = `
+                    <div class="sakana-msg-bubble">
+                        申し訳ありません。一時的な通信エラーが発生しました。お急ぎの場合はお電話（042-409-8256）またはお問い合わせフォームよりご連絡ください。
+                    </div>
+                    <div class="sakana-msg-meta"><span>System Notice</span></div>
+                `;
+                msgBody.appendChild(botMsgEl);
+                msgBody.scrollTop = msgBody.scrollHeight;
+            } finally {
+                sendBtn.disabled = false;
+                document.getElementById('sakana-user-input')?.focus();
+            }
+        }
+
+        function transferChatToInquiry() {
+            toggleSakanaChat();
+            const contactSection = document.getElementById('contact');
+            if (contactSection) {
+                contactSection.scrollIntoView({ behavior: 'smooth' });
+                const messageTextarea = document.getElementById('input-message');
+                if (messageTextarea && sakanaChatHistory.length > 0) {
+                    const lastUserMsg = sakanaChatHistory.filter(m => m.role === 'user').pop();
+                    if (lastUserMsg) {
+                        messageTextarea.value = `【AI相談からの転記】\nご相談内容: ${lastUserMsg.content}`;
+                        messageTextarea.focus();
+                    }
+                }
+            }
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderMarkdown(md) {
+            if (!md) return '';
+            let html = escapeHtml(md);
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Headings
+            html = html.replace(/^### (.*$)/gim, '<h4 style="margin:8px 0 4px;font-size:14px;font-weight:700;color:var(--primary);">$1</h4>');
+            // Lists
+            html = html.replace(/^\- (.*$)/gim, '<li style="margin-left:16px;">$1</li>');
+            html = html.replace(/^\d+\. (.*$)/gim, '<li style="margin-left:16px;list-style-type:decimal;">$1</li>');
+            // Line breaks
+            html = html.replace(/\n\n/g, '<br><br>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
     </script>
 </body>
 </html>
