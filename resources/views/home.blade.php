@@ -375,18 +375,61 @@
                     <span class="lang-en">SSW Recruitment & Visa FAQs</span>
                 </h2>
                 <p class="section-subtitle">
-                    <span class="lang-ja">企業様からよくいただくご質問とその回答をまとめました。ご不明な点がございましたらお気軽にお問い合わせください。</span>
+                    <span class="lang-ja">企業様からよくいただくご質問とその回答をまとめました。管理画面より随時最新情報に更新・追加されています。</span>
                     <span class="lang-en">Find answers to common questions about candidate qualifications, visa procedures, onboarding timelines, and fees.</span>
                 </p>
             </div>
 
-            <div class="faq-grid">
+            <!-- FAQ Filter & Search Toolbar -->
+            @php
+                $faqCategories = $faqs->map(function($f) {
+                    return [
+                        'ja' => $f->category_ja,
+                        'en' => $f->category_en ?: $f->category_ja
+                    ];
+                })->unique('ja');
+            @endphp
+
+            <div style="margin-bottom: 28px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+                    <!-- Category Tabs -->
+                    <div class="faq-category-tabs" style="display: flex; flex-wrap: wrap; gap: 8px;" id="faq-category-nav">
+                        <button type="button" class="faq-tab-btn active" onclick="filterFrontendFaqs('all', this)" style="padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--primary); background: var(--primary); color: #FFFFFF; transition: all 0.2s;">
+                            <span class="lang-ja">すべて ({{ count($faqs) }})</span>
+                            <span class="lang-en">All ({{ count($faqs) }})</span>
+                        </button>
+                        @foreach($faqCategories as $cat)
+                        <button type="button" class="faq-tab-btn" onclick="filterFrontendFaqs('{{ $cat['ja'] }}', this)" style="padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #E2E8F0; background: #FFFFFF; color: #475569; transition: all 0.2s;">
+                            <span class="lang-ja">{{ $cat['ja'] }}</span>
+                            <span class="lang-en">{{ $cat['en'] }}</span>
+                        </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Live Keyword Search -->
+                    <div style="position: relative; width: 100%; max-width: 280px;">
+                        <input 
+                            type="text" 
+                            id="frontend-faq-search" 
+                            oninput="searchFrontendFaqs()" 
+                            placeholder="FAQを検索..." 
+                            style="width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #CBD5E1; border-radius: 20px; font-size: 13px; outline: none; background: #FFFFFF;"
+                        >
+                        <span style="position: absolute; left: 12px; top: 9px; color: #94A3B8; font-size: 13px;">🔍</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-grid" id="frontend-faq-list">
                 @forelse($faqs as $faq)
-                <div class="faq-card">
-                    <span class="faq-category-tag">
-                        <span class="lang-ja">{{ $faq->category_ja }}</span>
-                        <span class="lang-en">{{ $faq->category_en }}</span>
-                    </span>
+                <div class="faq-card" data-category="{{ $faq->category_ja }}" data-search="{{ strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en) }}">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+                        <span class="faq-category-tag">
+                            <span class="lang-ja">{{ $faq->category_ja }}</span>
+                            <span class="lang-en">{{ $faq->category_en }}</span>
+                        </span>
+                        <span style="font-size: 11px; color: #94A3B8; font-weight: 600;">#{{ $faq->sort_order ?? $loop->iteration }}</span>
+                    </div>
                     <div class="faq-question">
                         <span class="faq-q-badge">Q</span>
                         <div>
@@ -402,11 +445,24 @@
                 @empty
                 <div class="faq-card" style="grid-column: span 2; text-align: center; padding: 40px;">
                     <p style="color: #64748B;">
-                        <span class="lang-ja">FAQ項目を読み込んでいます...</span>
-                        <span class="lang-en">Loading FAQs...</span>
+                        <span class="lang-ja">現在登録されているFAQ項目はありません。</span>
+                        <span class="lang-en">No FAQs currently available.</span>
                     </p>
                 </div>
                 @endforelse
+            </div>
+
+            <!-- Empty Search State -->
+            <div id="faq-no-results" style="display: none; text-align: center; padding: 40px 20px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1; margin-top: 16px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                <div style="font-weight: 700; color: #0F172A; margin-bottom: 4px;">
+                    <span class="lang-ja">該当するFAQが見つかりませんでした</span>
+                    <span class="lang-en">No matching FAQs found</span>
+                </div>
+                <p style="font-size: 13px; color: #64748B; margin: 0;">
+                    <span class="lang-ja">キーワードを変更するか、右下のAI相談またはお問い合わせフォームより直接お問い合わせください。</span>
+                    <span class="lang-en">Try another search keyword, or ask our AI consultant or contact form directly.</span>
+                </p>
             </div>
         </div>
     </section>
@@ -627,7 +683,7 @@
                         </div>
                         @endif
 
-                        <form id="contact-form" action="{{ route('contact.submit') }}" method="POST">
+                        <form id="contact-form" action="{{ route('contact.submit', [], false) }}" method="POST">
                             @csrf
                             <div class="form-group">
                                 <label class="form-label">
@@ -1031,6 +1087,57 @@
             html = html.replace(/\n\n/g, '<br><br>');
             html = html.replace(/\n/g, '<br>');
             return html;
+        }
+
+        // --- FRONTEND FAQ FILTERING & SEARCH ---
+        let currentFaqCategory = 'all';
+
+        function filterFrontendFaqs(category, btnElement) {
+            currentFaqCategory = category;
+
+            // Update button styles
+            document.querySelectorAll('#faq-category-nav .faq-tab-btn').forEach(btn => {
+                btn.style.background = '#FFFFFF';
+                btn.style.color = '#475569';
+                btn.style.borderColor = '#E2E8F0';
+            });
+            if (btnElement) {
+                btnElement.style.background = 'var(--primary)';
+                btnElement.style.color = '#FFFFFF';
+                btnElement.style.borderColor = 'var(--primary)';
+            }
+
+            applyFrontendFaqFilter();
+        }
+
+        function searchFrontendFaqs() {
+            applyFrontendFaqFilter();
+        }
+
+        function applyFrontendFaqFilter() {
+            const query = (document.getElementById('frontend-faq-search')?.value || '').toLowerCase().trim();
+            const cards = document.querySelectorAll('#frontend-faq-list .faq-card');
+            const noResults = document.getElementById('faq-no-results');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardCat = card.getAttribute('data-category') || '';
+                const cardSearch = card.getAttribute('data-search') || '';
+
+                const matchesCat = (currentFaqCategory === 'all') || (cardCat === currentFaqCategory);
+                const matchesQuery = !query || cardSearch.includes(query);
+
+                if (matchesCat && matchesQuery) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (noResults) {
+                noResults.style.display = (visibleCount === 0 && cards.length > 0) ? 'block' : 'none';
+            }
         }
     </script>
 </body>

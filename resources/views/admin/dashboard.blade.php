@@ -142,7 +142,7 @@
                 <a href="/" target="_blank" style="color: #93C5FD; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                     <span>↗ 公開サイトを確認</span>
                 </a>
-                <a href="{{ route('admin.logout') }}" style="color: #EF4444; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <a href="{{ route('admin.logout', [], false) }}" style="color: #EF4444; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                     <span>🚪 ログアウト</span>
                 </a>
             </div>
@@ -170,7 +170,7 @@
                         会社基本情報・代表者（CEO）設定・ヒーロー設定
                     </h2>
 
-                    <form action="{{ route('admin.company.update') }}" method="POST">
+                    <form action="{{ route('admin.company.update', [], false) }}" method="POST">
                         @csrf
                         <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）バイリンガル氏名・役職・写真</h3>
                         
@@ -326,7 +326,7 @@
                         About Us (会社紹介・理念) 設定
                     </h2>
 
-                    <form action="{{ route('admin.about.update') }}" method="POST">
+                    <form action="{{ route('admin.about.update', [], false) }}" method="POST">
                         @csrf
                         <div class="form-grid-2">
                             <div class="form-group">
@@ -469,85 +469,275 @@
             <!-- TAB 5: FAQS (よくある質問) -->
             <div id="pane-faqs" class="tab-pane">
                 <div class="admin-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
-                            FAQ・よくある質問 管理 ({{ count($faqs) }}件)
-                        </h2>
-                        <button type="button" class="btn-primary" onclick="openFaqCreateModal()" style="font-size: 13px; padding: 8px 16px;">+ 新規FAQを追加</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">
+                                💬 FAQ・よくある質問 管理 (<span id="faq-count-display">{{ count($faqs) }}</span>件)
+                            </h2>
+                            <p style="font-size: 13px; color: #64748B; margin: 0;">ウェブサイト上のFAQセクションにリアルタイムに反映されます。並び順、カテゴリ、日英語の編集・追加・削除が可能です。</p>
+                        </div>
+                        <button type="button" class="btn-primary" onclick="openFaqCreateModal()" style="font-size: 14px; padding: 10px 20px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            新規FAQを追加
+                        </button>
                     </div>
 
-                    <table class="table-custom">
+                    <!-- Search & Filter Controls -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #F8FAFC; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                        <div style="flex: 1; min-width: 240px; position: relative;">
+                            <input 
+                                type="text" 
+                                id="faq-search-input" 
+                                oninput="filterFaqTable()" 
+                                placeholder="🔍 質問・回答・キーワードで絞り込み検索..." 
+                                style="width: 100%; padding: 8px 12px 8px 32px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF;"
+                            >
+                            <span style="position: absolute; left: 10px; top: 9px; color: #94A3B8; pointer-events: none;">🔍</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <label style="font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">カテゴリ絞込:</label>
+                            <select id="faq-category-filter" onchange="filterFaqTable()" style="padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF; color: #334155;">
+                                <option value="all">すべてのカテゴリ (All)</option>
+                                @php
+                                    $uniqueCategories = $faqs->pluck('category_ja')->unique()->filter();
+                                @endphp
+                                @foreach($uniqueCategories as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="table-custom" id="faqs-table">
                         <thead>
                             <tr>
-                                <th style="width: 130px;">カテゴリ</th>
-                                <th>質問 (Question)</th>
-                                <th>回答 (Answer)</th>
-                                <th style="width: 100px;">操作</th>
+                                <th style="width: 70px; text-align: center;">表示順</th>
+                                <th style="width: 160px;">カテゴリ</th>
+                                <th>質問内容 (日 / 英)</th>
+                                <th>回答概要 (Answer)</th>
+                                <th style="width: 140px; text-align: center;">操作</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach ($faqs as $faq)
-                            <tr>
-                                <td>
-                                    <span class="badge-status">{{ $faq->category_ja }}</span>
+                        <tbody id="faqs-table-body">
+                            @forelse ($faqs as $faq)
+                            <tr class="faq-row" data-category="{{ $faq->category_ja }}" data-search="{{ strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en) }}">
+                                <td style="text-align: center;">
+                                    <span style="display: inline-block; background: #F1F5F9; color: #334155; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 12px; border: 1px solid #CBD5E1;">
+                                        #{{ $faq->sort_order ?? $loop->iteration }}
+                                    </span>
                                 </td>
                                 <td>
-                                    <strong>{{ $faq->question_ja }}</strong><br>
-                                    <span style="font-size: 12px; color: #64748B;">{{ $faq->question_en }}</span>
-                                </td>
-                                <td style="font-size: 13px; color: #475569; max-width: 320px;">
-                                    {{ Str::limit($faq->answer_ja, 110) }}
+                                    <span class="badge-status" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 600;">
+                                        {{ $faq->category_ja }}
+                                    </span>
+                                    <div style="font-size: 11px; color: #64748B; margin-top: 3px;">
+                                        {{ $faq->category_en }}
+                                    </div>
                                 </td>
                                 <td>
-                                    <form action="{{ route('admin.faqs.delete', $faq->id) }}" method="POST" onsubmit="return confirm('このFAQを削除してもよろしいですか？')">
-                                        @csrf
-                                        <button type="submit" style="background: none; border: none; color: #EF4444; font-size: 13px; font-weight: 600; cursor: pointer;">削除</button>
-                                    </form>
+                                    <div style="font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px;">
+                                        {{ $faq->question_ja }}
+                                    </div>
+                                    <div style="font-size: 12px; color: #64748B; line-height: 1.4;">
+                                        {{ $faq->question_en }}
+                                    </div>
+                                </td>
+                                <td style="font-size: 13px; color: #475569; max-width: 320px; line-height: 1.5;">
+                                    <div style="color: #334155; margin-bottom: 4px;">{{ Str::limit($faq->answer_ja, 90) }}</div>
+                                    <div style="font-size: 11px; color: #94A3B8;">{{ Str::limit($faq->answer_en, 80) }}</div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                        <button 
+                                            type="button" 
+                                            class="btn-outline-white" 
+                                            style="padding: 5px 10px; font-size: 12px; color: #0F4C81; border-color: #93C5FD; background: #F0F7FF; border-radius: 4px; cursor: pointer;"
+                                            onclick='openFaqEditModal(@json($faq))'
+                                        >
+                                            ✏️ 編集
+                                        </button>
+                                        <form action="{{ route('admin.faqs.delete', $faq->id, false) }}" method="POST" onsubmit="return confirm('本当にこのFAQ「{{ addslashes($faq->question_ja) }}」を削除しますか？')" style="margin: 0;">
+                                            @csrf
+                                            <button type="submit" style="background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                                🗑️ 削除
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr id="faq-empty-row">
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #64748B;">
+                                    登録されているFAQはありません。「+ 新規FAQを追加」ボタンから質問を追加してください。
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Add FAQ Modal -->
-                <div id="faqCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-                    <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;">新規FAQの追加</h3>
-                            <button type="button" onclick="closeFaqCreateModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+                <div id="faqCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: #FFFFFF; border-radius: 16px; padding: 32px; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 24px;">💬</span>
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">新規FAQの追加 (Add New FAQ)</h3>
+                                    <p style="font-size: 12px; color: #64748B; margin: 0;">ウェブサイト上のよくある質問セクションに即時公開されます。</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="closeFaqCreateModal()" style="background: #F1F5F9; border: none; font-size: 16px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748B; cursor: pointer;">✕</button>
                         </div>
-                        <form action="{{ route('admin.faqs.store') }}" method="POST">
+                        
+                        <form action="{{ route('admin.faqs.store', [], false) }}" method="POST" id="form-create-faq">
                             @csrf
+                            
+                            <!-- Quick Category Selector Chips -->
+                            <div style="margin-bottom: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px; border-radius: 8px;">
+                                <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">💡 よく使われるカテゴリのクイック選択 (Quick Preset):</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    <button type="button" onclick="setCreateFaqCategory('特定技能・在留資格', 'Specified Skilled Worker (SSW)')" class="badge-status" style="cursor: pointer; border: 1px solid #BFDBFE; background: #EFF6FF; color: #1D4ED8;">特定技能・在留資格</button>
+                                    <button type="button" onclick="setCreateFaqCategory('介護分野の採用', 'Caregiving Sector Recruitment')" class="badge-status" style="cursor: pointer; border: 1px solid #BBF7D0; background: #F0FDF4; color: #15803D;">介護分野の採用</button>
+                                    <button type="button" onclick="setCreateFaqCategory('ネパール人材・語学力', 'Nepali Talent & Language')" class="badge-status" style="cursor: pointer; border: 1px solid #FED7AA; background: #FFF7ED; color: #C2410C;">ネパール人材・語学力</button>
+                                    <button type="button" onclick="setCreateFaqCategory('採用フロー・期間', 'Recruitment Timeline & Process')" class="badge-status" style="cursor: pointer; border: 1px solid #E9D5FF; background: #FAF5FF; color: #7E22CE;">採用フロー・期間</button>
+                                    <button type="button" onclick="setCreateFaqCategory('費用・サポート体制', 'Costs & Support System')" class="badge-status" style="cursor: pointer; border: 1px solid #CBD5E1; background: #F8FAFC; color: #334155;">費用・サポート体制</button>
+                                    <button type="button" onclick="setCreateFaqCategory('入国・生活支援・定着', 'Onboarding & Living Support')" class="badge-status" style="cursor: pointer; border: 1px solid #99F6E4; background: #F0FDFA; color: #0F766E;">生活支援・定着</button>
+                                </div>
+                            </div>
+
                             <div class="form-grid-2">
                                 <div class="form-group">
-                                    <label class="form-label">カテゴリ (日本語)</label>
-                                    <input type="text" name="category_ja" class="form-input" value="特定技能・在留資格" required>
+                                    <label class="form-label">カテゴリ (日本語) <span style="color: #EF4444;">*</span></label>
+                                    <input type="text" id="create-cat-ja" name="category_ja" class="form-input" value="特定技能・在留資格" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">カテゴリ (英語)</label>
-                                    <input type="text" name="category_en" class="form-input" value="Specified Skilled Worker (SSW)" required>
+                                    <label class="form-label">カテゴリ (英語) <span style="color: #EF4444;">*</span></label>
+                                    <input type="text" id="create-cat-en" name="category_en" class="form-input" value="Specified Skilled Worker (SSW)" required>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">質問内容 (日本語)</label>
-                                <input type="text" name="question_ja" class="form-input" placeholder="例: 介護の特定技能1号の受入れ要件は何ですか？" required>
+
+                            <div class="form-grid-2">
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <label class="form-label" style="margin-bottom: 0;">質問内容 (日本語) <span style="color: #EF4444;">*</span></label>
+                                        <span style="font-size: 11px; color: #64748B;">サイト訪問者が知りたい具体的な質問</span>
+                                    </div>
+                                    <input type="text" id="create-q-ja" name="question_ja" class="form-input" placeholder="例: 介護の特定技能1号の受入れ要件は何ですか？" required>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="form-label">質問内容 (英語) (Question in English)</label>
+                                    <input type="text" id="create-q-en" name="question_en" class="form-input" placeholder="e.g. What are the requirements for Nursing Care SSW?">
+                                </div>
                             </div>
+
                             <div class="form-group">
-                                <label class="form-label">質問内容 (英語)</label>
-                                <input type="text" name="question_en" class="form-input" placeholder="e.g. What are the requirements for Nursing Care SSW?">
+                                <label class="form-label">回答内容 (日本語) <span style="color: #EF4444;">*</span></label>
+                                <textarea id="create-a-ja" name="answer_ja" class="form-textarea" rows="4" required placeholder="わかりやすく丁寧な回答を入力してください"></textarea>
                             </div>
+
                             <div class="form-group">
-                                <label class="form-label">回答内容 (日本語)</label>
-                                <textarea name="answer_ja" class="form-textarea" rows="4" required placeholder="わかりやすく丁寧な回答を入力してください"></textarea>
+                                <label class="form-label">回答内容 (英語) (Answer in English)</label>
+                                <textarea id="create-a-en" name="answer_en" class="form-textarea" rows="4" placeholder="English translation of the answer"></textarea>
                             </div>
+
+                            <div class="form-grid-2" style="align-items: center;">
+                                <div class="form-group">
+                                    <label class="form-label">表示順序 (Sort Order - 小さい数字ほど上位表示)</label>
+                                    <input type="number" name="sort_order" class="form-input" value="{{ count($faqs) + 1 }}" min="0" step="1">
+                                </div>
+                                <div style="padding-top: 18px;">
+                                    <button type="button" onclick="autoTranslateCreateFaq()" class="btn-outline-white" style="font-size: 12px; padding: 8px 14px; border-color: #38BDF8; color: #0284C7; background: #F0F9FF; display: inline-flex; align-items: center; gap: 6px;">
+                                        ⚡ 日本語から英語を自動入力 (AI Quick Translate)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #E2E8F0; padding-top: 16px;">
+                                <button type="button" onclick="closeFaqCreateModal()" class="btn-outline-white" style="color: #475569; border-color: #CBD5E1; padding: 10px 20px;">キャンセル</button>
+                                <button type="submit" class="btn-primary" style="padding: 10px 24px;">✓ FAQを保存して公開</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Edit FAQ Modal -->
+                <div id="faqEditModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: #FFFFFF; border-radius: 16px; padding: 32px; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 24px;">✏️</span>
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">FAQの編集 (Edit FAQ)</h3>
+                                    <p style="font-size: 12px; color: #64748B; margin: 0;">FAQ ID: <span id="edit-faq-id-badge" style="font-weight: 700; color: #0F4C81;">-</span> の質問・回答を更新します。</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="closeFaqEditModal()" style="background: #F1F5F9; border: none; font-size: 16px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748B; cursor: pointer;">✕</button>
+                        </div>
+                        
+                        <form id="form-edit-faq" action="" method="POST">
+                            @csrf
+                            
+                            <!-- Quick Category Selector Chips for Edit -->
+                            <div style="margin-bottom: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px; border-radius: 8px;">
+                                <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">💡 カテゴリのクイック変更:</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    <button type="button" onclick="setEditFaqCategory('特定技能・在留資格', 'Specified Skilled Worker (SSW)')" class="badge-status" style="cursor: pointer; border: 1px solid #BFDBFE; background: #EFF6FF; color: #1D4ED8;">特定技能・在留資格</button>
+                                    <button type="button" onclick="setEditFaqCategory('介護分野の採用', 'Caregiving Sector Recruitment')" class="badge-status" style="cursor: pointer; border: 1px solid #BBF7D0; background: #F0FDF4; color: #15803D;">介護分野の採用</button>
+                                    <button type="button" onclick="setEditFaqCategory('ネパール人材・語学力', 'Nepali Talent & Language')" class="badge-status" style="cursor: pointer; border: 1px solid #FED7AA; background: #FFF7ED; color: #C2410C;">ネパール人材・語学力</button>
+                                    <button type="button" onclick="setEditFaqCategory('採用フロー・期間', 'Recruitment Timeline & Process')" class="badge-status" style="cursor: pointer; border: 1px solid #E9D5FF; background: #FAF5FF; color: #7E22CE;">採用フロー・期間</button>
+                                    <button type="button" onclick="setEditFaqCategory('費用・サポート体制', 'Costs & Support System')" class="badge-status" style="cursor: pointer; border: 1px solid #CBD5E1; background: #F8FAFC; color: #334155;">費用・サポート体制</button>
+                                    <button type="button" onclick="setEditFaqCategory('入国・生活支援・定着', 'Onboarding & Living Support')" class="badge-status" style="cursor: pointer; border: 1px solid #99F6E4; background: #F0FDFA; color: #0F766E;">生活支援・定着</button>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">カテゴリ (日本語) <span style="color: #EF4444;">*</span></label>
+                                    <input type="text" id="edit-cat-ja" name="category_ja" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">カテゴリ (英語) <span style="color: #EF4444;">*</span></label>
+                                    <input type="text" id="edit-cat-en" name="category_en" class="form-input" required>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="form-label">質問内容 (日本語) <span style="color: #EF4444;">*</span></label>
+                                    <input type="text" id="edit-q-ja" name="question_ja" class="form-input" required>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="form-label">質問内容 (英語) (Question in English)</label>
+                                    <input type="text" id="edit-q-en" name="question_en" class="form-input">
+                                </div>
+                            </div>
+
                             <div class="form-group">
-                                <label class="form-label">回答内容 (英語)</label>
-                                <textarea name="answer_en" class="form-textarea" rows="4" placeholder="English translation of the answer"></textarea>
+                                <label class="form-label">回答内容 (日本語) <span style="color: #EF4444;">*</span></label>
+                                <textarea id="edit-a-ja" name="answer_ja" class="form-textarea" rows="4" required></textarea>
                             </div>
-                            <div style="margin-top: 20px; display: flex; gap: 12px;">
-                                <button type="submit" class="btn-primary">FAQを保存する</button>
-                                <button type="button" onclick="closeFaqCreateModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">キャンセル</button>
+
+                            <div class="form-group">
+                                <label class="form-label">回答内容 (英語) (Answer in English)</label>
+                                <textarea id="edit-a-en" name="answer_en" class="form-textarea" rows="4"></textarea>
+                            </div>
+
+                            <div class="form-grid-2" style="align-items: center;">
+                                <div class="form-group">
+                                    <label class="form-label">表示順序 (Sort Order)</label>
+                                    <input type="number" id="edit-sort-order" name="sort_order" class="form-input" min="0" step="1">
+                                </div>
+                                <div style="padding-top: 18px;">
+                                    <button type="button" onclick="autoTranslateEditFaq()" class="btn-outline-white" style="font-size: 12px; padding: 8px 14px; border-color: #38BDF8; color: #0284C7; background: #F0F9FF; display: inline-flex; align-items: center; gap: 6px;">
+                                        ⚡ 日本語から英語を自動入力 (AI Quick Translate)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #E2E8F0; padding-top: 16px;">
+                                <button type="button" onclick="closeFaqEditModal()" class="btn-outline-white" style="color: #475569; border-color: #CBD5E1; padding: 10px 20px;">キャンセル</button>
+                                <button type="submit" class="btn-primary" style="padding: 10px 24px;">✓ FAQの変更を保存する</button>
                             </div>
                         </form>
                     </div>
@@ -661,14 +851,187 @@
             window.location.hash = tabName;
         }
 
+        // --- FAQ MANAGEMENT JAVASCRIPT ---
         function openFaqCreateModal() {
             document.getElementById('faqCreateModal').style.display = 'flex';
+            document.getElementById('create-q-ja').focus();
         }
 
         function closeFaqCreateModal() {
             document.getElementById('faqCreateModal').style.display = 'none';
         }
 
+        function setCreateFaqCategory(ja, en) {
+            document.getElementById('create-cat-ja').value = ja;
+            document.getElementById('create-cat-en').value = en;
+        }
+
+        function openFaqEditModal(faq) {
+            if (!faq) return;
+            const modal = document.getElementById('faqEditModal');
+            const form = document.getElementById('form-edit-faq');
+            
+            // Set form action URL to /admin/faqs/{id}
+            form.action = `/admin/faqs/${faq.id}`;
+            
+            document.getElementById('edit-faq-id-badge').textContent = `#${faq.id}`;
+            document.getElementById('edit-cat-ja').value = faq.category_ja || '';
+            document.getElementById('edit-cat-en').value = faq.category_en || '';
+            document.getElementById('edit-q-ja').value = faq.question_ja || '';
+            document.getElementById('edit-q-en').value = faq.question_en || '';
+            document.getElementById('edit-a-ja').value = faq.answer_ja || '';
+            document.getElementById('edit-a-en').value = faq.answer_en || '';
+            document.getElementById('edit-sort-order').value = faq.sort_order ?? 0;
+            
+            modal.style.display = 'flex';
+            document.getElementById('edit-q-ja').focus();
+        }
+
+        function closeFaqEditModal() {
+            document.getElementById('faqEditModal').style.display = 'none';
+        }
+
+        function setEditFaqCategory(ja, en) {
+            document.getElementById('edit-cat-ja').value = ja;
+            document.getElementById('edit-cat-en').value = en;
+        }
+
+        function filterFaqTable() {
+            const query = (document.getElementById('faq-search-input').value || '').toLowerCase().trim();
+            const category = document.getElementById('faq-category-filter').value;
+            const rows = document.querySelectorAll('#faqs-table-body .faq-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowCategory = row.getAttribute('data-category') || '';
+                const rowSearch = row.getAttribute('data-search') || '';
+
+                const matchesQuery = !query || rowSearch.includes(query);
+                const matchesCategory = category === 'all' || rowCategory === category;
+
+                if (matchesQuery && matchesCategory) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const countDisplay = document.getElementById('faq-count-display');
+            if (countDisplay) countDisplay.textContent = visibleCount;
+        }
+
+        async function autoTranslateCreateFaq() {
+            const qJa = document.getElementById('create-q-ja').value.trim();
+            const aJa = document.getElementById('create-a-ja').value.trim();
+            if (!qJa && !aJa) {
+                alert('日本語の質問または回答を入力してから実行してください。');
+                return;
+            }
+
+            try {
+                const res = await fetch('{{ route("sakana.translateJob") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ 
+                        sourceText: `Question: ${qJa}\n\nAnswer: ${aJa}`,
+                        targetLanguage: 'en'
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.translation) {
+                        const parts = data.translation.split(/Answer:/i);
+                        if (parts.length >= 2) {
+                            document.getElementById('create-q-en').value = parts[0].replace(/Question:\s*/i, '').trim();
+                            document.getElementById('create-a-en').value = parts[1].trim();
+                        } else {
+                            document.getElementById('create-a-en').value = data.translation;
+                        }
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('AI translate fallback', e);
+            }
+
+            // Fallback quick draft
+            if (!document.getElementById('create-q-en').value && qJa) {
+                document.getElementById('create-q-en').value = qJa;
+            }
+            if (!document.getElementById('create-a-en').value && aJa) {
+                document.getElementById('create-a-en').value = aJa;
+            }
+        }
+
+        async function autoTranslateEditFaq() {
+            const qJa = document.getElementById('edit-q-ja').value.trim();
+            const aJa = document.getElementById('edit-a-ja').value.trim();
+            if (!qJa && !aJa) {
+                alert('日本語の質問または回答を入力してから実行してください。');
+                return;
+            }
+
+            try {
+                const res = await fetch('{{ route("sakana.translateJob") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ 
+                        sourceText: `Question: ${qJa}\n\nAnswer: ${aJa}`,
+                        targetLanguage: 'en'
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.translation) {
+                        const parts = data.translation.split(/Answer:/i);
+                        if (parts.length >= 2) {
+                            document.getElementById('edit-q-en').value = parts[0].replace(/Question:\s*/i, '').trim();
+                            document.getElementById('edit-a-en').value = parts[1].trim();
+                        } else {
+                            document.getElementById('edit-a-en').value = data.translation;
+                        }
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('AI translate fallback', e);
+            }
+
+            // Fallback
+            if (!document.getElementById('edit-q-en').value && qJa) {
+                document.getElementById('edit-q-en').value = qJa;
+            }
+            if (!document.getElementById('edit-a-en').value && aJa) {
+                document.getElementById('edit-a-en').value = aJa;
+            }
+        }
+
+        // Close modals on Escape key or backdrop click
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeFaqCreateModal();
+                closeFaqEditModal();
+            }
+        });
+
+        document.getElementById('faqCreateModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'faqCreateModal') closeFaqCreateModal();
+        });
+
+        document.getElementById('faqEditModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'faqEditModal') closeFaqEditModal();
+        });
+
+        // --- SAKANA AI TESTING ---
         async function testSakanaConnection() {
             const btn = document.getElementById('btn-test-ai');
             const resultBox = document.getElementById('ai-test-results');
@@ -700,11 +1063,16 @@
             }
         }
 
+        // --- INITIALIZE TAB ON LOAD ---
         (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryTab = urlParams.get('tab');
             const hash = window.location.hash.replace('#', '').replace('-tab', '');
-            if (['company', 'about', 'services', 'stories', 'faqs', 'ai', 'inquiries'].includes(hash)) {
-                const btn = document.querySelector(`[onclick*="${hash}"]`);
-                if (btn) switchAdminTab(hash, btn);
+            const targetTab = queryTab || hash || '{{ $activeTab ?? "company" }}';
+            
+            if (['company', 'about', 'services', 'stories', 'faqs', 'ai', 'inquiries'].includes(targetTab)) {
+                const btn = document.querySelector(`[onclick*="${targetTab}"]`);
+                if (btn) switchAdminTab(targetTab, btn);
             }
         })();
     </script>
