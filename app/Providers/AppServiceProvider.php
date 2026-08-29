@@ -20,14 +20,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (
-            app()->environment('production') ||
-            request()->header('x-forwarded-proto') === 'https' ||
-            request()->server('HTTP_X_FORWARDED_PROTO') === 'https' ||
-            request()->isSecure() ||
-            str_starts_with((string) config('app.url'), 'https://')
-        ) {
-            URL::forceScheme('https');
+        if (app()->runningInConsole()) {
+            return;
+        }
+
+        try {
+            $host = request()->getHost();
+            $isLocalHost = in_array($host, ['127.0.0.1', 'localhost', '::1', '0.0.0.0']) || str_ends_with($host, '.test') || str_ends_with($host, '.local');
+
+            $isHttpsForwarded = (
+                request()->header('x-forwarded-proto') === 'https' ||
+                request()->server('HTTP_X_FORWARDED_PROTO') === 'https' ||
+                request()->header('x-forwarded-ssl') === 'on' ||
+                request()->isSecure()
+            );
+
+            if ($isHttpsForwarded || (!$isLocalHost && app()->environment('production'))) {
+                URL::forceScheme('https');
+            }
+        } catch (\Throwable $e) {
+            // Graceful fallback for CLI/isolated contexts
         }
     }
 }

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIRANSH LLC | 管理者ダッシュボード (Admin Portal)</title>
+    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
     <style>
         .admin-layout {
             display: grid;
@@ -121,9 +121,9 @@
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
-                <div class="brand-icon" style="width: 34px; height: 34px; font-size: 16px;">M</div>
+                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;">
                 <div>
-                    <div style="font-weight: 800; font-size: 16px; color: #FFFFFF;">MIRANSH Admin</div>
+                    <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
                     <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
                 </div>
             </div>
@@ -150,6 +150,17 @@
 
         <!-- Main Content Area -->
         <main class="admin-main">
+            <!-- Mobile Horizontal Tabs Bar -->
+            <div class="admin-mobile-tabs-scroller">
+                <button type="button" class="mobile-tab-btn active" onclick="switchAdminTab('company', this)">🏢 会社・代表者</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('about', this)">📖 About</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('services', this)">💼 事業内容</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('stories', this)">📰 採用事例</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('faqs', this)">❓ FAQ ({{ count($faqs) }})</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('ai', this)">🐟 AI設定</button>
+                <button type="button" class="mobile-tab-btn" onclick="switchAdminTab('inquiries', this)">📬 問合せ ({{ count($inquiries) }})</button>
+            </div>
+
             <div class="admin-topbar">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム (Laravel)</h1>
@@ -198,9 +209,25 @@
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">代表者 顔写真 画像URL</label>
-                                <input type="text" name="ceo_image" class="form-input" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}">
-                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/ceo_portrait.jpg</code></div>
+                                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+                                    <span>代表者 顔写真 画像URL (CEO Photo URL)</span>
+                                    <span class="admin-preview-badge">📷 プレビュー表示中</span>
+                                </label>
+                                <input type="text" id="input_ceo_image" name="ceo_image" class="form-input" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" oninput="updateAdminImagePreview('input_ceo_image', 'preview_ceo_image', 'preview_ceo_status')">
+                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">利用可能画像例: <code>/images/ceo_portrait.jpg</code>, <code>/images/abc.jpeg</code> またはHTTPS画像URL</div>
+
+                                <!-- ACTUAL IMAGE PREVIEW CARD -->
+                                <div class="admin-image-preview-card">
+                                    <img id="preview_ceo_image" src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="CEO Portrait Preview" class="admin-preview-thumbnail" onerror="handleImagePreviewError(this, 'preview_ceo_status')">
+                                    <div class="admin-preview-meta">
+                                        <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;" id="preview_ceo_status">
+                                            ✓ 代表者 顔写真 プレビュー
+                                        </div>
+                                        <div style="font-size: 12px; color: #64748B; line-height: 1.4;">
+                                            公開サイトの「代表メッセージ」セクションに表示される写真です。画像URLを変更すると即座にプレビューが更新されます。
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">代表者 統合表示名 (後方互換)</label>
@@ -222,8 +249,22 @@
                         <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">2. ヒーローバナー（トップ大画面）</h3>
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">トップバナー画像URL</label>
-                                <input type="text" name="hero_image" class="form-input" value="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}">
+                                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+                                    <span>トップバナー画像URL (Hero Banner URL)</span>
+                                    <span class="admin-preview-badge">🖼️ プレビュー表示中</span>
+                                </label>
+                                <input type="text" id="input_hero_image" name="hero_image" class="form-input" value="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" oninput="updateAdminImagePreview('input_hero_image', 'preview_hero_image', 'preview_hero_status')">
+                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/hero_banner.jpg</code> またはHTTPS画像URL</div>
+
+                                <!-- ACTUAL HERO BANNER PREVIEW CARD -->
+                                <div class="admin-image-preview-card" style="flex-direction: column; align-items: flex-start;">
+                                    <img id="preview_hero_image" src="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" alt="Hero Banner Preview" class="admin-preview-banner-thumbnail" onerror="handleImagePreviewError(this, 'preview_hero_status')">
+                                    <div class="admin-preview-meta" style="margin-top: 8px;">
+                                        <div style="font-size: 13px; font-weight: 700; color: #0F172A;" id="preview_hero_status">
+                                            ✓ トップバナー背景画像 プレビュー
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">許認可番号バッジ表示</label>
@@ -397,35 +438,37 @@
                         </h2>
                     </div>
 
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">アイコン</th>
-                                <th>事業名 (日本語 / 英語)</th>
-                                <th>概要</th>
-                                <th style="width: 120px;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($services as $service)
-                            <tr>
-                                <td style="font-size: 24px; text-align: center;">{{ $service->icon ?? '💼' }}</td>
-                                <td>
-                                    <strong>{{ $service->title_ja }}</strong><br>
-                                    <span style="font-size: 12px; color: #64748B;">{{ $service->title_en }}</span>
-                                </td>
-                                <td style="font-size: 13px; color: #475569;">
-                                    {{ Str::limit($service->description_ja, 90) }}
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 8px;">
-                                        <a href="{{ route('services.detail', $service->id) }}" target="_blank" class="badge-status" style="text-decoration: none;">表示 ↗</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">アイコン</th>
+                                    <th>事業名 (日本語 / 英語)</th>
+                                    <th>概要</th>
+                                    <th style="width: 120px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($services as $service)
+                                <tr>
+                                    <td style="font-size: 24px; text-align: center;">{{ $service->icon ?? '💼' }}</td>
+                                    <td>
+                                        <strong>{{ $service->title_ja }}</strong><br>
+                                        <span style="font-size: 12px; color: #64748B;">{{ $service->title_en }}</span>
+                                    </td>
+                                    <td style="font-size: 13px; color: #475569;">
+                                        {{ Str::limit($service->description_ja, 90) }}
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <a href="{{ route('services.detail', $service->id) }}" target="_blank" class="badge-status" style="text-decoration: none;">表示 ↗</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -438,31 +481,37 @@
                         </h2>
                     </div>
 
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>タイトル (日本語 / 英語)</th>
-                                <th>カテゴリ</th>
-                                <th>公開日</th>
-                                <th style="width: 120px;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($stories as $story)
-                            <tr>
-                                <td>
-                                    <strong>{{ $story->title_ja }}</strong><br>
-                                    <span style="font-size: 12px; color: #64748B;">{{ $story->title_en }}</span>
-                                </td>
-                                <td><span class="badge-status">{{ $story->category_ja }}</span></td>
-                                <td style="font-size: 13px; color: #64748B;">{{ $story->published_date }}</td>
-                                <td>
-                                    <a href="{{ route('stories.detail', $story->id) }}" target="_blank" class="badge-status" style="text-decoration: none;">記事確認 ↗</a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">写真</th>
+                                    <th>タイトル (日本語 / 英語)</th>
+                                    <th>カテゴリ</th>
+                                    <th>公開日</th>
+                                    <th style="width: 120px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($stories as $story)
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img src="{{ $story->image ?? '/images/story1.jpg' }}" alt="{{ $story->title_ja }}" style="width: 54px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    </td>
+                                    <td>
+                                        <strong>{{ $story->title_ja }}</strong><br>
+                                        <span style="font-size: 12px; color: #64748B;">{{ $story->title_en }}</span>
+                                    </td>
+                                    <td><span class="badge-status">{{ $story->category_ja }}</span></td>
+                                    <td style="font-size: 13px; color: #64748B;">{{ $story->published_date }}</td>
+                                    <td>
+                                        <a href="{{ route('stories.detail', $story->id) }}" target="_blank" class="badge-status" style="text-decoration: none;">記事確認 ↗</a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -508,72 +557,75 @@
                         </div>
                     </div>
 
-                    <table class="table-custom" id="faqs-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 70px; text-align: center;">表示順</th>
-                                <th style="width: 160px;">カテゴリ</th>
-                                <th>質問内容 (日 / 英)</th>
-                                <th>回答概要 (Answer)</th>
-                                <th style="width: 140px; text-align: center;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="faqs-table-body">
-                            @forelse ($faqs as $faq)
-                            <tr class="faq-row" data-category="{{ $faq->category_ja }}" data-search="{{ strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en) }}">
-                                <td style="text-align: center;">
-                                    <span style="display: inline-block; background: #F1F5F9; color: #334155; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 12px; border: 1px solid #CBD5E1;">
-                                        #{{ $faq->sort_order ?? $loop->iteration }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge-status" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 600;">
-                                        {{ $faq->category_ja }}
-                                    </span>
-                                    <div style="font-size: 11px; color: #64748B; margin-top: 3px;">
-                                        {{ $faq->category_en }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px;">
-                                        {{ $faq->question_ja }}
-                                    </div>
-                                    <div style="font-size: 12px; color: #64748B; line-height: 1.4;">
-                                        {{ $faq->question_en }}
-                                    </div>
-                                </td>
-                                <td style="font-size: 13px; color: #475569; max-width: 320px; line-height: 1.5;">
-                                    <div style="color: #334155; margin-bottom: 4px;">{{ Str::limit($faq->answer_ja, 90) }}</div>
-                                    <div style="font-size: 11px; color: #94A3B8;">{{ Str::limit($faq->answer_en, 80) }}</div>
-                                </td>
-                                <td style="text-align: center;">
-                                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                        <button 
-                                            type="button" 
-                                            class="btn-outline-white" 
-                                            style="padding: 5px 10px; font-size: 12px; color: #0F4C81; border-color: #93C5FD; background: #F0F7FF; border-radius: 4px; cursor: pointer;"
-                                            onclick='openFaqEditModal(@json($faq))'
-                                        >
-                                            ✏️ 編集
-                                        </button>
-                                        <form action="{{ route('admin.faqs.delete', $faq->id, false) }}" method="POST" onsubmit="return confirm('本当にこのFAQ「{{ addslashes($faq->question_ja) }}」を削除しますか？')" style="margin: 0;">
-                                            @csrf
-                                            <button type="submit" style="background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                                                🗑️ 削除
+                    <div class="table-responsive">
+                        <table class="table-custom" id="faqs-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">表示順</th>
+                                    <th style="width: 160px;">カテゴリ</th>
+                                    <th>質問内容 (日 / 英)</th>
+                                    <th>回答概要 (Answer)</th>
+                                    <th style="width: 140px; text-align: center;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="faqs-table-body">
+                                @forelse ($faqs as $faq)
+                                <tr class="faq-row" data-category="{{ $faq->category_ja }}" data-search="{{ strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en) }}">
+                                    <td style="text-align: center;">
+                                        <span style="display: inline-block; background: #F1F5F9; color: #334155; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 12px; border: 1px solid #CBD5E1;">
+                                            #{{ $faq->sort_order ?? $loop->iteration }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-status" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 600;">
+                                            {{ $faq->category_ja }}
+                                        </span>
+                                        <div style="font-size: 11px; color: #64748B; margin-top: 3px;">
+                                            {{ $faq->category_en }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 700; color: #0F172A; font-size: 14px; margin-bottom: 2px;">
+                                            {{ $faq->question_ja }}
+                                        </div>
+                                        <div style="font-size: 12px; color: #64748B; line-height: 1.4;">
+                                            {{ $faq->question_en }}
+                                        </div>
+                                    </td>
+                                    <td style="font-size: 13px; color: #475569; max-width: 320px; line-height: 1.5;">
+                                        <div style="color: #334155; margin-bottom: 4px;">{{ Str::limit($faq->answer_ja, 90) }}</div>
+                                        <div style="font-size: 11px; color: #94A3B8;">{{ Str::limit($faq->answer_en, 80) }}</div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                            <button 
+                                                type="button" 
+                                                class="btn-outline-white" 
+                                                style="padding: 5px 10px; font-size: 12px; color: #0F4C81; border-color: #93C5FD; background: #F0F7FF; border-radius: 4px; cursor: pointer;"
+                                                onclick='openFaqEditModal(@json($faq))'
+                                            >
+                                                ✏️ 編集
                                             </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr id="faq-empty-row">
-                                <td colspan="5" style="text-align: center; padding: 40px; color: #64748B;">
-                                    登録されているFAQはありません。「+ 新規FAQを追加」ボタンから質問を追加してください。
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                            <form action="{{ route('admin.faqs.delete', $faq->id, false) }}" method="POST" onsubmit="return confirm('本当にこのFAQ「{{ addslashes($faq->question_ja) }}」を削除しますか？')" style="margin: 0;">
+                                                @csrf
+                                                <button type="submit" style="background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                                    🗑️ 削除
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr id="faq-empty-row">
+                                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748B;">
+                                        登録されているFAQはありません。「+ 新規FAQを追加」ボタンから質問を追加してください。
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 </div>
 
                 <!-- Add FAQ Modal -->
@@ -799,38 +851,40 @@
                     </h2>
 
                     @if (count($inquiries) > 0)
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>受信日時</th>
-                                <th>企業名 / お名前</th>
-                                <th>連絡先</th>
-                                <th>ご相談分野</th>
-                                <th>メッセージ内容</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($inquiries as $inq)
-                            <tr>
-                                <td style="font-size: 12px; color: #64748B; white-space: nowrap;">{{ $inq->created_at }}</td>
-                                <td>
-                                    <strong>{{ $inq->name }}</strong><br>
-                                    <span style="font-size: 12px; color: #64748B;">{{ $inq->company_name ?? '個人・未記入' }}</span>
-                                </td>
-                                <td style="font-size: 13px;">
-                                    <div>📧 {{ $inq->email }}</div>
-                                    <div>📞 {{ $inq->phone ?? '-' }}</div>
-                                </td>
-                                <td>
-                                    <span class="badge-status">{{ $inq->service_interest ?? '全般' }}</span>
-                                </td>
-                                <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">
-                                    {{ $inq->message }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>受信日時</th>
+                                    <th>企業名 / お名前</th>
+                                    <th>連絡先</th>
+                                    <th>ご相談分野</th>
+                                    <th>メッセージ内容</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($inquiries as $inq)
+                                <tr>
+                                    <td style="font-size: 12px; color: #64748B; white-space: nowrap;">{{ $inq->created_at }}</td>
+                                    <td>
+                                        <strong>{{ $inq->name }}</strong><br>
+                                        <span style="font-size: 12px; color: #64748B;">{{ $inq->company_name ?? '個人・未記入' }}</span>
+                                    </td>
+                                    <td style="font-size: 13px;">
+                                        <div>📧 {{ $inq->email }}</div>
+                                        <div>📞 {{ $inq->phone ?? '-' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge-status">{{ $inq->service_interest ?? '全般' }}</span>
+                                    </td>
+                                    <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">
+                                        {{ $inq->message }}
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                     @else
                     <p style="color: #64748B; font-size: 14px; text-align: center; padding: 40px;">現在、新しいお問い合わせはありません。</p>
                     @endif
@@ -843,12 +897,42 @@
         function switchAdminTab(tabName, btnElement) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-item-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.mobile-tab-btn').forEach(el => el.classList.remove('active'));
             
             const targetPane = document.getElementById('pane-' + tabName);
             if (targetPane) targetPane.classList.add('active');
-            if (btnElement) btnElement.classList.add('active');
+            
+            // Sync all matching buttons (desktop sidebar + mobile scroller)
+            document.querySelectorAll(`[onclick*="${tabName}"]`).forEach(btn => {
+                btn.classList.add('active');
+            });
             
             window.location.hash = tabName;
+        }
+
+        // --- REAL-TIME IMAGE PREVIEW ENGINE ---
+        function updateAdminImagePreview(inputId, imgId, statusId) {
+            const input = document.getElementById(inputId);
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            if (input && img) {
+                const val = input.value.trim();
+                if (val) {
+                    img.src = val;
+                    if (status) {
+                        status.innerHTML = '🔄 入力中のURLをプレビュー中...';
+                        status.style.color = '#2563EB';
+                    }
+                }
+            }
+        }
+
+        function handleImagePreviewError(imgElement, statusId) {
+            const status = document.getElementById(statusId);
+            if (status) {
+                status.innerHTML = '⚠️ 画像が見つからないか読み込めません (URLをご確認ください)';
+                status.style.color = '#DC2626';
+            }
         }
 
         // --- FAQ MANAGEMENT JAVASCRIPT ---

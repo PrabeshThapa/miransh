@@ -6,7 +6,7 @@
     <title>{{ $story->title_ja }} | {{ $company->name_ja ?? 'MIRANSH合同会社' }}</title>
     <meta name="description" content="{{ $story->summary_ja }}">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
 </head>
 <body class="ja">
 
@@ -14,7 +14,7 @@
     <header>
         <div class="container navbar">
             <a href="/" class="brand-wrapper">
-                <div class="brand-icon">M</div>
+                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" class="brand-logo-img">
                 <div>
                     <div class="brand-title">
                         <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
@@ -41,13 +41,76 @@
                     <button type="button" class="lang-btn active" id="btn-lang-ja" onclick="setLanguage('ja')">日本語</button>
                     <button type="button" class="lang-btn" id="btn-lang-en" onclick="setLanguage('en')">EN</button>
                 </div>
-                <a href="/#contact" class="btn-header-cta">
+                <a href="/#contact" class="btn-header-cta" style="display: inline-flex;">
                     <span class="lang-ja">お問い合わせ</span>
                     <span class="lang-en">Contact</span>
                 </a>
+                <button type="button" class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="ナビゲーションメニューを開く">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- MOBILE NAVIGATION SLIDE-OVER DRAWER -->
+    <div id="mobile-nav-drawer" class="mobile-nav-drawer" onclick="closeMobileNavOnBackdrop(event)">
+        <div class="mobile-nav-content" onclick="event.stopPropagation()">
+            <div class="mobile-nav-header">
+                <div class="brand-wrapper">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
+                    <div class="brand-title" style="font-size: 16px;">
+                        <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
+                        <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+                    </div>
+                </div>
+                <button type="button" class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="メニューを閉じる">✕</button>
+            </div>
+
+            <div class="mobile-nav-body">
+                <a href="/#about" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">🏢 会社紹介 (About)</span>
+                    <span class="lang-en">🏢 About Us</span>
+                    <span>→</span>
+                </a>
+                <a href="/#services" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">💼 事業案内 (Services)</span>
+                    <span class="lang-en">💼 Our Services</span>
+                    <span>→</span>
+                </a>
+                <a href="/#strengths" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">✨ 当社の強み (Strengths)</span>
+                    <span class="lang-en">✨ Why MIRANSH</span>
+                    <span>→</span>
+                </a>
+                <a href="/#industries" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">🌐 対応分野 (Industries)</span>
+                    <span class="lang-en">🌐 Industries</span>
+                    <span>→</span>
+                </a>
+                <a href="/#stories" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">📰 採用事例 (Stories)</span>
+                    <span class="lang-en">📰 Case Studies</span>
+                    <span>→</span>
+                </a>
+                <a href="/#faq" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">❓ よくある質問 (FAQ)</span>
+                    <span class="lang-en">❓ FAQ</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <div class="mobile-nav-footer">
+                <div class="lang-toggle-group" style="justify-content: center; width: 100%;">
+                    <button type="button" class="lang-btn active" style="flex: 1; text-align: center;" onclick="setLanguage('ja')">日本語</button>
+                    <button type="button" class="lang-btn" style="flex: 1; text-align: center;" onclick="setLanguage('en')">English</button>
+                </div>
+                <a href="/#contact" class="btn-primary" style="width: 100%; justify-content: center;" onclick="toggleMobileNav()">
+                    <span class="lang-ja">無料相談・お問い合わせ</span>
+                    <span class="lang-en">Contact MIRANSH</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Story Hero -->
     <section class="detail-hero">
@@ -150,8 +213,22 @@
         </div>
     </footer>
 
-    <!-- Language Script -->
+    <!-- Language & Navigation Script -->
     <script>
+        function toggleMobileNav() {
+            const drawer = document.getElementById('mobile-nav-drawer');
+            if (drawer) {
+                drawer.classList.toggle('active');
+                if (drawer.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        function closeMobileNavOnBackdrop(e) {
+            if (e.target.id === 'mobile-nav-drawer') toggleMobileNav();
+        }
         function setLanguage(lang) {
             document.body.className = lang;
             const btnJa = document.getElementById('btn-lang-ja');
