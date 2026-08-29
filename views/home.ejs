@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= company.name_en || 'MIRANSH LLC' %> | <%= company.tagline_en || 'International Human Resources & Student Support' %></title>
+
+    <meta name="description"
+        content="<%= company.name_en || 'MIRANSH LLC' %> - <%= company.business_en || 'Foreign worker recruitment, visa support, life support and international student support in Japan.' %>">
+
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        .db-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+        }
+        .db-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: <%= dbStatus && dbStatus.connected ? '#10b981' : '#3b82f6' %>;
+        }
+        .admin-trigger-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 999;
+            transition: all 0.2s ease;
+        }
+        .admin-trigger-btn:hover {
+            background: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .admin-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 24px 16px;
+        }
+        .admin-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-content {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+        }
+        .admin-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .admin-tab.active {
+            background: #0284c7;
+            color: #ffffff;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e293b;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="en">
+
+    <%- include('partials/header') %>
+
+    <main id="top">
+        <!-- HERO -->
+        <section class="hero">
+
+            <div class="container hero-grid">
+
+                <div>
+
+                    <div class="lang-en">
+                        <div class="hero-label">
+                            <%= company.tagline_en || 'International Human Resources & Student Support' %>
+                        </div>
+
+                        <h1>
+                            <%= company.hero_title_en || 'Connecting Japan' %><br>
+                            with <span><%= company.hero_title_accent_en || 'Global Talent' %></span>
+                        </h1>
+
+                        <p>
+                            <%= company.hero_desc_en || 'We at MIRANSH LLC aim to be a bridge between Japan and the international community, contributing to the creation of a beautiful society where all people can help one another and live happily.' %>
+                        </p>
+
+                        <div class="hero-buttons">
+                            <a href="#services" class="btn btn-primary" id="btn-services-en">Our Services</a>
+                            <a href="tel:<%= company.phone || '042-409-8256' %>" class="btn btn-secondary" id="btn-contact-en">Contact Us</a>
+                        </div>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="hero-label">
+                            <%= company.tagline_ja || '国際人材紹介・留学生紹介' %>
+                        </div>
+
+                        <h1>
+                            <%= company.hero_title_ja || '日本と世界を' %><br>
+                            <span><%= company.hero_title_accent_ja || 'つなぐ会社' %></span>
+                        </h1>
+
+                        <p>
+                            <%= company.hero_desc_ja || 'ミランス合同会社は、日本と国際社会をつなぐ架け橋となり、すべての人々がお互いに助け合い、幸せに暮らせる美しい社会の実現に貢献することを目指しています。' %>
+                        </p>
+
+                        <div class="hero-buttons">
+                            <a href="#services" class="btn btn-primary" id="btn-services-ja">サービス</a>
+                            <a href="tel:<%= company.phone || '042-409-8256' %>" class="btn btn-secondary" id="btn-contact-ja">お問い合わせ</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="hero-image">
+                    <img src="<%= company.hero_image || '/images/abc.jpeg' %>" alt="<%= company.name_en || 'MIRANSH LLC' %>">
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ABOUT -->
+        <section id="about">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div class="lang-en">
+                        <div class="small"><%= about.badge_en || 'About MIRANSH' %></div>
+                        <h2><%= about.heading_en || 'Building Bridges Between Japan and the World' %></h2>
+                        <p><%= about.subheading_en || 'Supporting people who want to work, study and build their future in Japan.' %></p>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="small"><%= about.badge_ja || 'MIRANSHについて' %></div>
+                        <h2><%= about.heading_ja || '日本と世界をつなぐ架け橋' %></h2>
+                        <p><%= about.subheading_ja || '日本で働きたい、学びたい、将来を築きたい外国人の皆様をサポートします。' %></p>
+                    </div>
+
+                </div>
+
+                <div class="about-grid">
+
+                    <div class="about-content">
+
+                        <div class="lang-en">
+                            <h3><%= about.title_en || 'MIRANSH LLC' %></h3>
+
+                            <p>
+                                <%= about.desc1_en || 'We partner with educational institutions abroad to support foreigners, primarily from Nepal, who have passed the Japanese Language Proficiency Test and/or specific skills tests, or hold a university degree, in their search for employment or study in Japan.' %>
+                            </p>
+
+                            <p>
+                                <%= about.desc2_en || 'We provide support with visa applications, preparations for coming to Japan, and daily life and living support after arriving in Japan.' %>
+                            </p>
+                        </div>
+
+                        <div class="lang-ja">
+                            <h3><%= about.title_ja || 'ミランス合同会社' %></h3>
+
+                            <p>
+                                <%= about.desc1_ja || '海外の教育機関と連携し、主にネパールをはじめとする外国人の方々を対象に、日本語能力試験（JLPT）や特定技能試験に合格された方、または大学を卒業された方の日本での就職・就学をサポートしています。' %>
+                            </p>
+
+                            <p>
+                                <%= about.desc2_ja || 'ビザ申請、日本へ来日するための準備、そして日本での生活・暮らしに関するライフサポートも行っています。' %>
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="quote-box">
+
+                        <div class="lang-en">
+                            <%= about.quote_en || '"We aim to contribute to a beautiful society where all people can help one another and live happily."' %>
+                        </div>
+
+                        <div class="lang-ja">
+                            <%= about.quote_ja || '「すべての人々がお互いに助け合い、幸せに暮らせる美しい社会の実現に貢献することを目指しています。」' %>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SERVICES -->
+        <section id="services" class="services">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div class="lang-en">
+                        <div class="small">What We Do</div>
+                        <h2>Our Services</h2>
+                        <p>Comprehensive support for foreign workers and international students.</p>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="small">事業内容</div>
+                        <h2>サービス</h2>
+                        <p>外国人材と留学生の皆様を総合的にサポートします。</p>
+                    </div>
+
+                </div>
+
+                <div class="service-grid">
+
+                    <% if (services && services.length > 0) { %>
+                        <% services.forEach((service, index) => { %>
+                            <div class="service-card" id="service-card-<%= service.id %>">
+
+                                <div class="service-number"><%= service.number_label || ('0' + (index + 1)) %></div>
+
+                                <div class="lang-en">
+                                    <h3><%= service.title_en %></h3>
+
+                                    <p><%= service.desc_en %></p>
+
+                                    <% if (service.items_en && service.items_en.length > 0) { %>
+                                        <ul>
+                                            <% service.items_en.forEach(item => { %>
+                                                <li><%= item %></li>
+                                            <% }); %>
+                                        </ul>
+                                    <% } %>
+                                </div>
+
+                                <div class="lang-ja">
+                                    <h3><%= service.title_ja %></h3>
+
+                                    <p><%= service.desc_ja %></p>
+
+                                    <% if (service.items_ja && service.items_ja.length > 0) { %>
+                                        <ul>
+                                            <% service.items_ja.forEach(item => { %>
+                                                <li><%= item %></li>
+                                            <% }); %>
+                                        </ul>
+                                    <% } %>
+                                </div>
+
+                            </div>
+                        <% }); %>
+                    <% } %>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LICENSE -->
+        <section class="license">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div class="lang-en">
+                        <div class="small">Official License</div>
+                        <h2>Paid Employment Placement Business</h2>
+                        <p><%= company.name_en || 'MIRANSH LLC' %> operates as a licensed paid employment placement business.</p>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="small">許可情報</div>
+                        <h2>有料職業紹介事業許可</h2>
+                        <p><%= company.name_ja || 'ミランス合同会社' %>は、有料職業紹介事業の許可を取得しています。</p>
+                    </div>
+
+                </div>
+
+                <div class="license-box">
+
+                    <div class="lang-en">
+                        <div class="license-title">Paid Employment Placement Business License</div>
+                        <div class="license-number"><%= company.license || license %></div>
+                        <div class="license-note">License Number</div>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="license-title">有料職業紹介事業許可</div>
+                        <div class="license-number"><%= company.license || license %></div>
+                        <div class="license-note">許可番号</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- COMPANY PROFILE -->
+        <section id="company">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div class="lang-en">
+                        <div class="small">Company Profile</div>
+                        <h2>Company Details</h2>
+                    </div>
+
+                    <div class="lang-ja">
+                        <div class="small">会社概要</div>
+                        <h2>会社情報</h2>
+                    </div>
+
+                </div>
+
+                <div class="company-grid">
+
+                    <div>
+
+                        <table class="company-table">
+
+                            <tr>
+                                <th>
+                                    <span class="lang-en">Company Name</span>
+                                    <span class="lang-ja">会社名</span>
+                                </th>
+                                <td>
+                                    <span class="lang-en"><%= company.name_en || 'MIRANSH LLC' %></span>
+                                    <span class="lang-ja"><%= company.name_ja || 'ミランス合同会社' %></span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <span class="lang-en">Location</span>
+                                    <span class="lang-ja">所在地</span>
+                                </th>
+                                <td>
+                                    <span class="lang-en"><%= company.location_en || 'Koganei-shi, Tokyo, Japan' %></span>
+                                    <span class="lang-ja"><%= company.location_ja || '東京都小金井市' %></span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <span class="lang-en">Contact Number</span>
+                                    <span class="lang-ja">電話番号</span>
+                                </th>
+                                <td>
+                                    <a href="tel:<%= company.phone || '042-409-8256' %>"><%= company.phone || '042-409-8256' %></a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <span class="lang-en">Business</span>
+                                    <span class="lang-ja">事業内容</span>
+                                </th>
+                                <td>
+                                    <span class="lang-en">
+                                        <%= company.business_en || 'Foreign Worker Recruitment, Visa Support, Life Support, International Student Support' %>
+                                    </span>
+                                    <span class="lang-ja">
+                                        <%= company.business_ja || '外国人材紹介、ビザサポート、ライフサポート、留学生紹介' %>
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <span class="lang-en">License</span>
+                                    <span class="lang-ja">許可番号</span>
+                                </th>
+                                <td><%= company.license || license %></td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+                    <div class="ceo-box">
+
+                        <div class="ceo-label">
+                            <span class="lang-en">Representative / CEO</span>
+                            <span class="lang-ja">代表者</span>
+                        </div>
+
+                        <div class="ceo-name"><%= company.ceo_name || 'RK Giri' %></div>
+
+                        <div class="ceo-role">
+                            <span class="lang-en"><%= company.ceo_role_en || 'CEO / Representative of MIRANSH LLC' %></span>
+                            <span class="lang-ja"><%= company.ceo_role_ja || 'ミランス合同会社 代表者' %></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTACT -->
+        <section id="contact" class="cta">
+
+            <div class="container">
+
+                <div class="lang-en">
+                    <h2>Let's Build Your Future in Japan</h2>
+
+                    <p>
+                        Whether you are looking for employment, planning to study
+                        in Japan, or need visa and life support, <%= company.name_en || 'MIRANSH LLC' %> is
+                        here to help.
+                    </p>
+
+                    <a href="tel:<%= company.phone || '042-409-8256' %>" class="btn btn-primary">📞 Contact <%= company.name_en || 'MIRANSH LLC' %></a>
+                </div>
+
+                <div class="lang-ja">
+                    <h2>日本での未来を一緒につくりましょう</h2>
+
+                    <p>
+                        日本での就職、留学、ビザ申請、来日前の準備、
+                        日本での生活サポートなど、お気軽にご相談ください。
+                    </p>
+
+                    <a href="tel:<%= company.phone || '042-409-8256' %>" class="btn btn-primary">📞 <%= company.name_ja || 'ミランス合同会社' %>へお問い合わせ</a>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Admin / Live Database Management Trigger -->
+    <button class="admin-trigger-btn" id="openAdminBtn" onclick="toggleAdminModal()">
+        <span>⚙️ Edit Dynamic Content</span>
+    </button>
+
+    <!-- Live Data Modal -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 18px; color: #0f172a;">Manage Database Content (MySQL)</h3>
+                <button onclick="toggleAdminModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+
+            <div class="db-badge">
+                <span class="db-dot"></span>
+                <span>DB: <strong><%= dbStatus.database %></strong> on <strong><%= dbStatus.host %>:<%= dbStatus.port %></strong></span>
+                <span style="color: <%= dbStatus.connected ? '#10b981' : '#3b82f6' %>; font-weight: 600;">
+                    (<%= dbStatus.connected ? 'MySQL Connected' : 'Dynamic Storage Synced' %>)
+                </span>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchTab('companyTab', this)">Company Info</button>
+                <button class="admin-tab" onclick="switchTab('aboutTab', this)">About Section</button>
+                <button class="admin-tab" onclick="switchTab('servicesTab', this)">Services</button>
+            </div>
+
+            <!-- Company Form -->
+            <form id="companyForm" onsubmit="saveCompanyInfo(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Company Name (EN)</label>
+                        <input type="text" name="name_en" class="form-control" value="<%= company.name_en %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name (JA)</label>
+                        <input type="text" name="name_ja" class="form-control" value="<%= company.name_ja %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone" class="form-control" value="<%= company.phone %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>License Number</label>
+                        <input type="text" name="license" class="form-control" value="<%= company.license %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Location (EN)</label>
+                        <input type="text" name="location_en" class="form-control" value="<%= company.location_en %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location (JA)</label>
+                        <input type="text" name="location_ja" class="form-control" value="<%= company.location_ja %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>CEO Name</label>
+                        <input type="text" name="ceo_name" class="form-control" value="<%= company.ceo_name %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CEO Role (EN)</label>
+                        <input type="text" name="ceo_role_en" class="form-control" value="<%= company.ceo_role_en %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Business Description (EN)</label>
+                        <textarea name="business_en" class="form-control" rows="2"><%= company.business_en %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Business Description (JA)</label>
+                        <textarea name="business_ja" class="form-control" rows="2"><%= company.business_ja %></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Save Company Info to DB</button>
+            </form>
+
+            <!-- About Form -->
+            <form id="aboutTab" style="display: none;" onsubmit="saveAboutInfo(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Badge Title (EN)</label>
+                        <input type="text" name="badge_en" class="form-control" value="<%= about.badge_en %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Badge Title (JA)</label>
+                        <input type="text" name="badge_ja" class="form-control" value="<%= about.badge_ja %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Heading (EN)</label>
+                        <input type="text" name="heading_en" class="form-control" value="<%= about.heading_en %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Heading (JA)</label>
+                        <input type="text" name="heading_ja" class="form-control" value="<%= about.heading_ja %>" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>About Paragraph 1 (EN)</label>
+                        <textarea name="desc1_en" class="form-control" rows="3"><%= about.desc1_en %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>About Paragraph 1 (JA)</label>
+                        <textarea name="desc1_ja" class="form-control" rows="3"><%= about.desc1_ja %></textarea>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Quote Statement (EN)</label>
+                        <textarea name="quote_en" class="form-control" rows="2"><%= about.quote_en %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Quote Statement (JA)</label>
+                        <textarea name="quote_ja" class="form-control" rows="2"><%= about.quote_ja %></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Save About Section to DB</button>
+            </form>
+
+            <!-- Services Tab -->
+            <div id="servicesTab" style="display: none;">
+                <% services.forEach(service => { %>
+                    <form onsubmit="saveServiceInfo(event, <%= service.id %>)" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed #cbd5e1;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #0284c7;">Service #<%= service.number_label %>: <%= service.title_en %></h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Title (EN)</label>
+                                <input type="text" name="title_en" class="form-control" value="<%= service.title_en %>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Title (JA)</label>
+                                <input type="text" name="title_ja" class="form-control" value="<%= service.title_ja %>" required>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Description (EN)</label>
+                                <textarea name="desc_en" class="form-control" rows="2"><%= service.desc_en %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Description (JA)</label>
+                                <textarea name="desc_ja" class="form-control" rows="2"><%= service.desc_ja %></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;">Update Service #<%= service.number_label %></button>
+                    </form>
+                <% }); %>
+            </div>
+
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script src="/js/app.js"></script>
+    <script>
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.toggle('show');
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.getElementById('companyForm').style.display = tabId === 'companyTab' ? 'block' : 'none';
+            document.getElementById('aboutTab').style.display = tabId === 'aboutTab' ? 'block' : 'none';
+            document.getElementById('servicesTab').style.display = tabId === 'servicesTab' ? 'block' : 'none';
+        }
+
+        async function saveCompanyInfo(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const res = await fetch('/api/company', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('Company Info updated in database!');
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert('Error updating: ' + err.message);
+            }
+        }
+
+        async function saveAboutInfo(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const res = await fetch('/api/about', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('About section updated in database!');
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert('Error updating: ' + err.message);
+            }
+        }
+
+        async function saveServiceInfo(e, id) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const res = await fetch('/api/services/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('Service #' + id + ' updated in database!');
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert('Error updating: ' + err.message);
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
-<header>
+<header id="site-header">
     <div class="container navbar">
 
         <a href="#top" class="logo">
-            MIRANSH <span>LLC</span>
+            <%= (company && company.name_en ? company.name_en.split(' ')[0] : 'MIRANSH') %> <span><%= (company && company.name_en && company.name_en.split(' ')[1] ? company.name_en.split(' ')[1] : 'LLC') %></span>
         </a>
 
         <div class="nav-right">
@@ -43,8 +43,8 @@
                 </button>
             </div>
 
-            <a href="tel:042-409-8256" class="phone-btn">
-                📞 042-409-8256
+            <a href="tel:<%= company.phone || '042-409-8256' %>" class="phone-btn">
+                📞 <%= company.phone || '042-409-8256' %>
             </a>
 
         </div>
