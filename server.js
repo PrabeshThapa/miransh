@@ -9,11 +9,19 @@ import {
   getCompanyInfo,
   getAboutSection,
   getServices,
+  getServiceById,
+  getStories,
+  getStoryById,
+  getInquiries,
+  addInquiry,
   updateCompanyInfo,
   updateAboutSection,
   updateService,
   addService,
-  deleteService
+  deleteService,
+  addStory,
+  updateStory,
+  deleteStory
 } from './db.js';
 
 dotenv.config();
@@ -52,11 +60,92 @@ function requireAdmin(req, res, next) {
   return res.redirect('/admin/login');
 }
 
-// ==========================================
-// ADMIN PANEL ROUTES
-// ==========================================
+// 1. Public Home Page
+app.get('/', async (req, res) => {
+  try {
+    const data = await getAllData();
+    res.render('home', {
+      company: data.company,
+      about: data.about,
+      services: data.services,
+      stories: data.stories,
+      query: req.query
+    });
+  } catch (err) {
+    console.error('Error rendering home page:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
-// 1. Admin Login View
+// 2. Service Detail Page (On click service show on dedicated page)
+app.get('/services/:id', async (req, res) => {
+  try {
+    const service = await getServiceById(req.params.id);
+    if (!service) {
+      return res.redirect('/#services');
+    }
+    const [company, allServices] = await Promise.all([
+      getCompanyInfo(),
+      getServices()
+    ]);
+    res.render('service-detail', {
+      service,
+      company,
+      allServices,
+      query: req.query
+    });
+  } catch (err) {
+    console.error('Error rendering service detail:', err);
+    res.redirect('/');
+  }
+});
+
+// 3. Story Detail Page
+app.get('/stories/:id', async (req, res) => {
+  try {
+    const story = await getStoryById(req.params.id);
+    if (!story) {
+      return res.redirect('/#stories');
+    }
+    const [company, allStories] = await Promise.all([
+      getCompanyInfo(),
+      getStories()
+    ]);
+    res.render('story-detail', {
+      story,
+      company,
+      allStories,
+      query: req.query
+    });
+  } catch (err) {
+    console.error('Error rendering story detail:', err);
+    res.redirect('/');
+  }
+});
+
+// 4. Contact Form Submission
+app.post('/contact', async (req, res) => {
+  try {
+    const { name, company_name, email, phone, service_interest, message } = req.body;
+    await addInquiry({
+      name,
+      company_name,
+      email,
+      phone,
+      service_interest,
+      message
+    });
+    if (req.xhr || req.headers.accept?.includes('json')) {
+      return res.json({ success: true, message: 'Your message has been sent successfully.' });
+    }
+    res.redirect('/?submitted=true#contact');
+  } catch (err) {
+    console.error('Error handling contact form:', err);
+    res.redirect('/?error=true#contact');
+  }
+});
+
+// 5. Admin Authentication
 app.get('/admin/login', (req, res) => {
   if (req.session && req.session.isAdmin) {
     return res.redirect('/admin');
@@ -64,7 +153,6 @@ app.get('/admin/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
 
-// 2. Admin Login Action
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
   const adminUser = process.env.ADMIN_USER || 'admin';
@@ -84,249 +172,207 @@ app.post('/admin/login', (req, res) => {
   });
 });
 
-// 3. Admin Logout Action
 app.post('/admin/logout', (req, res) => {
-  req.session.destroy(err => {
+  req.session.destroy(() => {
     res.redirect('/admin/login');
   });
 });
 
 app.get('/admin/logout', (req, res) => {
-  req.session.destroy(err => {
+  req.session.destroy(() => {
     res.redirect('/admin/login');
   });
 });
 
-// 4. Admin Dashboard (Manage Company, About, Services)
+// 6. Admin Dashboard
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
-    const { company, about, services } = await getAllData();
-    const activeTab = req.query.tab || 'company';
-    const successMsg = req.query.success || null;
-    const errorMsg = req.query.error || null;
-
+    const data = await getAllData();
+    const message = req.session.flashMessage || null;
+    req.session.flashMessage = null;
     res.render('admin/dashboard', {
-      company,
-      about,
-      services,
-      activeTab,
-      success: successMsg,
-      error: errorMsg,
-      adminUser: req.session.adminUser || 'admin'
+      company: data.company,
+      about: data.about,
+      services: data.services,
+      stories: data.stories,
+      inquiries: data.inquiries,
+      dbStatus: data.dbStatus,
+      message
     });
   } catch (err) {
-    console.error('Error rendering admin dashboard:', err);
-    res.status(500).send('Internal Server Error');
+    console.error('Error loading admin dashboard:', err);
+    res.status(500).send('Admin Dashboard Error');
   }
 });
 
-// 5. Admin: Update Company Info
+// 7. Admin Update Company Info & Photos
 app.post('/admin/company', requireAdmin, async (req, res) => {
   try {
     await updateCompanyInfo(req.body);
-    res.redirect('/admin?tab=company&success=' + encodeURIComponent('Company Information updated successfully!'));
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'Company Profile & Executive Media updated successfully!'
+    };
   } catch (err) {
-    console.error('Admin company update error:', err);
-    res.redirect('/admin?tab=company&error=' + encodeURIComponent(err.message));
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to update company info: ' + err.message
+    };
   }
+  res.redirect('/admin#company-tab');
 });
 
-// 6. Admin: Update About Section
+// 8. Admin Update About
 app.post('/admin/about', requireAdmin, async (req, res) => {
   try {
     await updateAboutSection(req.body);
-    res.redirect('/admin?tab=about&success=' + encodeURIComponent('About Section updated successfully!'));
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'About Us section updated successfully!'
+    };
   } catch (err) {
-    console.error('Admin about update error:', err);
-    res.redirect('/admin?tab=about&error=' + encodeURIComponent(err.message));
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to update about section: ' + err.message
+    };
   }
+  res.redirect('/admin#about-tab');
 });
 
-// 7. Admin: Add New Service
+// 9. Admin Services CRUD
 app.post('/admin/services', requireAdmin, async (req, res) => {
   try {
-    const { number_label, title_en, title_ja, desc_en, desc_ja, items_en, items_ja, sort_order } = req.body;
-    
-    // Parse multiline string to array
-    const parseList = (str) => {
-      if (!str) return [];
-      return str.split('\n').map(s => s.trim()).filter(Boolean);
-    };
+    const itemsEn = req.body.items_en ? req.body.items_en.split('\n').map(s => s.trim()).filter(Boolean) : [];
+    const itemsJa = req.body.items_ja ? req.body.items_ja.split('\n').map(s => s.trim()).filter(Boolean) : [];
+    const stepsEn = req.body.workflow_steps_en ? req.body.workflow_steps_en.split('\n').map(s => s.trim()).filter(Boolean) : [];
+    const stepsJa = req.body.workflow_steps_ja ? req.body.workflow_steps_ja.split('\n').map(s => s.trim()).filter(Boolean) : [];
 
     await addService({
-      number_label,
-      title_en,
-      title_ja,
-      desc_en,
-      desc_ja,
-      items_en: parseList(items_en),
-      items_ja: parseList(items_ja),
-      sort_order: parseInt(sort_order, 10) || 0
+      ...req.body,
+      items_en: itemsEn,
+      items_ja: itemsJa,
+      workflow_steps_en: stepsEn,
+      workflow_steps_ja: stepsJa
     });
-
-    res.redirect('/admin?tab=services&success=' + encodeURIComponent('New service added successfully!'));
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'New service created successfully!'
+    };
   } catch (err) {
-    console.error('Admin add service error:', err);
-    res.redirect('/admin?tab=services&error=' + encodeURIComponent(err.message));
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to create service: ' + err.message
+    };
   }
+  res.redirect('/admin#services-tab');
 });
 
-// 8. Admin: Update Existing Service
 app.post('/admin/services/:id', requireAdmin, async (req, res) => {
   try {
-    const { number_label, title_en, title_ja, desc_en, desc_ja, items_en, items_ja, sort_order } = req.body;
-
-    const parseList = (input) => {
-      if (Array.isArray(input)) return input;
-      if (!input) return [];
-      return input.split('\n').map(s => s.trim()).filter(Boolean);
-    };
+    const itemsEn = typeof req.body.items_en === 'string'
+      ? req.body.items_en.split('\n').map(s => s.trim()).filter(Boolean)
+      : (req.body.items_en || []);
+    const itemsJa = typeof req.body.items_ja === 'string'
+      ? req.body.items_ja.split('\n').map(s => s.trim()).filter(Boolean)
+      : (req.body.items_ja || []);
+    const stepsEn = typeof req.body.workflow_steps_en === 'string'
+      ? req.body.workflow_steps_en.split('\n').map(s => s.trim()).filter(Boolean)
+      : (req.body.workflow_steps_en || []);
+    const stepsJa = typeof req.body.workflow_steps_ja === 'string'
+      ? req.body.workflow_steps_ja.split('\n').map(s => s.trim()).filter(Boolean)
+      : (req.body.workflow_steps_ja || []);
 
     await updateService(req.params.id, {
-      number_label,
-      title_en,
-      title_ja,
-      desc_en,
-      desc_ja,
-      items_en: parseList(items_en),
-      items_ja: parseList(items_ja),
-      sort_order: parseInt(sort_order, 10) || 0
+      ...req.body,
+      items_en: itemsEn,
+      items_ja: itemsJa,
+      workflow_steps_en: stepsEn,
+      workflow_steps_ja: stepsJa
     });
-
-    res.redirect('/admin?tab=services&success=' + encodeURIComponent('Service #' + number_label + ' updated successfully!'));
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'Service updated successfully!'
+    };
   } catch (err) {
-    console.error('Admin update service error:', err);
-    res.redirect('/admin?tab=services&error=' + encodeURIComponent(err.message));
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to update service: ' + err.message
+    };
   }
+  res.redirect('/admin#services-tab');
 });
 
-// 9. Admin: Delete Service
 app.post('/admin/services/:id/delete', requireAdmin, async (req, res) => {
   try {
     await deleteService(req.params.id);
-    res.redirect('/admin?tab=services&success=' + encodeURIComponent('Service deleted successfully!'));
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'Service deleted successfully!'
+    };
   } catch (err) {
-    console.error('Admin delete service error:', err);
-    res.redirect('/admin?tab=services&error=' + encodeURIComponent(err.message));
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to delete service: ' + err.message
+    };
   }
+  res.redirect('/admin#services-tab');
 });
 
-// ==========================================
-// PUBLIC FRONTEND ROUTES
-// ==========================================
-
-// Main dynamic landing page route
-app.get('/', async (req, res) => {
+// 10. Admin Stories CRUD
+app.post('/admin/stories', requireAdmin, async (req, res) => {
   try {
-    const { company, about, services, dbStatus } = await getAllData();
-    res.render('home', {
-      company,
-      about,
-      services,
-      dbStatus,
-      isAdmin: Boolean(req.session && req.session.isAdmin),
-      license: company.license || '13-ユ-319558',
-      year: new Date().getFullYear()
-    });
+    await addStory(req.body);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'New Story / Case Study published successfully!'
+    };
   } catch (err) {
-    console.error('Error rendering page:', err);
-    res.status(500).send('Internal Server Error');
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to create story: ' + err.message
+    };
   }
+  res.redirect('/admin#stories-tab');
 });
 
-
-// JSON API endpoints
-app.get('/api/data', async (req, res) => {
+app.post('/admin/stories/:id', requireAdmin, async (req, res) => {
   try {
-    const data = await getAllData();
-    res.json({ success: true, data });
+    await updateStory(req.params.id, req.body);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'Story updated successfully!'
+    };
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to update story: ' + err.message
+    };
   }
+  res.redirect('/admin#stories-tab');
 });
 
-app.get('/api/company', async (req, res) => {
+app.post('/admin/stories/:id/delete', requireAdmin, async (req, res) => {
   try {
-    const company = await getCompanyInfo();
-    res.json({ success: true, data: company });
+    await deleteStory(req.params.id);
+    req.session.flashMessage = {
+      type: 'success',
+      text: 'Story deleted successfully!'
+    };
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    req.session.flashMessage = {
+      type: 'error',
+      text: 'Failed to delete story: ' + err.message
+    };
   }
+  res.redirect('/admin#stories-tab');
 });
 
-app.put('/api/company', async (req, res) => {
-  try {
-    const updated = await updateCompanyInfo(req.body);
-    res.json({ success: true, message: 'Company information updated', data: updated });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.get('/api/about', async (req, res) => {
-  try {
-    const about = await getAboutSection();
-    res.json({ success: true, data: about });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.put('/api/about', async (req, res) => {
-  try {
-    const updated = await updateAboutSection(req.body);
-    res.json({ success: true, message: 'About section updated', data: updated });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.get('/api/services', async (req, res) => {
-  try {
-    const services = await getServices();
-    res.json({ success: true, data: services });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.put('/api/services/:id', async (req, res) => {
-  try {
-    const services = await updateService(req.params.id, req.body);
-    res.json({ success: true, message: 'Service updated', data: services });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.post('/api/services', async (req, res) => {
-  try {
-    const service = await addService(req.body);
-    res.json({ success: true, message: 'Service added', data: service });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Database health / status endpoint
-app.get('/api/db/status', async (req, res) => {
-  const isOk = await initDatabase();
-  res.json({
-    connected: isOk,
-    config: {
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: process.env.DB_PORT || '3306',
-      database: process.env.DB_DATABASE || 'miransh',
-      user: process.env.DB_USERNAME || process.env.DB_USER || 'root'
-    }
+// Start Server
+async function start() {
+  await initDatabase();
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[MIRANSH Corporate Server] Running on http://localhost:${PORT}`);
   });
-});
+}
 
-// Initialize database on startup
-initDatabase().catch(err => {
-  console.warn('[DB Init] Startup connection check:', err.message);
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`MIRANSH server running on http://0.0.0.0:${PORT}`);
-});
+start();

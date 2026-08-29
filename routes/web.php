@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 
+// Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/services/{id}', [HomeController::class, 'serviceDetail'])->name('services.detail');
+Route::get('/stories/{id}', [HomeController::class, 'storyDetail'])->name('stories.detail');
+Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
 
 // Admin Authentication Routes
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
@@ -20,5 +24,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
     Route::post('/services/{id}', [AdminController::class, 'updateService'])->name('admin.services.update');
     Route::post('/services/{id}/delete', [AdminController::class, 'deleteService'])->name('admin.services.delete');
+    Route::post('/stories', [AdminController::class, 'storeStory'])->name('admin.stories.store');
+    Route::post('/stories/{id}', [AdminController::class, 'updateStory'])->name('admin.stories.update');
+    Route::post('/stories/{id}/delete', [AdminController::class, 'deleteStory'])->name('admin.stories.delete');
 });
-

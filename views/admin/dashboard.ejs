@@ -1,863 +1,668 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | MIRANSH LLC Content Management</title>
+    <title>MIRANSH LLC | 管理者ダッシュボード (Admin Portal)</title>
     <link rel="stylesheet" href="/css/app.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
     <style>
-        :root {
-            --primary: #0f4c81;
-            --primary-dark: #0a365c;
-            --primary-light: #e0eef8;
-            --accent: #d97706;
-            --surface: #ffffff;
-            --bg-page: #f8fafc;
-            --border: #e2e8f0;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-        }
-
-        body {
-            background-color: var(--bg-page);
-            color: var(--text-dark);
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
             min-height: 100vh;
+            background: #F1F5F9;
         }
-
-        /* Top Admin Bar */
-        .admin-nav {
-            background: #0f4c81;
-            color: #ffffff;
-            padding: 0 24px;
-            height: 64px;
+        .admin-sidebar {
+            background: #0B1C38;
+            color: #FFFFFF;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-brand {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .admin-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .admin-badge {
-            background: #d97706;
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .admin-nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .btn-view-site {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(255,255,255,0.25);
-            transition: all 0.2s;
-        }
-
-        .btn-view-site:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
-        .btn-logout {
-            background: #ef4444;
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-logout:hover {
-            background: #dc2626;
-        }
-
-        /* Layout */
-        .admin-container {
-            max-width: 1200px;
-            margin: 32px auto;
-            padding: 0 20px;
-        }
-
-        /* Alerts */
-        .flash-alert {
-            padding: 14px 20px;
-            border-radius: 10px;
+            gap: 10px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 24px;
-            font-size: 15px;
-            font-weight: 500;
+        }
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+        .sidebar-item-btn {
+            width: 100%;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .flash-success {
-            background: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-
-        .flash-error {
-            background: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        /* Tab Navigation */
-        .admin-tabs {
-            display: flex;
-            gap: 8px;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 30px;
-            background: #fff;
-            padding: 8px 12px 0;
-            border-radius: 12px 12px 0 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
-        .admin-tab-btn {
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            color: #CBD5E1;
+            font-size: 14px;
+            font-weight: 600;
             background: transparent;
             border: none;
-            padding: 12px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-muted);
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .sidebar-item-btn:hover,
+        .sidebar-item-btn.active {
+            background: #2563EB;
+            color: #FFFFFF;
+        }
+        .admin-main {
+            padding: 32px 40px;
+            overflow-y: auto;
+        }
+        .admin-topbar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            justify-content: space-between;
+            margin-bottom: 28px;
         }
-
-        .admin-tab-btn:hover {
-            color: var(--primary);
-        }
-
-        .admin-tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Card Section */
         .admin-card {
-            background: #ffffff;
-            border: 1px solid var(--border);
+            background: #FFFFFF;
             border-radius: 12px;
             padding: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-bottom: 32px;
         }
-
-        .admin-card-header {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 18px;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-card-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .admin-card-subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Form Grid */
         .form-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-
-        @media (max-width: 768px) {
-            .form-grid-2 {
-                grid-template-columns: 1fr;
-            }
+        .tab-pane {
+            display: none;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
+        .tab-pane.active {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 6px;
         }
-
-        .form-group label span.ja-tag {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-left: 6px;
-        }
-
-        .form-group label span.en-tag {
-            background: #eff6ff;
-            color: #1e40af;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-left: 6px;
-        }
-
-        .form-control {
+        .table-custom {
             width: 100%;
-            padding: 10px 14px;
-            font-size: 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            outline: none;
-            transition: all 0.2s;
-            background: #fff;
-            color: #1e293b;
-            font-family: inherit;
+            border-collapse: collapse;
         }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.15);
-        }
-
-        textarea.form-control {
-            min-height: 90px;
-            resize: vertical;
-        }
-
-        .btn-save {
-            background: #0f4c81;
-            color: #ffffff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-save:hover {
-            background: #0a365c;
-        }
-
-        /* Services List styling */
-        .service-manage-item {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.2s;
-        }
-
-        .service-manage-item:hover {
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-
-        .service-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .service-item-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: #0f4c81;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .service-num-badge {
-            background: #0f4c81;
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 6px;
+        .table-custom th {
+            background: #F8FAFC;
+            padding: 12px 16px;
             font-size: 13px;
             font-weight: 700;
+            color: #334155;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
         }
-
-        .service-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-action-delete {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-action-delete:hover {
-            background: #fecaca;
-            color: #991b1b;
-        }
-
-        .btn-action-add {
-            background: #10b981;
-            color: #ffffff;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
+        .table-custom td {
+            padding: 14px 16px;
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            border-bottom: 1px solid #E2E8F0;
+            vertical-align: top;
         }
-
-        .btn-action-add:hover {
-            background: #059669;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 20px;
+        .badge-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 9999px;
             font-size: 12px;
-            font-weight: 600;
-            background: #ecfdf5;
-            color: #059669;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
+            font-weight: 700;
+            background: #EFF6FF;
+            color: #1D4ED8;
         }
     </style>
 </head>
 <body>
 
-    <!-- TOP NAVIGATION -->
-    <header class="admin-nav">
-        <div class="admin-brand">
-            <span>MIRANSH LLC</span>
-            <span class="admin-badge">ADMIN CMS</span>
-            <span class="status-pill">
-                <span class="status-dot"></span> Live Sync Enabled
-            </span>
-        </div>
-
-        <div class="admin-nav-actions">
-            <a href="/" target="_blank" class="btn-view-site" id="btn-view-website">
-                🌐 View Live Website ↗
-            </a>
-            <form action="/admin/logout" method="POST" style="margin:0;">
-                <button type="submit" class="btn-logout" id="btn-admin-logout">
-                    Log Out
-                </button>
-            </form>
-        </div>
-    </header>
-
-    <div class="admin-container">
-
-        <!-- FLASH NOTIFICATIONS -->
-        <% if (success) { %>
-            <div class="flash-alert flash-success" id="flash-success-msg">
-                <span>✅ <strong>Success!</strong> <%= success %> Changes are now live on the website.</span>
-                <a href="/" target="_blank" style="text-decoration:underline; font-weight:600; color:inherit;">Check Website</a>
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon" style="width: 34px; height: 34px; font-size: 16px;">M</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 16px; color: #FFFFFF;">MIRANSH Admin</div>
+                    <div style="font-size: 11px; color: #94A3B8;">Web Content Manager</div>
+                </div>
             </div>
-        <% } %>
 
-        <% if (error) { %>
-            <div class="flash-alert flash-error" id="flash-error-msg">
-                <span>⚠️ <strong>Error:</strong> <%= error %></span>
+            <ul class="sidebar-menu">
+                <li><button class="sidebar-item-btn active" onclick="switchAdminTab('company', this)">🏢 会社情報・CEO写真</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('about', this)">📖 About (会社紹介)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('services', this)">💼 事業内容 (Services)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this)">📰 採用事例 (Stories)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this)">📬 お問い合わせ (<%= inquiries ? inquiries.length : 0 %>)</button></li>
+            </ul>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <a href="/" target="_blank" style="color: #93C5FD; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    <span>↗ 公開サイトを確認</span>
+                </a>
+                <a href="/admin/logout" style="color: #EF4444; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    <span>🚪 ログアウト</span>
+                </a>
             </div>
-        <% } %>
+        </aside>
 
-        <!-- DASHBOARD NAVIGATION TABS -->
-        <div class="admin-tabs" id="admin-tabs-nav">
-            <button class="admin-tab-btn <%= (activeTab === 'company') ? 'active' : '' %>" onclick="switchTab('company')">
-                🏢 Company Info & Profile
-            </button>
-            <button class="admin-tab-btn <%= (activeTab === 'services') ? 'active' : '' %>" onclick="switchTab('services')">
-                💼 Services (<%= services.length %>)
-            </button>
-            <button class="admin-tab-btn <%= (activeTab === 'about') ? 'active' : '' %>" onclick="switchTab('about')">
-                📖 About MIRANSH
-            </button>
-        </div>
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム</h1>
+                    <p style="font-size: 14px; color: #64748B;">ホームページ上の全テキスト・写真・事業内容・採用事例をリアルタイムに更新できます。</p>
+                </div>
+            </div>
 
-        <!-- ==============================================
-             TAB 1: COMPANY INFO & HERO EDIT FORM
-             ============================================== -->
-        <div id="tab-company" class="tab-content <%= (activeTab === 'company') ? 'active' : '' %>">
-            <form action="/admin/company" method="POST" id="form-update-company">
+            <% if (message) { %>
+            <div style="background: <%= message.type === 'success' ? '#ECFDF5' : '#FEF2F2' %>; border: 1px solid <%= message.type === 'success' ? '#10B981' : '#EF4444' %>; color: <%= message.type === 'success' ? '#065F46' : '#991B1B' %>; padding: 14px 20px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; font-size: 14px;">
+                <%= message.text %>
+            </div>
+            <% } %>
+
+            <!-- TAB 1: COMPANY INFO & CEO PICTURE -->
+            <div id="pane-company" class="tab-pane active">
                 <div class="admin-card">
-                    <div class="admin-card-header">
-                        <div>
-                            <h2 class="admin-card-title">General Company Details</h2>
-                            <p class="admin-card-subtitle">Official company legal names, license registration, and contact information</p>
-                        </div>
-                        <button type="submit" class="btn-save" id="btn-save-company-top">💾 Save Company Info</button>
-                    </div>
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        会社基本情報・代表写真・ヒーロー設定
+                    </h2>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="name_en">Company Name (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="name_en" name="name_en" class="form-control" value="<%= company.name_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="name_ja">Company Name (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="name_ja" name="name_ja" class="form-control" value="<%= company.name_ja || '' %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="tagline_en">Tagline (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="tagline_en" name="tagline_en" class="form-control" value="<%= company.tagline_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="tagline_ja">Tagline (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="tagline_ja" name="tagline_ja" class="form-control" value="<%= company.tagline_ja || '' %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="phone">Contact Phone Number 📞</label>
-                            <input type="text" id="phone" name="phone" class="form-control" value="<%= company.phone || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="license">License Number (有料職業紹介事業許可)</label>
-                            <input type="text" id="license" name="license" class="form-control" value="<%= company.license || '' %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="location_en">Location (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="location_en" name="location_en" class="form-control" value="<%= company.location_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="location_ja">Location (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="location_ja" name="location_ja" class="form-control" value="<%= company.location_ja || '' %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="business_en">Business Description (English) <span class="en-tag">EN</span></label>
-                            <textarea id="business_en" name="business_en" class="form-control" rows="3" required><%= company.business_en || '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="business_ja">Business Description (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="business_ja" name="business_ja" class="form-control" rows="3" required><%= company.business_ja || '' %></textarea>
-                        </div>
-                    </div>
-
-                    <hr style="border:0; border-top:1px solid var(--border); margin: 24px 0;">
-
-                    <h3 style="font-size:16px; font-weight:700; color:#0f4c81; margin-bottom:16px;">👤 Leadership & CEO Profile</h3>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="ceo_name">CEO / Representative Name</label>
-                            <input type="text" id="ceo_name" name="ceo_name" class="form-control" value="<%= company.ceo_name || '' %>" required>
-                        </div>
-                        <div class="form-group"></div>
-                        <div class="form-group">
-                            <label for="ceo_role_en">CEO Title (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="ceo_role_en" name="ceo_role_en" class="form-control" value="<%= company.ceo_role_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="ceo_role_ja">CEO Title (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="ceo_role_ja" name="ceo_role_ja" class="form-control" value="<%= company.ceo_role_ja || '' %>" required>
-                        </div>
-                    </div>
-
-                    <hr style="border:0; border-top:1px solid var(--border); margin: 24px 0;">
-
-                    <h3 style="font-size:16px; font-weight:700; color:#0f4c81; margin-bottom:16px;">🌟 Hero Banner & Header Section</h3>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="hero_title_en">Hero Title (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="hero_title_en" name="hero_title_en" class="form-control" value="<%= company.hero_title_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hero_title_accent_en">Hero Accent Word (English)</label>
-                            <input type="text" id="hero_title_accent_en" name="hero_title_accent_en" class="form-control" value="<%= company.hero_title_accent_en || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hero_title_ja">Hero Title (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="hero_title_ja" name="hero_title_ja" class="form-control" value="<%= company.hero_title_ja || '' %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hero_title_accent_ja">Hero Accent Word (Japanese)</label>
-                            <input type="text" id="hero_title_accent_ja" name="hero_title_accent_ja" class="form-control" value="<%= company.hero_title_accent_ja || '' %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="hero_desc_en">Hero Paragraph (English) <span class="en-tag">EN</span></label>
-                            <textarea id="hero_desc_en" name="hero_desc_en" class="form-control" rows="3" required><%= company.hero_desc_en || '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="hero_desc_ja">Hero Paragraph (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="hero_desc_ja" name="hero_desc_ja" class="form-control" rows="3" required><%= company.hero_desc_ja || '' %></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="hero_image">Hero Banner Image Path</label>
-                        <input type="text" id="hero_image" name="hero_image" class="form-control" value="<%= company.hero_image || '/images/abc.jpeg' %>" required>
-                    </div>
-
-                    <hr style="border:0; border-top:1px solid var(--border); margin: 24px 0;">
-
-                    <h3 style="font-size:16px; font-weight:700; color:#0f4c81; margin-bottom:16px;">📄 Footer Information</h3>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="footer_text_en">Footer Summary (English) <span class="en-tag">EN</span></label>
-                            <textarea id="footer_text_en" name="footer_text_en" class="form-control" rows="2" required><%= company.footer_text_en || '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="footer_text_ja">Footer Summary (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="footer_text_ja" name="footer_text_ja" class="form-control" rows="2" required><%= company.footer_text_ja || '' %></textarea>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 20px;">
-                        <button type="submit" class="btn-save" id="btn-save-company-bottom">
-                            💾 Save and Apply Company Info
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- ==============================================
-             TAB 2: SERVICES (ADD / EDIT / DELETE)
-             ============================================== -->
-        <div id="tab-services" class="tab-content <%= (activeTab === 'services') ? 'active' : '' %>">
-            
-            <!-- ADD NEW SERVICE CARD -->
-            <div class="admin-card" style="border-left: 4px solid #10b981;">
-                <div class="admin-card-header">
-                    <div>
-                        <h2 class="admin-card-title" style="color: #065f46;">➕ Add New Service</h2>
-                        <p class="admin-card-subtitle">Create and publish a new service card to the website</p>
-                    </div>
-                </div>
-
-                <form action="/admin/services" method="POST" id="form-add-service">
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="new_number_label">Number Label (e.g. 03)</label>
-                            <input type="text" id="new_number_label" name="number_label" class="form-control" placeholder="03" value="0<%= services.length + 1 %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new_sort_order">Sort Order Display Rank</label>
-                            <input type="number" id="new_sort_order" name="sort_order" class="form-control" value="<%= services.length + 1 %>" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="new_title_en">Service Title (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="new_title_en" name="title_en" class="form-control" placeholder="e.g. Visa & Settlement Support" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new_title_ja">Service Title (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="new_title_ja" name="title_ja" class="form-control" placeholder="例：ビザ・生活定着支援" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="new_desc_en">Service Description (English) <span class="en-tag">EN</span></label>
-                            <textarea id="new_desc_en" name="desc_en" class="form-control" placeholder="Detailed description of the service in English..." required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="new_desc_ja">Service Description (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="new_desc_ja" name="desc_ja" class="form-control" placeholder="サービスの詳しい説明（日本語）..." required></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="new_items_en">Bullet Items (English) <small style="color:var(--text-muted);">(one item per line)</small></label>
-                            <textarea id="new_items_en" name="items_en" class="form-control" rows="4" placeholder="Candidate screening&#10;Interview coordination&#10;Documentation support"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="new_items_ja">Bullet Items (Japanese) <small style="color:var(--text-muted);">(one item per line)</small></label>
-                            <textarea id="new_items_ja" name="items_ja" class="form-control" rows="4" placeholder="候補者の選定&#10;面接のスケジュール調整&#10;書類作成サポート"></textarea>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-action-add" id="btn-submit-add-service">
-                        ➕ Publish New Service
-                    </button>
-                </form>
-            </div>
-
-            <!-- EXISTING SERVICES LIST WITH INLINE EDIT & DELETE -->
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <div>
-                        <h2 class="admin-card-title">Existing Services (<%= services.length %>)</h2>
-                        <p class="admin-card-subtitle">Edit details or remove services currently active on the site</p>
-                    </div>
-                </div>
-
-                <% if (services && services.length > 0) { %>
-                    <% services.forEach(function(service, index) { %>
-                        <div class="service-manage-item" id="service-item-<%= service.id %>">
-                            <div class="service-item-header">
-                                <div class="service-item-title">
-                                    <span class="service-num-badge"><%= service.number_label || ('0' + (index + 1)) %></span>
-                                    <span><%= service.title_en %> / <%= service.title_ja %></span>
-                                </div>
-                                <div class="service-actions">
-                                    <form action="/admin/services/<%= service.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete service \'<%= service.title_en %>\'?');" style="margin:0;">
-                                        <button type="submit" class="btn-action-delete" id="btn-delete-service-<%= service.id %>">
-                                            🗑️ Delete
-                                        </button>
-                                    </form>
-                                </div>
+                    <form action="/admin/company" method="POST">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）写真・代表メッセージ</h3>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">代表者 役職 (日本語)</label>
+                                <input type="text" name="ceo_role_ja" class="form-input" value="<%= company.ceo_role_ja || '代表社員' %>">
                             </div>
-
-                            <form action="/admin/services/<%= service.id %>" method="POST" id="form-edit-service-<%= service.id %>">
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label>Number Label</label>
-                                        <input type="text" name="number_label" class="form-control" value="<%= service.number_label || '' %>" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Sort Order</label>
-                                        <input type="number" name="sort_order" class="form-control" value="<%= service.sort_order || (index + 1) %>" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label>Title (English) <span class="en-tag">EN</span></label>
-                                        <input type="text" name="title_en" class="form-control" value="<%= service.title_en || '' %>" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Title (Japanese) <span class="ja-tag">日本語</span></label>
-                                        <input type="text" name="title_ja" class="form-control" value="<%= service.title_ja || '' %>" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label>Description (English) <span class="en-tag">EN</span></label>
-                                        <textarea name="desc_en" class="form-control" rows="3" required><%= service.desc_en || '' %></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Description (Japanese) <span class="ja-tag">日本語</span></label>
-                                        <textarea name="desc_ja" class="form-control" rows="3" required><%= service.desc_ja || '' %></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label>Bullet Items (English) <small style="color:var(--text-muted);">(one item per line)</small></label>
-                                        <textarea name="items_en" class="form-control" rows="5"><%= Array.isArray(service.items_en) ? service.items_en.join('\n') : '' %></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Bullet Items (Japanese) <small style="color:var(--text-muted);">(one item per line)</small></label>
-                                        <textarea name="items_ja" class="form-control" rows="5"><%= Array.isArray(service.items_ja) ? service.items_ja.join('\n') : '' %></textarea>
-                                    </div>
-                                </div>
-
-                                <div style="text-align: right; margin-top: 10px;">
-                                    <button type="submit" class="btn-save" id="btn-update-service-<%= service.id %>">
-                                        💾 Update Service #<%= service.number_label %>
-                                    </button>
-                                </div>
-                            </form>
+                            <div class="form-group">
+                                <label class="form-label">代表者 役職 (英語)</label>
+                                <input type="text" name="ceo_role_en" class="form-input" value="<%= company.ceo_role_en || 'Representative Member' %>">
+                            </div>
                         </div>
-                    <% }); %>
-                <% } else { %>
-                    <p style="color: var(--text-muted); text-align: center; padding: 24px;">No services added yet. Use the form above to add your first service.</p>
-                <% } %>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">代表者 氏名</label>
+                                <input type="text" name="ceo_name" class="form-input" value="<%= company.ceo_name || 'ギリ ラム クリシュナ (Giri Ram Krishna)' %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表者 顔写真 画像URL</label>
+                                <input type="text" name="ceo_image" class="form-input" value="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>">
+                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/ceo_portrait.jpg</code></div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">代表挨拶 (日本語)</label>
+                                <textarea name="ceo_message_ja" class="form-textarea" rows="6"><%= company.ceo_message_ja %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表挨拶 (英語)</label>
+                                <textarea name="ceo_message_en" class="form-textarea" rows="6"><%= company.ceo_message_en %></textarea>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">2. ヒーローバナー（トップ大画面）</h3>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">トップバナー画像URL</label>
+                                <input type="text" name="hero_image" class="form-input" value="<%= company.hero_image || '/images/hero_banner.jpg' %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">許認可番号バッジ表示</label>
+                                <input type="text" name="license" class="form-input" value="<%= company.license || '有料職業紹介事業許可：13-ユ-319558' %>">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">ヒーロー メインキャッチ (日本語)</label>
+                                <input type="text" name="hero_title_ja" class="form-input" value="<%= company.hero_title_ja %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ヒーロー アクセント文字 (日本語)</label>
+                                <input type="text" name="hero_title_accent_ja" class="form-input" value="<%= company.hero_title_accent_ja %>">
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">3. 会社概要・登記情報</h3>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">会社名 (日本語)</label>
+                                <input type="text" name="name_ja" class="form-input" value="<%= company.name_ja %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">会社名 (英語)</label>
+                                <input type="text" name="name_en" class="form-input" value="<%= company.name_en %>">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">法人番号 (13桁)</label>
+                                <input type="text" name="corporate_number" class="form-input" value="<%= company.corporate_number || '5012403006691' %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">設立・法人番号指定日 (日本語)</label>
+                                <input type="text" name="established_ja" class="form-input" value="<%= company.established_ja %>">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">本店所在地 (日本語)</label>
+                                <input type="text" name="address_ja" class="form-input" value="<%= company.address_ja %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">本店所在地 (英語)</label>
+                                <input type="text" name="address_en" class="form-input" value="<%= company.address_en %>">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">電話番号</label>
+                                <input type="text" name="phone" class="form-input" value="<%= company.phone || '042-409-8256' %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表メールアドレス</label>
+                                <input type="email" name="email" class="form-input" value="<%= company.email || 'info@miransh.jp' %>">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px;">
+                            <button type="submit" class="btn-primary">保存して反映する (Save Changes)</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- ==============================================
-             TAB 3: ABOUT MIRANSH EDIT FORM
-             ============================================== -->
-        <div id="tab-about" class="tab-content <%= (activeTab === 'about') ? 'active' : '' %>">
-            <form action="/admin/about" method="POST" id="form-update-about">
+            <!-- TAB 2: ABOUT US -->
+            <div id="pane-about" class="tab-pane">
                 <div class="admin-card">
-                    <div class="admin-card-header">
-                        <div>
-                            <h2 class="admin-card-title">About MIRANSH Section</h2>
-                            <p class="admin-card-subtitle">Manage company mission, background story, and quote statements</p>
-                        </div>
-                        <button type="submit" class="btn-save" id="btn-save-about-top">💾 Save About Section</button>
-                    </div>
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        About (会社紹介セクション) 設定
+                    </h2>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="badge_en">Section Badge (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="badge_en" name="badge_en" class="form-control" value="<%= about.badge_en || '' %>" required>
+                    <form action="/admin/about" method="POST">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">見出し (日本語)</label>
+                                <input type="text" name="heading_ja" class="form-input" value="<%= about.heading_ja %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">見出し (英語)</label>
+                                <input type="text" name="heading_en" class="form-input" value="<%= about.heading_en %>">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="badge_ja">Section Badge (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="badge_ja" name="badge_ja" class="form-control" value="<%= about.badge_ja || '' %>" required>
-                        </div>
-                    </div>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="heading_en">Main Heading (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="heading_en" name="heading_en" class="form-control" value="<%= about.heading_en || '' %>" required>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">紹介文 1 (日本語)</label>
+                                <textarea name="desc1_ja" class="form-textarea" rows="4"><%= about.desc1_ja %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">紹介文 1 (英語)</label>
+                                <textarea name="desc1_en" class="form-textarea" rows="4"><%= about.desc1_en %></textarea>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="heading_ja">Main Heading (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="heading_ja" name="heading_ja" class="form-control" value="<%= about.heading_ja || '' %>" required>
-                        </div>
-                    </div>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="subheading_en">Subheading (English) <span class="en-tag">EN</span></label>
-                            <textarea id="subheading_en" name="subheading_en" class="form-control" rows="2" required><%= about.subheading_en || '' %></textarea>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">紹介文 2 (日本語)</label>
+                                <textarea name="desc2_ja" class="form-textarea" rows="4"><%= about.desc2_ja %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">紹介文 2 (英語)</label>
+                                <textarea name="desc2_en" class="form-textarea" rows="4"><%= about.desc2_en %></textarea>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="subheading_ja">Subheading (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="subheading_ja" name="subheading_ja" class="form-control" rows="2" required><%= about.subheading_ja || '' %></textarea>
-                        </div>
-                    </div>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="about_title_en">Title (English) <span class="en-tag">EN</span></label>
-                            <input type="text" id="about_title_en" name="title_en" class="form-control" value="<%= about.title_en || '' %>" required>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">代表メッセージ引用 (日本語)</label>
+                                <input type="text" name="quote_ja" class="form-input" value="<%= about.quote_ja %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表メッセージ引用 (英語)</label>
+                                <input type="text" name="quote_en" class="form-input" value="<%= about.quote_en %>">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="about_title_ja">Title (Japanese) <span class="ja-tag">日本語</span></label>
-                            <input type="text" id="about_title_ja" name="title_ja" class="form-control" value="<%= about.title_ja || '' %>" required>
-                        </div>
-                    </div>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="desc1_en">Paragraph 1 (English) <span class="en-tag">EN</span></label>
-                            <textarea id="desc1_en" name="desc1_en" class="form-control" rows="4" required><%= about.desc1_en || '' %></textarea>
+                        <div style="margin-top: 24px;">
+                            <button type="submit" class="btn-primary">Aboutセクションを更新 (Save About)</button>
                         </div>
-                        <div class="form-group">
-                            <label for="desc1_ja">Paragraph 1 (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="desc1_ja" name="desc1_ja" class="form-control" rows="4" required><%= about.desc1_ja || '' %></textarea>
-                        </div>
-                    </div>
+                    </form>
+                </div>
+            </div>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="desc2_en">Paragraph 2 (English) <span class="en-tag">EN</span></label>
-                            <textarea id="desc2_en" name="desc2_en" class="form-control" rows="4" required><%= about.desc2_en || '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="desc2_ja">Paragraph 2 (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="desc2_ja" name="desc2_ja" class="form-control" rows="4" required><%= about.desc2_ja || '' %></textarea>
-                        </div>
-                    </div>
+            <!-- TAB 3: SERVICES -->
+            <div id="pane-services" class="tab-pane">
+                <div class="admin-card">
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        事業内容一覧 (Services Manager)
+                    </h2>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="quote_en">Featured Quote (English) <span class="en-tag">EN</span></label>
-                            <textarea id="quote_en" name="quote_en" class="form-control" rows="3" required><%= about.quote_en || '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="quote_ja">Featured Quote (Japanese) <span class="ja-tag">日本語</span></label>
-                            <textarea id="quote_ja" name="quote_ja" class="form-control" rows="3" required><%= about.quote_ja || '' %></textarea>
-                        </div>
-                    </div>
+                    <table class="table-custom" style="margin-bottom: 32px;">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>事業名 (日本語 / 英語)</th>
+                                <th>概要</th>
+                                <th>詳細ページ</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% services.forEach(function(s) { %>
+                            <tr>
+                                <td><span class="badge-status"><%= s.number_label %></span></td>
+                                <td>
+                                    <strong><%= s.title_ja %></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><%= s.title_en %></span>
+                                </td>
+                                <td style="font-size: 13px; color: #475569; max-width: 280px;">
+                                    <%= s.desc_ja.substring(0, 70) %>...
+                                </td>
+                                <td>
+                                    <a href="/services/<%= s.id %>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 13px;">
+                                        ↗ 詳細表示
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" onclick="editServiceModal(<%= JSON.stringify(s) %>)" class="btn-outline-white" style="color: #0F172A; border-color: #CBD5E1; padding: 6px 12px; font-size: 12px;">
+                                        編集
+                                    </button>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
 
-                    <div style="margin-top: 20px;">
-                        <button type="submit" class="btn-save" id="btn-save-about-bottom">
-                            💾 Save and Apply About Section
-                        </button>
+                    <!-- Add New Service -->
+                    <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">➕ 新規事業・サービスを追加</h3>
+                    <form action="/admin/services" method="POST">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">事業番号 (例: 05)</label>
+                                <input type="text" name="number_label" class="form-input" placeholder="05">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">アイコン (users, award, heart-handshake, globe)</label>
+                                <input type="text" name="icon" class="form-input" value="users">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">事業名 (日本語)</label>
+                                <input type="text" name="title_ja" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">事業名 (英語)</label>
+                                <input type="text" name="title_en" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">概要説明 (日本語)</label>
+                                <textarea name="desc_ja" class="form-textarea" rows="2" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">概要説明 (英語)</label>
+                                <textarea name="desc_en" class="form-textarea" rows="2" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">主なサポート項目 (1行に1項目・日本語)</label>
+                                <textarea name="items_ja" class="form-textarea" rows="3" placeholder="項目1&#10;項目2&#10;項目3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">主なサポート項目 (1行に1項目・英語)</label>
+                                <textarea name="items_en" class="form-textarea" rows="3" placeholder="Item 1&#10;Item 2&#10;Item 3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">実施の流れ・ステップ (1行に1ステップ・日本語)</label>
+                                <textarea name="workflow_steps_ja" class="form-textarea" rows="3" placeholder="1. ヒアリング&#10;2. 募集&#10;3. 面接"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">実施の流れ・ステップ (1行に1ステップ・英語)</label>
+                                <textarea name="workflow_steps_en" class="form-textarea" rows="3" placeholder="1. Needs Assessment&#10;2. Sourcing&#10;3. Interview"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">新しい事業を追加 (Publish Service)</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 4: STORIES -->
+            <div id="pane-stories" class="tab-pane">
+                <div class="admin-card">
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        採用事例・ニュース管理 (Stories & Case Studies)
+                    </h2>
+
+                    <table class="table-custom" style="margin-bottom: 32px;">
+                        <thead>
+                            <tr>
+                                <th>画像</th>
+                                <th>カテゴリ</th>
+                                <th>タイトル (日本語)</th>
+                                <th>日付</th>
+                                <th>詳細</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% stories.forEach(function(st) { %>
+                            <tr>
+                                <td style="width: 70px;">
+                                    <img src="<%= st.image %>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                </td>
+                                <td><span class="badge-status"><%= st.category_ja %></span></td>
+                                <td>
+                                    <strong><%= st.title_ja %></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><%= st.title_en %></span>
+                                </td>
+                                <td style="font-size: 12px; color: #64748B;"><%= st.published_date %></td>
+                                <td>
+                                    <a href="/stories/<%= st.id %>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 13px;">
+                                        ↗ 記事確認
+                                    </a>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+
+                    <!-- Add Story Form -->
+                    <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">➕ 新規事例・記事の投稿</h3>
+                    <form action="/admin/stories" method="POST">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (日本語)</label>
+                                <input type="text" name="category_ja" class="form-input" value="介護分野・特定技能">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (英語)</label>
+                                <input type="text" name="category_en" class="form-input" value="Caregiving / SSW">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">タイトル (日本語)</label>
+                                <input type="text" name="title_ja" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">タイトル (英語)</label>
+                                <input type="text" name="title_en" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">概要要約 (日本語)</label>
+                                <textarea name="summary_ja" class="form-textarea" rows="2" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">概要要約 (英語)</label>
+                                <textarea name="summary_en" class="form-textarea" rows="2" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">記事本文 (日本語)</label>
+                                <textarea name="content_ja" class="form-textarea" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">記事本文 (英語)</label>
+                                <textarea name="content_en" class="form-textarea" rows="5"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">アイキャッチ画像URL</label>
+                                <input type="text" name="image" class="form-input" value="/images/story1.jpg">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">公開日</label>
+                                <input type="text" name="published_date" class="form-input" value="<%= new Date().toISOString().slice(0,10).replace(/-/g, '.') %>">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">記事を公開 (Publish Story)</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 5: INQUIRIES -->
+            <div id="pane-inquiries" class="tab-pane">
+                <div class="admin-card">
+                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        お問い合わせ・相談受付一覧 (<%= inquiries ? inquiries.length : 0 %>件)
+                    </h2>
+
+                    <% if (inquiries && inquiries.length > 0) { %>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>受信日時</th>
+                                <th>企業名 / お名前</th>
+                                <th>連絡先</th>
+                                <th>ご相談分野</th>
+                                <th>メッセージ内容</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% inquiries.forEach(function(inq) { %>
+                            <tr>
+                                <td style="font-size: 12px; color: #64748B; white-space: nowrap;"><%= inq.created_at %></td>
+                                <td>
+                                    <strong><%= inq.name %></strong><br>
+                                    <span style="font-size: 12px; color: #64748B;"><%= inq.company_name || '個人・未記入' %></span>
+                                </td>
+                                <td style="font-size: 13px;">
+                                    <div>📧 <%= inq.email %></div>
+                                    <div>📞 <%= inq.phone || '-' %></div>
+                                </td>
+                                <td>
+                                    <span class="badge-status"><%= inq.service_interest || '全般' %></span>
+                                </td>
+                                <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">
+                                    <%= inq.message %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                    <% } else { %>
+                    <p style="color: #64748B; font-size: 14px; text-align: center; padding: 40px;">現在、新しいお問い合わせはありません。</p>
+                    <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Service Modal -->
+    <div id="serviceEditModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;" id="editModalTitle">事業内容の編集</h3>
+                <button type="button" onclick="closeServiceModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+            <form id="serviceEditForm" method="POST">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">事業名 (日本語)</label>
+                        <input type="text" name="title_ja" id="edit_title_ja" class="form-input" required>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">事業名 (英語)</label>
+                        <input type="text" name="title_en" id="edit_title_en" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">概要 (日本語)</label>
+                        <textarea name="desc_ja" id="edit_desc_ja" class="form-textarea" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">概要 (英語)</label>
+                        <textarea name="desc_en" id="edit_desc_en" class="form-textarea" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                    <button type="submit" class="btn-primary">変更を保存</button>
+                    <button type="button" onclick="closeServiceModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">キャンセル</button>
                 </div>
             </form>
         </div>
-
     </div>
 
     <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        function switchAdminTab(tabName, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item-btn').forEach(el => el.classList.remove('active'));
             
-            const targetBtn = Array.from(document.querySelectorAll('.admin-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
-            if (targetBtn) targetBtn.classList.add('active');
+            const targetPane = document.getElementById('pane-' + tabName);
+            if (targetPane) targetPane.classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
             
-            const targetContent = document.getElementById('tab-' + tabId);
-            if (targetContent) targetContent.classList.add('active');
-
-            // Update URL without reload for direct linking
-            const url = new URL(window.location);
-            url.searchParams.set('tab', tabId);
-            window.history.pushState({}, '', url);
+            window.location.hash = tabName;
         }
+
+        function editServiceModal(service) {
+            document.getElementById('serviceEditForm').action = '/admin/services/' + service.id;
+            document.getElementById('edit_title_ja').value = service.title_ja || '';
+            document.getElementById('edit_title_en').value = service.title_en || '';
+            document.getElementById('edit_desc_ja').value = service.desc_ja || '';
+            document.getElementById('edit_desc_en').value = service.desc_en || '';
+            document.getElementById('serviceEditModal').style.display = 'flex';
+        }
+
+        function closeServiceModal() {
+            document.getElementById('serviceEditModal').style.display = 'none';
+        }
+
+        // Initialize tab based on hash
+        (function() {
+            const hash = window.location.hash.replace('#', '').replace('-tab', '');
+            if (['company', 'about', 'services', 'stories', 'inquiries'].includes(hash)) {
+                const btn = document.querySelector(`[onclick*="${hash}"]`);
+                switchAdminTab(hash, btn);
+            }
+        })();
     </script>
 </body>
 </html>

@@ -31,5 +31,7 @@ class Service extends Model
     protected $casts = [
         'items_en' => 'array',
         'items_ja' => 'array',
+        'workflow_steps_en' => 'array',
+        'workflow_steps_ja' => 'array',
     ];
 }
