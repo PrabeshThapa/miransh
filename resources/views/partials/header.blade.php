@@ -27,6 +27,10 @@
                     <span class="lang-en">Inquiry</span>
                     <span class="lang-ja">お問い合わせ</span>
                 </a>
+
+                <a href="{{ route('admin.dashboard') }}" class="admin-link-btn" title="Admin Control Panel" style="font-weight: 600; color: #0f4c81; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 5px 10px; border-radius: 6px; font-size: 13px;">
+                    ⚙️ <span class="lang-en">Admin</span><span class="lang-ja">管理</span>
+                </a>
             </nav>
 
             <div class="language-switcher">

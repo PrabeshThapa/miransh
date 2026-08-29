@@ -120,5 +120,15 @@ class DatabaseSeeder extends Seeder
                 'sort_order' => 2,
             ]
         );
+
+        // 4. Seed Default Admin User
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@miransh.jp'],
+            [
+                'name' => 'admin',
+                'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

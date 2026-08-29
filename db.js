@@ -494,3 +494,37 @@ export async function addService(data) {
   fallbackServices.push(newService);
   return newService;
 }
+
+export async function deleteService(id) {
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      await getPool().query('DELETE FROM services WHERE id = ?', [numId]);
+    } catch (err) {
+      console.error('[MySQL Error] deleteService failed:', err.message);
+    }
+  }
+  fallbackServices = fallbackServices.filter(s => s.id !== numId);
+  return true;
+}
+
+export async function getServiceById(id) {
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      const [rows] = await getPool().query('SELECT * FROM services WHERE id = ? LIMIT 1', [numId]);
+      if (rows && rows.length > 0) {
+        const r = rows[0];
+        return {
+          ...r,
+          items_en: typeof r.items_en === 'string' ? JSON.parse(r.items_en) : (r.items_en || []),
+          items_ja: typeof r.items_ja === 'string' ? JSON.parse(r.items_ja) : (r.items_ja || [])
+        };
+      }
+    } catch (err) {
+      console.error('[MySQL Error] getServiceById failed:', err.message);
+    }
+  }
+  return fallbackServices.find(s => s.id === numId) || null;
+}
+
