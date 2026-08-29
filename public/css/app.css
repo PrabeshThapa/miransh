@@ -1,0 +1,680 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans JP",
+        "Hiragino Kaku Gothic ProN",
+        Meiryo,
+        sans-serif;
+    color: #1f2937;
+    background: #fff;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+.container {
+    width: 92%;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* =========================
+   LANGUAGE
+========================== */
+
+.lang-en,
+.lang-ja {
+    display: none;
+}
+
+body.en .lang-en {
+    display: inline;
+}
+
+body.ja .lang-ja {
+    display: inline;
+}
+
+div.lang-en,
+div.lang-ja,
+section.lang-en,
+section.lang-ja {
+    display: none;
+}
+
+body.en div.lang-en,
+body.en section.lang-en {
+    display: block;
+}
+
+body.ja div.lang-ja,
+body.ja section.lang-ja {
+    display: block;
+}
+
+/* =========================
+   HEADER
+========================== */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid #e5e7eb;
+    backdrop-filter: blur(8px);
+}
+
+.navbar {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 800;
+    color: #0f4c81;
+    white-space: nowrap;
+}
+
+.logo span {
+    color: #16a085;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+nav a {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+nav a:hover {
+    color: #0f4c81;
+}
+
+.language-switcher {
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid #d1d5db;
+    border-radius: 25px;
+}
+
+.lang-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.lang-btn.active {
+    background: #0f4c81;
+    color: #fff;
+}
+
+.phone-btn {
+    background: #16a085;
+    color: #fff;
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* =========================
+   HERO
+========================== */
+
+.hero {
+    background: linear-gradient(
+        135deg,
+        #eef7fb,
+        #ffffff 55%,
+        #ecf9f5
+    );
+    padding: 55px 0;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 45px;
+}
+
+.hero-label {
+    display: inline-block;
+    background: #e5f4f1;
+    color: #087f6a;
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 13px;
+}
+
+.hero h1 {
+    font-size: clamp(38px, 5vw, 58px);
+    line-height: 1.1;
+    color: #0f4c81;
+    margin-bottom: 16px;
+}
+
+.hero h1 span {
+    color: #16a085;
+}
+
+.hero p {
+    color: #4b5563;
+    font-size: 16px;
+    max-width: 620px;
+    margin-bottom: 20px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 11px 19px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #0f4c81;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #0b3d68;
+}
+
+.btn-secondary {
+    border: 1px solid #0f4c81;
+    color: #0f4c81;
+    background: #fff;
+}
+
+.hero-image {
+    overflow: hidden;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 15px 35px rgba(15, 76, 129, 0.14);
+}
+
+.hero-image img {
+    width: 100%;
+    height: 360px;
+    object-fit: cover;
+}
+
+/* =========================
+   SECTIONS
+========================== */
+
+section {
+    padding: 55px 0;
+}
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.section-heading .small {
+    color: #16a085;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.section-heading h2 {
+    color: #0f4c81;
+    font-size: 32px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+}
+
+.section-heading p {
+    color: #6b7280;
+    max-width: 700px;
+    margin: auto;
+    font-size: 15px;
+}
+
+/* =========================
+   ABOUT
+========================== */
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 35px;
+    align-items: center;
+}
+
+.about-content h3 {
+    color: #0f4c81;
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+.about-content p {
+    color: #4b5563;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.quote-box {
+    background: #f1f8fb;
+    border-left: 4px solid #16a085;
+    padding: 20px;
+    border-radius: 7px;
+    color: #374151;
+    font-size: 15px;
+    font-style: italic;
+}
+
+/* =========================
+   SERVICES
+========================== */
+
+.services {
+    background: #f8fafc;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.service-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.service-number {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e5f4f1;
+    color: #087f6a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.service-card h3 {
+    color: #0f4c81;
+    font-size: 21px;
+    margin-bottom: 7px;
+}
+
+.service-card p {
+    color: #5b6472;
+    font-size: 14px;
+}
+
+.service-card ul {
+    margin-top: 9px;
+    padding-left: 19px;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.service-card li {
+    margin-bottom: 4px;
+}
+
+/* =========================
+   LICENSE
+========================== */
+
+.license {
+    background: #0f4c81;
+    color: #fff;
+}
+
+.license .section-heading .small {
+    color: #8de2d0;
+}
+
+.license .section-heading h2 {
+    color: #fff;
+}
+
+.license .section-heading p {
+    color: #dbeafe;
+}
+
+.license-box {
+    max-width: 750px;
+    margin: auto;
+    padding: 25px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.license-title {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.license-number {
+    color: #8de2d0;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 5px 0;
+}
+
+.license-note {
+    color: #dbeafe;
+    font-size: 13px;
+}
+
+/* =========================
+   COMPANY
+========================== */
+
+.company-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: 30px;
+    align-items: stretch;
+}
+
+.company-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.company-table tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.company-table th,
+.company-table td {
+    padding: 12px 8px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.company-table th {
+    width: 38%;
+    color: #0f4c81;
+    font-weight: 700;
+}
+
+.company-table td {
+    color: #4b5563;
+}
+
+.company-table a {
+    color: #16a085;
+    font-weight: 700;
+}
+
+.ceo-box {
+    background: #f1f8fb;
+    border-radius: 10px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ceo-label {
+    color: #16a085;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ceo-name {
+    color: #0f4c81;
+    font-size: 31px;
+    font-weight: 800;
+    margin: 4px 0;
+}
+
+.ceo-role {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* =========================
+   CONTACT
+========================== */
+
+.cta {
+    background: #ecf9f5;
+    text-align: center;
+    padding: 50px 0;
+}
+
+.cta h2 {
+    color: #0f4c81;
+    font-size: 31px;
+    margin-bottom: 8px;
+}
+
+.cta p {
+    max-width: 680px;
+    margin: 0 auto 18px;
+    color: #4b5563;
+    font-size: 15px;
+}
+
+/* =========================
+   FOOTER
+========================== */
+
+footer {
+    background: #102f47;
+    color: #fff;
+    padding: 35px 0 18px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+
+.footer-logo {
+    font-size: 23px;
+    font-weight: 800;
+    margin-bottom: 7px;
+}
+
+.footer-logo span {
+    color: #8de2d0;
+}
+
+.footer-text {
+    color: #cbd5e1;
+    font-size: 13px;
+    max-width: 500px;
+}
+
+.footer-contact {
+    text-align: right;
+}
+
+.footer-contact h4 {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.footer-contact a {
+    color: #8de2d0;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.footer-contact p {
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.copyright {
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 15px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* =========================
+   MOBILE
+========================== */
+
+@media (max-width: 850px) {
+
+    .navbar {
+        padding: 12px 0;
+        flex-wrap: wrap;
+    }
+
+    .nav-right {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    nav {
+        gap: 12px;
+    }
+
+    nav a {
+        font-size: 12px;
+    }
+
+    .hero-grid,
+    .about-grid,
+    .company-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 45px 0;
+    }
+
+    .hero-image img {
+        height: 300px;
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr;
+    }
+
+    section {
+        padding: 45px 0;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-contact {
+        text-align: left;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .logo {
+        font-size: 21px;
+    }
+
+    .phone-btn {
+        display: none;
+    }
+
+    .hero h1 {
+        font-size: 38px;
+    }
+
+    .hero p {
+        font-size: 15px;
+    }
+
+    .hero-image img {
+        height: 240px;
+    }
+
+    .section-heading h2 {
+        font-size: 28px;
+    }
+
+    .license-number {
+        font-size: 23px;
+    }
+
+    .company-table th,
+    .company-table td {
+        display: block;
+        width: 100%;
+        padding: 6px 0;
+    }
+
+    .company-table tr {
+        display: block;
+        padding: 8px 0;
+    }
+}
