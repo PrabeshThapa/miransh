@@ -35,17 +35,18 @@ class AdminController extends Controller
             'password' => 'required|string',
         ]);
 
-        if ($credentials['email'] === 'admin') {
-            $user = User::where('name', 'admin')->orWhere('email', 'admin@miransh.jp')->first();
-            if ($user && \Hash::check($credentials['password'], $user->password)) {
-                Auth::login($user);
-                return redirect()->intended(route('admin.dashboard'));
-            }
-        }
+        $loginInput = trim($credentials['email']);
+        $password = $credentials['password'];
 
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        // Search user by email or name
+        $user = User::where('email', $loginInput)
+            ->orWhere('name', $loginInput)
+            ->first();
+
+        if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+            Auth::login($user, true);
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([

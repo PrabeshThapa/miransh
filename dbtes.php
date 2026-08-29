@@ -1,6 +1,6 @@
 <?php
 
-$host = 'mysql1016.onamae.ne.jp';
+$host = '127.0.0.1';
 $db   = "v8p51_miransh_2026";
 $user = 'v8p51_33247841';
 $pass = 'manju.2221';

@@ -169,4 +169,4 @@
     </div>
 </body>
 </html>
-<?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/laravel/other/miransh/resources/views/admin/login.blade.php ENDPATH**/ ?>
+<?php /**PATH /app/applet/resources/views/admin/login.blade.php ENDPATH**/ ?>
