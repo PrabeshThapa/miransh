@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $company->name_ja ?? 'MIRANSH合同会社' }} | {{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋' }}</title>
+    <title><?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?> | <?php echo e($company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋'); ?></title>
     <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポートを提供します。">
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
@@ -17,8 +17,8 @@
                 <div class="brand-icon">M</div>
                 <div>
                     <div class="brand-title">
-                        <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
-                        <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+                        <span class="lang-ja"><?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?></span>
+                        <span class="lang-en"><?php echo e($company->name_en ?? 'MIRANSH LLC'); ?></span>
                     </div>
                     <div class="brand-subtitle">
                         <span class="lang-ja">ミランス合同会社 | 国際人材ソリューション</span>
@@ -58,23 +58,25 @@
             <div class="hero-content">
                 <div class="hero-badge">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span>{{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }}</span>
+                    <span><?php echo e($company->license ?? '有料職業紹介事業許可：13-ユ-319558'); ?></span>
                 </div>
 
                 <h1 class="hero-title">
                     <span class="lang-ja">
-                        {{ $company->hero_title_ja ?? '日本企業と海外人材をつなぐ、' }}
-                        <span class="hero-title-accent">{{ $company->hero_title_accent_ja ?? '信頼の架け橋。' }}</span>
+                        <?php echo e($company->hero_title_ja ?? '日本企業と海外人材をつなぐ、'); ?>
+
+                        <span class="hero-title-accent"><?php echo e($company->hero_title_accent_ja ?? '信頼の架け橋。'); ?></span>
                     </span>
                     <span class="lang-en">
-                        {{ $company->hero_title_en ?? 'Bridging Japanese Enterprises and' }}
-                        <span class="hero-title-accent">{{ $company->hero_title_accent_en ?? 'Global Talent with Trust.' }}</span>
+                        <?php echo e($company->hero_title_en ?? 'Bridging Japanese Enterprises and'); ?>
+
+                        <span class="hero-title-accent"><?php echo e($company->hero_title_accent_en ?? 'Global Talent with Trust.'); ?></span>
                     </span>
                 </h1>
 
                 <p class="hero-desc">
-                    <span class="lang-ja">{{ $company->hero_desc_ja ?? '外国人材の採用から入国・就労、入社後の生活サポートまで、双方に寄り添うトータル人材ソリューション。' }}</span>
-                    <span class="lang-en">{{ $company->hero_desc_en ?? 'Comprehensive recruitment solutions—from overseas hiring, visa procedures, and orientation to long-term post-employment support.' }}</span>
+                    <span class="lang-ja"><?php echo e($company->hero_desc_ja ?? '外国人材の採用から入国・就労、入社後の生活サポートまで、双方に寄り添うトータル人材ソリューション。'); ?></span>
+                    <span class="lang-en"><?php echo e($company->hero_desc_en ?? 'Comprehensive recruitment solutions—from overseas hiring, visa procedures, and orientation to long-term post-employment support.'); ?></span>
                 </p>
 
                 <div class="hero-actions">
@@ -107,7 +109,7 @@
 
             <div class="hero-image-wrapper">
                 <div class="hero-image-card">
-                    <img src="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" alt="MIRANSH Global Talent Support">
+                    <img src="<?php echo e($company->hero_image ?? '/images/hero_banner.jpg'); ?>" alt="MIRANSH Global Talent Support">
                 </div>
                 <div class="hero-floating-badge">
                     <div class="badge-icon-box">
@@ -127,28 +129,28 @@
         <div class="container">
             <div class="about-grid">
                 <div>
-                    <span class="section-badge"><span class="lang-ja">{{ $about->badge_ja ?? 'MIRANSH合同会社について' }}</span><span class="lang-en">{{ $about->badge_en ?? 'About MIRANSH LLC' }}</span></span>
+                    <span class="section-badge"><span class="lang-ja"><?php echo e($about->badge_ja ?? 'MIRANSH合同会社について'); ?></span><span class="lang-en"><?php echo e($about->badge_en ?? 'About MIRANSH LLC'); ?></span></span>
                     <h2 class="section-title">
-                        <span class="lang-ja">{{ $about->heading_ja ?? '日本企業と海外人材をつなぎ、採用から定着までを伴走支援' }}</span>
-                        <span class="lang-en">{{ $about->heading_en ?? 'Bridging Japanese Enterprises & International Talent with Complete Lifecycle Support' }}</span>
+                        <span class="lang-ja"><?php echo e($about->heading_ja ?? '日本企業と海外人材をつなぎ、採用から定着までを伴走支援'); ?></span>
+                        <span class="lang-en"><?php echo e($about->heading_en ?? 'Bridging Japanese Enterprises & International Talent with Complete Lifecycle Support'); ?></span>
                     </h2>
                     <p class="about-text-lead">
-                        <span class="lang-ja">{{ $about->subheading_ja ?? '日本で働きたい外国人材と、信頼できる人材を求める日本企業双方に寄り添うトータルサポート。' }}</span>
-                        <span class="lang-en">{{ $about->subheading_en ?? 'Supporting people who want to work, grow, and build their future in Japan.' }}</span>
+                        <span class="lang-ja"><?php echo e($about->subheading_ja ?? '日本で働きたい外国人材と、信頼できる人材を求める日本企業双方に寄り添うトータルサポート。'); ?></span>
+                        <span class="lang-en"><?php echo e($about->subheading_en ?? 'Supporting people who want to work, grow, and build their future in Japan.'); ?></span>
                     </p>
                     <p class="about-text-body">
-                        <span class="lang-ja">{{ $about->desc1_ja }}</span>
-                        <span class="lang-en">{{ $about->desc1_en }}</span>
+                        <span class="lang-ja"><?php echo e($about->desc1_ja); ?></span>
+                        <span class="lang-en"><?php echo e($about->desc1_en); ?></span>
                     </p>
                     <p class="about-text-body">
-                        <span class="lang-ja">{{ $about->desc2_ja }}</span>
-                        <span class="lang-en">{{ $about->desc2_en }}</span>
+                        <span class="lang-ja"><?php echo e($about->desc2_ja); ?></span>
+                        <span class="lang-en"><?php echo e($about->desc2_en); ?></span>
                     </p>
 
                     <div class="about-quote-box">
                         <div class="about-quote-text">
-                            <span class="lang-ja">{{ $about->quote_ja }}</span>
-                            <span class="lang-en">{{ $about->quote_en }}</span>
+                            <span class="lang-ja"><?php echo e($about->quote_ja); ?></span>
+                            <span class="lang-en"><?php echo e($about->quote_en); ?></span>
                         </div>
                     </div>
                 </div>
@@ -213,25 +215,25 @@
             </div>
 
             <div class="services-grid">
-                @foreach($services as $service)
+                <?php $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="service-card">
                     <div class="service-card-icon">
-                        <span style="font-size: 26px;">{{ $service->icon ?? '💼' }}</span>
+                        <span style="font-size: 26px;"><?php echo e($service->icon ?? '💼'); ?></span>
                     </div>
                     <h3 class="service-card-title">
-                        <span class="lang-ja">{{ $service->title_ja }}</span>
-                        <span class="lang-en">{{ $service->title_en }}</span>
+                        <span class="lang-ja"><?php echo e($service->title_ja); ?></span>
+                        <span class="lang-en"><?php echo e($service->title_en); ?></span>
                     </h3>
                     <p class="service-card-desc">
-                        <span class="lang-ja">{{ $service->description_ja }}</span>
-                        <span class="lang-en">{{ $service->description_en }}</span>
+                        <span class="lang-ja"><?php echo e($service->description_ja); ?></span>
+                        <span class="lang-en"><?php echo e($service->description_en); ?></span>
                     </p>
-                    <a href="{{ route('services.detail', $service->id) }}" class="service-read-more">
+                    <a href="<?php echo e(route('services.detail', $service->id)); ?>" class="service-read-more">
                         <span class="lang-ja">詳しく見る →</span>
                         <span class="lang-en">Learn More →</span>
                     </a>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </section>
@@ -244,12 +246,12 @@
                     <span class="lang-ja">MIRANSHの強み</span><span class="lang-en">Why Choose MIRANSH</span>
                 </span>
                 <h2 class="strengths-callout-title">
-                    <span class="lang-ja">{{ $company->strengths_tagline_ja ?? '人材紹介だけで終わらない、手厚い継続サポート' }}</span>
-                    <span class="lang-en">{{ $company->strengths_tagline_en ?? 'Beyond Recruitment — Continuous, High-Touch Support' }}</span>
+                    <span class="lang-ja"><?php echo e($company->strengths_tagline_ja ?? '人材紹介だけで終わらない、手厚い継続サポート'); ?></span>
+                    <span class="lang-en"><?php echo e($company->strengths_tagline_en ?? 'Beyond Recruitment — Continuous, High-Touch Support'); ?></span>
                 </h2>
                 <p class="strengths-callout-desc">
-                    <span class="lang-ja">{{ $company->strengths_desc_ja }}</span>
-                    <span class="lang-en">{{ $company->strengths_desc_en }}</span>
+                    <span class="lang-ja"><?php echo e($company->strengths_desc_ja); ?></span>
+                    <span class="lang-en"><?php echo e($company->strengths_desc_en); ?></span>
                 </p>
 
                 <div class="strengths-pillars-grid">
@@ -333,32 +335,32 @@
             </div>
 
             <div class="stories-grid">
-                @foreach($stories as $story)
+                <?php $__currentLoopData = $stories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $story): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="story-card">
                     <div class="story-card-image">
-                        <img src="{{ $story->image ?? '/images/story1.jpg' }}" alt="{{ $story->title_ja }}">
+                        <img src="<?php echo e($story->image ?? '/images/story1.jpg'); ?>" alt="<?php echo e($story->title_ja); ?>">
                         <span class="story-category-tag">
-                            <span class="lang-ja">{{ $story->category_ja }}</span>
-                            <span class="lang-en">{{ $story->category_en }}</span>
+                            <span class="lang-ja"><?php echo e($story->category_ja); ?></span>
+                            <span class="lang-en"><?php echo e($story->category_en); ?></span>
                         </span>
                     </div>
                     <div class="story-card-body">
-                        <div class="story-date">{{ $story->published_date ?? '2024.11.20' }}</div>
+                        <div class="story-date"><?php echo e($story->published_date ?? '2024.11.20'); ?></div>
                         <h3 class="story-title">
-                            <span class="lang-ja">{{ $story->title_ja }}</span>
-                            <span class="lang-en">{{ $story->title_en }}</span>
+                            <span class="lang-ja"><?php echo e($story->title_ja); ?></span>
+                            <span class="lang-en"><?php echo e($story->title_en); ?></span>
                         </h3>
                         <p class="story-summary">
-                            <span class="lang-ja">{{ $story->summary_ja }}</span>
-                            <span class="lang-en">{{ $story->summary_en }}</span>
+                            <span class="lang-ja"><?php echo e($story->summary_ja); ?></span>
+                            <span class="lang-en"><?php echo e($story->summary_en); ?></span>
                         </p>
-                        <a href="{{ route('stories.detail', $story->id) }}" class="story-read-link">
+                        <a href="<?php echo e(route('stories.detail', $story->id)); ?>" class="story-read-link">
                             <span class="lang-ja">記事全文を読む →</span>
                             <span class="lang-en">Read Full Story →</span>
                         </a>
                     </div>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </section>
@@ -381,29 +383,29 @@
             </div>
 
             <!-- FAQ Filter & Search Toolbar -->
-            @php
+            <?php
                 $faqCategories = $faqs->map(function($f) {
                     return [
                         'ja' => $f->category_ja,
                         'en' => $f->category_en ?: $f->category_ja
                     ];
                 })->unique('ja');
-            @endphp
+            ?>
 
             <div style="margin-bottom: 28px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
                     <!-- Category Tabs -->
                     <div class="faq-category-tabs" style="display: flex; flex-wrap: wrap; gap: 8px;" id="faq-category-nav">
                         <button type="button" class="faq-tab-btn active" onclick="filterFrontendFaqs('all', this)" style="padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--primary); background: var(--primary); color: #FFFFFF; transition: all 0.2s;">
-                            <span class="lang-ja">すべて ({{ count($faqs) }})</span>
-                            <span class="lang-en">All ({{ count($faqs) }})</span>
+                            <span class="lang-ja">すべて (<?php echo e(count($faqs)); ?>)</span>
+                            <span class="lang-en">All (<?php echo e(count($faqs)); ?>)</span>
                         </button>
-                        @foreach($faqCategories as $cat)
-                        <button type="button" class="faq-tab-btn" onclick="filterFrontendFaqs('{{ $cat['ja'] }}', this)" style="padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #E2E8F0; background: #FFFFFF; color: #475569; transition: all 0.2s;">
-                            <span class="lang-ja">{{ $cat['ja'] }}</span>
-                            <span class="lang-en">{{ $cat['en'] }}</span>
+                        <?php $__currentLoopData = $faqCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <button type="button" class="faq-tab-btn" onclick="filterFrontendFaqs('<?php echo e($cat['ja']); ?>', this)" style="padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #E2E8F0; background: #FFFFFF; color: #475569; transition: all 0.2s;">
+                            <span class="lang-ja"><?php echo e($cat['ja']); ?></span>
+                            <span class="lang-en"><?php echo e($cat['en']); ?></span>
                         </button>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     <!-- Live Keyword Search -->
@@ -421,35 +423,35 @@
             </div>
 
             <div class="faq-grid" id="frontend-faq-list">
-                @forelse($faqs as $faq)
-                <div class="faq-card" data-category="{{ $faq->category_ja }}" data-search="{{ strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en) }}">
+                <?php $__empty_1 = true; $__currentLoopData = $faqs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $faq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <div class="faq-card" data-category="<?php echo e($faq->category_ja); ?>" data-search="<?php echo e(strtolower($faq->question_ja . ' ' . $faq->question_en . ' ' . $faq->answer_ja . ' ' . $faq->answer_en . ' ' . $faq->category_ja . ' ' . $faq->category_en)); ?>">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
                         <span class="faq-category-tag">
-                            <span class="lang-ja">{{ $faq->category_ja }}</span>
-                            <span class="lang-en">{{ $faq->category_en }}</span>
+                            <span class="lang-ja"><?php echo e($faq->category_ja); ?></span>
+                            <span class="lang-en"><?php echo e($faq->category_en); ?></span>
                         </span>
-                        <span style="font-size: 11px; color: #94A3B8; font-weight: 600;">#{{ $faq->sort_order ?? $loop->iteration }}</span>
+                        <span style="font-size: 11px; color: #94A3B8; font-weight: 600;">#<?php echo e($faq->sort_order ?? $loop->iteration); ?></span>
                     </div>
                     <div class="faq-question">
                         <span class="faq-q-badge">Q</span>
                         <div>
-                            <span class="lang-ja">{{ $faq->question_ja }}</span>
-                            <span class="lang-en">{{ $faq->question_en }}</span>
+                            <span class="lang-ja"><?php echo e($faq->question_ja); ?></span>
+                            <span class="lang-en"><?php echo e($faq->question_en); ?></span>
                         </div>
                     </div>
                     <div class="faq-answer">
-                        <div class="lang-ja">{!! nl2br(e($faq->answer_ja)) !!}</div>
-                        <div class="lang-en">{!! nl2br(e($faq->answer_en)) !!}</div>
+                        <div class="lang-ja"><?php echo nl2br(e($faq->answer_ja)); ?></div>
+                        <div class="lang-en"><?php echo nl2br(e($faq->answer_en)); ?></div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="faq-card" style="grid-column: span 2; text-align: center; padding: 40px;">
                     <p style="color: #64748B;">
                         <span class="lang-ja">現在登録されているFAQ項目はありません。</span>
                         <span class="lang-en">No FAQs currently available.</span>
                     </p>
                 </div>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <!-- Empty Search State -->
@@ -485,69 +487,70 @@
                             <tr>
                                 <th><span class="lang-ja">会社名</span><span class="lang-en">Company Name</span></th>
                                 <td>
-                                    <strong><span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span></strong>
+                                    <strong><span class="lang-ja"><?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?></span></strong>
                                     <br>
-                                    <span class="lang-en" style="color: var(--text-light);">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+                                    <span class="lang-en" style="color: var(--text-light);"><?php echo e($company->name_en ?? 'MIRANSH LLC'); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">法人番号</span><span class="lang-en">Corporate Number</span></th>
-                                <td><code>{{ $company->corporate_number ?? '5012403006691' }}</code></td>
+                                <td><code><?php echo e($company->corporate_number ?? '5012403006691'); ?></code></td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">許認可番号</span><span class="lang-en">License Number</span></th>
                                 <td>
                                     <span style="display: inline-block; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-                                        {{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }}
+                                        <?php echo e($company->license ?? '有料職業紹介事業許可：13-ユ-319558'); ?>
+
                                     </span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">本店所在地</span><span class="lang-en">Headquarters</span></th>
                                 <td>
-                                    <span class="lang-ja">{{ $company->address_ja }}</span>
-                                    <span class="lang-en">{{ $company->address_en }}</span>
+                                    <span class="lang-ja"><?php echo e($company->address_ja); ?></span>
+                                    <span class="lang-en"><?php echo e($company->address_en); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">法人形態</span><span class="lang-en">Corporate Form</span></th>
                                 <td>
-                                    <span class="lang-ja">{{ $company->corporate_form_ja ?? '合同会社' }}</span>
-                                    <span class="lang-en">{{ $company->corporate_form_en ?? 'Limited Liability Company (LLC)' }}</span>
+                                    <span class="lang-ja"><?php echo e($company->corporate_form_ja ?? '合同会社'); ?></span>
+                                    <span class="lang-en"><?php echo e($company->corporate_form_en ?? 'Limited Liability Company (LLC)'); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">設立・法人番号指定</span><span class="lang-en">Established</span></th>
                                 <td>
-                                    <span class="lang-ja">{{ $company->established_ja }}</span>
-                                    <span class="lang-en">{{ $company->established_en }}</span>
+                                    <span class="lang-ja"><?php echo e($company->established_ja); ?></span>
+                                    <span class="lang-en"><?php echo e($company->established_en); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">代表者</span><span class="lang-en">Executive</span></th>
                                 <td>
                                     <div class="lang-ja">
-                                        {{ $company->ceo_role_ja ?? '代表社員' }}：<strong>{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</strong>
-                                        <span style="color: #64748B; margin-left: 8px;">({{ $company->ceo_name_en ?? 'Giri Ram Krishna' }})</span>
+                                        <?php echo e($company->ceo_role_ja ?? '代表社員'); ?>：<strong><?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?></strong>
+                                        <span style="color: #64748B; margin-left: 8px;">(<?php echo e($company->ceo_name_en ?? 'Giri Ram Krishna'); ?>)</span>
                                     </div>
                                     <div class="lang-en">
-                                        {{ $company->ceo_role_en ?? 'Representative Member' }}: <strong>{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</strong>
-                                        <span style="color: #64748B; margin-left: 8px;">(Japanese: {{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }})</span>
+                                        <?php echo e($company->ceo_role_en ?? 'Representative Member'); ?>: <strong><?php echo e($company->ceo_name_en ?? 'Giri Ram Krishna'); ?></strong>
+                                        <span style="color: #64748B; margin-left: 8px;">(Japanese: <?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?>)</span>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">事業内容</span><span class="lang-en">Core Businesses</span></th>
                                 <td>
-                                    <span class="lang-ja">{{ $company->business_ja }}</span>
-                                    <span class="lang-en">{{ $company->business_en }}</span>
+                                    <span class="lang-ja"><?php echo e($company->business_ja); ?></span>
+                                    <span class="lang-en"><?php echo e($company->business_en); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th><span class="lang-ja">電話番号 / Email</span><span class="lang-en">Phone / Email</span></th>
                                 <td>
-                                    <div>TEL: <strong>{{ $company->phone ?? '042-409-8256' }}</strong></div>
-                                    <div>Email: {{ $company->email ?? 'info@miransh.jp' }}</div>
+                                    <div>TEL: <strong><?php echo e($company->phone ?? '042-409-8256'); ?></strong></div>
+                                    <div>Email: <?php echo e($company->email ?? 'info@miransh.jp'); ?></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -575,14 +578,14 @@
             <div class="vision-card">
                 <div class="vision-grid">
                     <div class="vision-ceo-card">
-                        <img src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}" class="vision-ceo-photo">
+                        <img src="<?php echo e($company->ceo_image ?? '/images/ceo_portrait.jpg'); ?>" alt="<?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?>" class="vision-ceo-photo">
                         <h3 class="vision-ceo-name">
-                            <span class="lang-ja">{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</span>
-                            <span class="lang-en">{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</span>
+                            <span class="lang-ja"><?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?></span>
+                            <span class="lang-en"><?php echo e($company->ceo_name_en ?? 'Giri Ram Krishna'); ?></span>
                         </h3>
                         <div class="vision-ceo-role">
-                            <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }}</span>
-                            <span class="lang-en">{{ $company->ceo_role_en ?? 'Representative Member' }}</span>
+                            <span class="lang-ja"><?php echo e($company->ceo_role_ja ?? '代表社員'); ?></span>
+                            <span class="lang-en"><?php echo e($company->ceo_role_en ?? 'Representative Member'); ?></span>
                         </div>
                     </div>
 
@@ -594,19 +597,19 @@
                         </h2>
 
                         <div class="vision-body-text">
-                            <div class="lang-ja">{!! nl2br(e($company->ceo_message_ja)) !!}</div>
-                            <div class="lang-en">{!! nl2br(e($company->ceo_message_en)) !!}</div>
+                            <div class="lang-ja"><?php echo nl2br(e($company->ceo_message_ja)); ?></div>
+                            <div class="lang-en"><?php echo nl2br(e($company->ceo_message_en)); ?></div>
                         </div>
 
                         <div class="vision-signature-block">
                             <div>
                                 <div class="vision-sign-company">
-                                    <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
-                                    <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+                                    <span class="lang-ja"><?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?></span>
+                                    <span class="lang-en"><?php echo e($company->name_en ?? 'MIRANSH LLC'); ?></span>
                                 </div>
                                 <div class="vision-sign-name">
-                                    <span class="lang-ja">{{ $company->ceo_role_ja ?? '代表社員' }} {{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}</span>
-                                    <span class="lang-en">{{ $company->ceo_role_en ?? 'Representative Member' }}: {{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}</span>
+                                    <span class="lang-ja"><?php echo e($company->ceo_role_ja ?? '代表社員'); ?> <?php echo e($company->ceo_name_ja ?? 'ギリ ラム クリシュナ'); ?></span>
+                                    <span class="lang-en"><?php echo e($company->ceo_role_en ?? 'Representative Member'); ?>: <?php echo e($company->ceo_name_en ?? 'Giri Ram Krishna'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -641,7 +644,7 @@
                             </div>
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">お電話でのお問い合わせ</span><span class="lang-en">Telephone Hotline</span></div>
-                                <div class="contact-detail-value">{{ $company->phone ?? '042-409-8256' }}</div>
+                                <div class="contact-detail-value"><?php echo e($company->phone ?? '042-409-8256'); ?></div>
                             </div>
                         </div>
 
@@ -651,7 +654,7 @@
                             </div>
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">メールでのお問い合わせ</span><span class="lang-en">Email Address</span></div>
-                                <div class="contact-detail-value">{{ $company->email ?? 'info@miransh.jp' }}</div>
+                                <div class="contact-detail-value"><?php echo e($company->email ?? 'info@miransh.jp'); ?></div>
                             </div>
                         </div>
 
@@ -662,8 +665,8 @@
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">本店所在地</span><span class="lang-en">Office Location</span></div>
                                 <div class="contact-detail-value" style="font-size: 13px;">
-                                    <span class="lang-ja">{{ $company->address_ja }}</span>
-                                    <span class="lang-en">{{ $company->address_en }}</span>
+                                    <span class="lang-ja"><?php echo e($company->address_ja); ?></span>
+                                    <span class="lang-en"><?php echo e($company->address_en); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -677,14 +680,15 @@
                             <span class="lang-en">Send Us an Inquiry</span>
                         </h3>
 
-                        @if (session('success'))
+                        <?php if(session('success')): ?>
                         <div style="background: #ECFDF5; border: 1px solid #10B981; color: #065F46; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; font-size: 14px;">
-                            ✓ {{ session('success') }}
-                        </div>
-                        @endif
+                            ✓ <?php echo e(session('success')); ?>
 
-                        <form id="contact-form" action="{{ route('contact.submit', [], false) }}" method="POST">
-                            @csrf
+                        </div>
+                        <?php endif; ?>
+
+                        <form id="contact-form" action="<?php echo e(route('contact.submit', [], false)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">貴社名 / 法人名</span><span class="lang-en">Company / Organization</span>
@@ -753,15 +757,16 @@
             <div class="footer-grid">
                 <div>
                     <div class="footer-brand-title">
-                        <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
-                        <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+                        <span class="lang-ja"><?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?></span>
+                        <span class="lang-en"><?php echo e($company->name_en ?? 'MIRANSH LLC'); ?></span>
                     </div>
                     <p class="footer-desc">
-                        <span class="lang-ja">{{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋。' }}</span>
-                        <span class="lang-en">{{ $company->tagline_en ?? 'Bridging Japanese Enterprises and Global Talent with Trust.' }}</span>
+                        <span class="lang-ja"><?php echo e($company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋。'); ?></span>
+                        <span class="lang-en"><?php echo e($company->tagline_en ?? 'Bridging Japanese Enterprises and Global Talent with Trust.'); ?></span>
                     </p>
                     <div class="footer-licence-badge">
-                        {{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }} | 法人番号: {{ $company->corporate_number ?? '5012403006691' }}
+                        <?php echo e($company->license ?? '有料職業紹介事業許可：13-ユ-319558'); ?> | 法人番号: <?php echo e($company->corporate_number ?? '5012403006691'); ?>
+
                     </div>
                 </div>
 
@@ -781,11 +786,11 @@
                 <div>
                     <h4 class="footer-col-title"><span class="lang-ja">お問い合わせ先</span><span class="lang-en">Contact Info</span></h4>
                     <div style="font-size: 13px; line-height: 1.8; color: #94A3B8;">
-                        <p><strong>TEL:</strong> {{ $company->phone ?? '042-409-8256' }}</p>
-                        <p><strong>Email:</strong> {{ $company->email ?? 'info@miransh.jp' }}</p>
+                        <p><strong>TEL:</strong> <?php echo e($company->phone ?? '042-409-8256'); ?></p>
+                        <p><strong>Email:</strong> <?php echo e($company->email ?? 'info@miransh.jp'); ?></p>
                         <p style="margin-top: 8px;">
-                            <span class="lang-ja">{{ $company->address_ja }}</span>
-                            <span class="lang-en">{{ $company->address_en }}</span>
+                            <span class="lang-ja"><?php echo e($company->address_ja); ?></span>
+                            <span class="lang-en"><?php echo e($company->address_en); ?></span>
                         </p>
                     </div>
                 </div>
@@ -793,10 +798,10 @@
 
             <div class="footer-bottom">
                 <div>
-                    &copy; {{ date('Y') }} {{ $company->name_ja ?? 'MIRANSH合同会社' }} (MIRANSH LLC). All Rights Reserved.
+                    &copy; <?php echo e(date('Y')); ?> <?php echo e($company->name_ja ?? 'MIRANSH合同会社'); ?> (MIRANSH LLC). All Rights Reserved.
                 </div>
                 <div>
-                    <a href="{{ route('admin.login') }}" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a>
+                    <a href="<?php echo e(route('admin.login')); ?>" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a>
                 </div>
             </div>
         </div>
@@ -889,11 +894,11 @@
     </div>
 
     <!-- Admin Floating Launcher -->
-    <!-- <a href="{{ route('admin.dashboard') }}" class="admin-float-btn" title="Admin Portal">
+    <a href="<?php echo e(route('admin.dashboard')); ?>" class="admin-float-btn" title="Admin Portal">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span class="lang-ja">管理画面</span>
         <span class="lang-en">Admin Portal</span>
-    </a> -->
+    </a>
 
     <!-- Language Switching Engine Script -->
     <script>
@@ -1000,7 +1005,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     },
                     body: JSON.stringify({
                         messages: sakanaChatHistory,
@@ -1142,3 +1147,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/laravel/other/miransh/resources/views/home.blade.php ENDPATH**/ ?>
