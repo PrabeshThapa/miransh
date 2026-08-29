@@ -158,10 +158,10 @@
                 </button>
             </form>
 
-            <div class="hint-box">
+            <!-- <div class="hint-box">
                 🔑 <strong>Default Admin Credentials:</strong><br>
                 Username: <code>admin@miransh.jp</code> &nbsp;|&nbsp; Password: <code>admin123</code>
-            </div>
+            </div> -->
 
             <a href="{{ route('home') }}" class="back-link">← Return to Website</a>
         </div>
