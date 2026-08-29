@@ -144,7 +144,10 @@
     <footer>
         <div class="container">
             <div class="footer-bottom" style="border: none; padding-top: 0;">
-                <div>&copy; <%= new Date().getFullYear() %> <%= company.name_ja || 'MIRANSH合同会社' %> (MIRANSH LLC). All Rights Reserved.</div>
+                <div>
+                    <span class="lang-ja">&copy; <%= new Date().getFullYear() %> <%= company.name_ja || 'MIRANSH合同会社' %> 全著作権所有</span>
+                    <span class="lang-en">&copy; <%= new Date().getFullYear() %> <%= company.name_en || 'MIRANSH LLC' %>. All Rights Reserved.</span>
+                </div>
                 <div><a href="/" style="color: #94A3B8;"><span class="lang-ja">← トップページへ戻る</span><span class="lang-en">← Back to Home</span></a></div>
             </div>
         </div>

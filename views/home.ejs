@@ -61,7 +61,8 @@
             <div class="hero-content">
                 <div class="hero-badge">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span><%= company.license || '有料職業紹介事業許可：13-ユ-319558' %></span>
+                    <span class="lang-ja"><%= company.license || '有料職業紹介事業許可：13-ユ-319558' %></span>
+                    <span class="lang-en">MHLW Certified License: 13-ユ-319558</span>
                 </div>
 
                 <h1 class="hero-title">
@@ -98,11 +99,17 @@
                         <div class="stat-item-label"><span class="lang-ja">在留資格・法令遵守</span><span class="lang-en">Compliance Assured</span></div>
                     </div>
                     <div>
-                        <div class="stat-item-num">ワンストップ</div>
+                        <div class="stat-item-num">
+                            <span class="lang-ja">ワンストップ</span>
+                            <span class="lang-en">All-in-One</span>
+                        </div>
                         <div class="stat-item-label"><span class="lang-ja">採用から入社後生活支援まで</span><span class="lang-en">End-to-End Support</span></div>
                     </div>
                     <div>
-                        <div class="stat-item-num">ネパール直結</div>
+                        <div class="stat-item-num">
+                            <span class="lang-ja">ネパール直結</span>
+                            <span class="lang-en">Nepal Network</span>
+                        </div>
                         <div class="stat-item-label"><span class="lang-ja">現地提携教育機関ネットワーク</span><span class="lang-en">Direct Academic Network</span></div>
                     </div>
                 </div>
@@ -388,7 +395,10 @@
                 <div class="industry-card">
                     <div class="industry-emoji-icon">🩺</div>
                     <h3 class="industry-name"><span class="lang-ja">介護分野</span><span class="lang-en">Nursing Care</span></h3>
-                    <div class="industry-en-tag">Caregiving / SSW</div>
+                    <div class="industry-en-tag">
+                        <span class="lang-ja">介護 / 特定技能1号</span>
+                        <span class="lang-en">Caregiving / SSW</span>
+                    </div>
                     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
                         <span class="lang-ja">高齢者施設・デイサービス等における身体介助・生活支援。専門用語教育済み。</span>
                         <span class="lang-en">Elderly welfare facilities & daily care support with specialized medical terminology training.</span>
@@ -398,7 +408,10 @@
                 <div class="industry-card">
                     <div class="industry-emoji-icon">🏗️</div>
                     <h3 class="industry-name"><span class="lang-ja">建設分野</span><span class="lang-en">Construction</span></h3>
-                    <div class="industry-en-tag">Construction & Engineering</div>
+                    <div class="industry-en-tag">
+                        <span class="lang-ja">建設・土木・内装仕上げ</span>
+                        <span class="lang-en">Construction & Engineering</span>
+                    </div>
                     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
                         <span class="lang-ja">型枠・鉄筋・内装仕上げ・土木工事など、現場の即戦力となる体力と熱意ある人材。</span>
                         <span class="lang-en">Formwork, rebar, interior finishing, and civil engineering with safety training.</span>
@@ -408,7 +421,10 @@
                 <div class="industry-card">
                     <div class="industry-emoji-icon">🧹</div>
                     <h3 class="industry-name"><span class="lang-ja">ビルクリーニング・清掃</span><span class="lang-en">Building Cleaning</span></h3>
-                    <div class="industry-en-tag">Facility Maintenance</div>
+                    <div class="industry-en-tag">
+                        <span class="lang-ja">施設清掃・環境衛生維持</span>
+                        <span class="lang-en">Facility Maintenance</span>
+                    </div>
                     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
                         <span class="lang-ja">商業施設・オフィスビル・ホテルの環境衛生維持。日本の衛生基準を徹底研修。</span>
                         <span class="lang-en">Commercial facilities, office buildings, and hotels adhering to Japanese hygiene protocols.</span>
@@ -418,7 +434,10 @@
                 <div class="industry-card">
                     <div class="industry-emoji-icon">🌐</div>
                     <h3 class="industry-name"><span class="lang-ja">その他特定技能分野</span><span class="lang-en">Other SSW Sectors</span></h3>
-                    <div class="industry-en-tag">Food, Logistics & Manufacturing</div>
+                    <div class="industry-en-tag">
+                        <span class="lang-ja">外食・飲食料品製造・農業</span>
+                        <span class="lang-en">Food, Logistics & Manufacturing</span>
+                    </div>
                     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
                         <span class="lang-ja">外食業・飲食料品製造業・農業・宿泊業など、特定技能制度対象職種に対応。</span>
                         <span class="lang-en">Food service, food manufacturing, agriculture, and hospitality under SSW program.</span>
@@ -451,7 +470,7 @@
                     <div class="commitment-icon-box">
                         <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h3 class="commitment-title"><span class="lang-ja">信頼 (Trust)</span><span class="lang-en">Trust & Transparency</span></h3>
+                    <h3 class="commitment-title"><span class="lang-ja">高い信頼性</span><span class="lang-en">Trust & Transparency</span></h3>
                     <p class="commitment-desc">
                         <span class="lang-ja">法令遵守を徹底し、企業様と外国人材の双方が納得できる透明性の高いマッチングを約束します。</span>
                         <span class="lang-en">Strict compliance with Japanese labor and immigration laws, ensuring transparent, honest partnerships.</span>
@@ -462,7 +481,7 @@
                     <div class="commitment-icon-box">
                         <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </div>
-                    <h3 class="commitment-title"><span class="lang-ja">安心 (Peace of Mind)</span><span class="lang-en">Peace of Mind</span></h3>
+                    <h3 class="commitment-title"><span class="lang-ja">安心のサポート</span><span class="lang-en">Peace of Mind</span></h3>
                     <p class="commitment-desc">
                         <span class="lang-ja">入国手続きから生活面の不安解消まで、母国語サポートを含む手厚いフォローで安心をお届けします。</span>
                         <span class="lang-en">End-to-end guidance from visa documentation to daily life counseling in the candidate's native tongue.</span>
@@ -473,7 +492,7 @@
                     <div class="commitment-icon-box">
                         <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </div>
-                    <h3 class="commitment-title"><span class="lang-ja">長期的な関係 (Partnership)</span><span class="lang-en">Long-Term Growth</span></h3>
+                    <h3 class="commitment-title"><span class="lang-ja">長期的な関係構築</span><span class="lang-en">Long-Term Growth</span></h3>
                     <p class="commitment-desc">
                         <span class="lang-ja">一過性の紹介ではなく、企業様の事業発展と外国人材の日本でのキャリア形成を長く支え続けます。</span>
                         <span class="lang-en">Fostering lasting bonds that drive sustainable business growth and fulfilling careers in Japan.</span>
@@ -551,9 +570,8 @@
                             <tr>
                                 <th><span class="lang-ja">会社名</span><span class="lang-en">Company Name</span></th>
                                 <td>
-                                    <strong><span class="lang-ja"><%= company.name_ja || 'MIRANSH合同会社（ミランス合同会社）' %></span></strong>
-                                    <br>
-                                    <span class="lang-en" style="color: var(--text-light);"><%= company.name_en || 'MIRANSH LLC (MIRANSH Godo Kaisha)' %></span>
+                                    <span class="lang-ja"><strong><%= company.name_ja || 'MIRANSH合同会社' %></strong></span>
+                                    <span class="lang-en"><strong><%= company.name_en || 'MIRANSH LLC' %></strong></span>
                                 </td>
                             </tr>
                             <tr>
@@ -564,7 +582,8 @@
                                 <th><span class="lang-ja">許認可番号</span><span class="lang-en">License Number</span></th>
                                 <td>
                                     <span style="display: inline-block; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-                                        <%= company.license || '有料職業紹介事業許可：13-ユ-319558' %>
+                                        <span class="lang-ja"><%= company.license || '有料職業紹介事業許可：13-ユ-319558' %></span>
+                                        <span class="lang-en"><%= company.license_en || 'MHLW Placement License: 13-ユ-319558' %></span>
                                     </span>
                                 </td>
                             </tr>
@@ -592,8 +611,8 @@
                             <tr>
                                 <th><span class="lang-ja">代表者</span><span class="lang-en">Executive</span></th>
                                 <td>
-                                    <span class="lang-ja"><%= company.ceo_role_ja || '代表社員' %>：<%= company.ceo_name || 'ギリ ラム クリシュナ (Giri Ram Krishna)' %></span>
-                                    <span class="lang-en"><%= company.ceo_role_en || 'Representative Member' %>: <%= company.ceo_name || 'Giri Ram Krishna' %></span>
+                                    <span class="lang-ja"><%= company.ceo_role_ja || '代表社員' %>：<%= company.ceo_name_ja || (company.ceo_name ? company.ceo_name.replace(/\(.*?\)/g, '').trim() : 'ギリ ラム クリシュナ') %></span>
+                                    <span class="lang-en"><%= company.ceo_role_en || 'Representative Member' %>: <%= company.ceo_name_en || (company.ceo_name && company.ceo_name.includes('(') ? company.ceo_name.match(/\((.*?)\)/)?.[1] : 'Giri Ram Krishna') %></span>
                                 </td>
                             </tr>
                             <tr>
@@ -604,10 +623,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th><span class="lang-ja">電話番号 / Email</span><span class="lang-en">Phone / Email</span></th>
+                                <th><span class="lang-ja">電話番号 / メール</span><span class="lang-en">Phone / Email</span></th>
                                 <td>
-                                    <div>TEL: <strong><%= company.phone || '042-409-8256' %></strong></div>
-                                    <div>Email: <%= company.email || 'info@miransh.jp' %></div>
+                                    <div><span class="lang-ja">電話番号</span><span class="lang-en">Phone</span>: <strong><%= company.phone || '042-409-8256' %></strong></div>
+                                    <div><span class="lang-ja">メール</span><span class="lang-en">Email</span>: <%= company.email || 'info@miransh.jp' %></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -638,7 +657,10 @@
                 <div class="vision-grid">
                     <div class="vision-ceo-card">
                         <img src="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>" alt="<%= company.ceo_name %>" class="vision-ceo-photo">
-                        <h3 class="vision-ceo-name"><%= company.ceo_name || 'ギリ ラム クリシュナ' %></h3>
+                        <h3 class="vision-ceo-name">
+                            <span class="lang-ja"><%= company.ceo_name_ja || (company.ceo_name ? company.ceo_name.replace(/\(.*?\)/g, '').trim() : 'ギリ ラム クリシュナ') %></span>
+                            <span class="lang-en"><%= company.ceo_name_en || (company.ceo_name && company.ceo_name.includes('(') ? company.ceo_name.match(/\((.*?)\)/)?.[1] : 'Giri Ram Krishna') %></span>
+                        </h3>
                         <div class="vision-ceo-role">
                             <span class="lang-ja"><%= company.ceo_role_ja || '代表社員' %></span>
                             <span class="lang-en"><%= company.ceo_role_en || 'Representative Member' %></span>
@@ -664,8 +686,8 @@
                                     <span class="lang-en"><%= company.name_en || 'MIRANSH LLC' %></span>
                                 </div>
                                 <div class="vision-sign-name">
-                                    <span class="lang-ja"><%= company.ceo_role_ja || '代表社員' %> <%= company.ceo_name || 'ギリ ラム クリシュナ' %></span>
-                                    <span class="lang-en"><%= company.ceo_name || 'Giri Ram Krishna' %></span>
+                                    <span class="lang-ja"><%= company.ceo_role_ja || '代表社員' %> <%= company.ceo_name_ja || (company.ceo_name ? company.ceo_name.replace(/\(.*?\)/g, '').trim() : 'ギリ ラム クリシュナ') %></span>
+                                    <span class="lang-en"><%= company.ceo_role_en || 'Representative Member' %>: <%= company.ceo_name_en || (company.ceo_name && company.ceo_name.includes('(') ? company.ceo_name.match(/\((.*?)\)/)?.[1] : 'Giri Ram Krishna') %></span>
                                 </div>
                             </div>
                         </div>
@@ -750,7 +772,8 @@
                                 <label class="form-label">
                                     <span class="lang-ja">貴社名 / 法人名</span><span class="lang-en">Company / Organization</span>
                                 </label>
-                                <input type="text" name="company_name" class="form-input" placeholder="例: 株式会社〇〇">
+                                <input type="text" name="company_name" class="form-input lang-input-ja" placeholder="例: 株式会社〇〇">
+                                <input type="text" name="company_name" class="form-input lang-input-en" placeholder="e.g. ABC Corporation">
                             </div>
 
                             <div class="form-group">
@@ -758,7 +781,8 @@
                                     <span class="lang-ja">ご担当者様 お名前</span><span class="lang-en">Full Name</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="text" name="name" class="form-input" required placeholder="例: 山田 太郎">
+                                <input type="text" name="name" class="form-input lang-input-ja" required placeholder="例: 山田 太郎">
+                                <input type="text" name="name" class="form-input lang-input-en" required placeholder="e.g. Taro Yamada / John Doe">
                             </div>
 
                             <div class="form-group">
@@ -766,26 +790,35 @@
                                     <span class="lang-ja">メールアドレス</span><span class="lang-en">Email Address</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="email" name="email" class="form-input" required placeholder="name@company.co.jp">
+                                <input type="email" name="email" class="form-input lang-input-ja" required placeholder="name@company.co.jp">
+                                <input type="email" name="email" class="form-input lang-input-en" required placeholder="name@company.com">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">お電話番号</span><span class="lang-en">Phone Number</span>
                                 </label>
-                                <input type="tel" name="phone" class="form-input" placeholder="03-0000-0000">
+                                <input type="tel" name="phone" class="form-input lang-input-ja" placeholder="03-0000-0000">
+                                <input type="tel" name="phone" class="form-input lang-input-en" placeholder="+81-3-0000-0000">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">ご相談分野・ご興味のある内容</span><span class="lang-en">Service of Interest</span>
                                 </label>
-                                <select name="service_interest" class="form-select">
-                                    <option value="介護人材の採用支援">特定技能（介護）人材の採用支援</option>
-                                    <option value="建設・その他特定技能">建設・その他分野の特定技能人材</option>
-                                    <option value="在留資格・ビザ手続き">在留資格（ビザ）手続きの相談</option>
-                                    <option value="入社後の生活・定着支援">入社後の生活・定着支援について</option>
-                                    <option value="その他">その他のお問い合わせ</option>
+                                <select name="service_interest" class="form-select lang-input-ja">
+                                    <option value="特定技能（介護）人材の採用支援">特定技能（介護）人材の採用支援</option>
+                                    <option value="建設・その他特定技能人材">建設・その他分野の特定技能人材</option>
+                                    <option value="在留資格（ビザ）手続きの相談">在留資格（ビザ）手続きの相談</option>
+                                    <option value="入社後の生活・定着支援について">入社後の生活・定着支援について</option>
+                                    <option value="その他のお問い合わせ">その他のお問い合わせ</option>
+                                </select>
+                                <select name="service_interest" class="form-select lang-input-en">
+                                    <option value="Nursing Care (SSW) Recruitment">Nursing Care (SSW) Recruitment</option>
+                                    <option value="Construction & Other SSW Fields">Construction & Other SSW Fields</option>
+                                    <option value="Visa & Legal Residence Processing">Visa & Legal Residence Processing</option>
+                                    <option value="Living & Workplace Retention Support">Living & Workplace Retention Support</option>
+                                    <option value="General Corporate Inquiry">General Corporate Inquiry</option>
                                 </select>
                             </div>
 
@@ -794,11 +827,12 @@
                                     <span class="lang-ja">ご相談内容・メッセージ</span><span class="lang-en">Inquiry Details</span>
                                     <span class="req">*</span>
                                 </label>
-                                <textarea name="message" class="form-textarea" required placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
+                                <textarea name="message" class="form-textarea lang-input-ja" required placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
+                                <textarea name="message" class="form-textarea lang-input-en" required placeholder="Please describe your requirements, planned headcount, target timeline, or job categories."></textarea>
                             </div>
 
                             <button type="submit" class="btn-submit-contact">
-                                <span class="lang-ja">送信する (Send Inquiry)</span>
+                                <span class="lang-ja">送信する</span>
                                 <span class="lang-en">Submit Inquiry</span>
                             </button>
                         </form>
@@ -824,7 +858,8 @@
                         <span class="lang-en"><%= company.tagline_en || 'Bridging Japanese Enterprises and Global Talent with Trust.' %></span>
                     </p>
                     <div class="footer-licence-badge">
-                        <%= company.license || '有料職業紹介事業許可：13-ユ-319558' %> | 法人番号: <%= company.corporate_number || '5012403006691' %>
+                        <span class="lang-ja"><%= company.license || '有料職業紹介事業許可：13-ユ-319558' %> | 法人番号: <%= company.corporate_number || '5012403006691' %></span>
+                        <span class="lang-en">MHLW License: 13-ユ-319558 | Corporate No: <%= company.corporate_number || '5012403006691' %></span>
                     </div>
                 </div>
 
@@ -855,10 +890,14 @@
 
             <div class="footer-bottom">
                 <div>
-                    &copy; <%= new Date().getFullYear() %> <%= company.name_ja || 'MIRANSH合同会社' %> (MIRANSH LLC). All Rights Reserved.
+                    <span class="lang-ja">&copy; <%= new Date().getFullYear() %> <%= company.name_ja || 'MIRANSH合同会社' %> 全著作権所有</span>
+                    <span class="lang-en">&copy; <%= new Date().getFullYear() %> <%= company.name_en || 'MIRANSH LLC' %>. All Rights Reserved.</span>
                 </div>
                 <div>
-                    <a href="/admin/login" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a>
+                    <a href="/admin/login" style="color: #64748B; font-size: 11px;">
+                        <span class="lang-ja">管理者ログイン</span>
+                        <span class="lang-en">Admin Login</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -867,7 +906,8 @@
     <!-- Admin Floating Launcher -->
     <a href="/admin" class="admin-float-btn" title="Admin Portal">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span>管理画面 (Admin)</span>
+        <span class="lang-ja">管理画面</span>
+        <span class="lang-en">Admin Portal</span>
     </a>
 
     <!-- Language Switching Engine Script -->

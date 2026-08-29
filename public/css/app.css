@@ -64,18 +64,7 @@ img {
    LANGUAGE SWITCHING (Bilingual Engine)
 =================================================== */
 .lang-en,
-.lang-ja {
-    display: none;
-}
-
-body.en .lang-en {
-    display: inline;
-}
-
-body.ja .lang-ja {
-    display: inline;
-}
-
+.lang-ja,
 div.lang-en,
 div.lang-ja,
 section.lang-en,
@@ -95,44 +84,90 @@ h4.lang-ja,
 ul.lang-en,
 ul.lang-ja,
 li.lang-en,
-li.lang-ja {
-    display: none;
+li.lang-ja,
+.lang-input-ja,
+.lang-input-en,
+.lang-flex-ja,
+.lang-flex-en {
+    display: none !important;
 }
 
-body.en div.lang-en,
-body.en section.lang-en,
-body.en p.lang-en,
-body.en span.lang-en,
-body.en h1.lang-en,
-body.en h2.lang-en,
-body.en h3.lang-en,
-body.en h4.lang-en,
-body.en ul.lang-en,
-body.en li.lang-en {
-    display: block;
+/* Japanese Mode */
+body.ja .lang-ja,
+body.ja span.lang-ja {
+    display: inline !important;
 }
 
 body.ja div.lang-ja,
 body.ja section.lang-ja,
 body.ja p.lang-ja,
-body.ja span.lang-ja,
 body.ja h1.lang-ja,
 body.ja h2.lang-ja,
 body.ja h3.lang-ja,
 body.ja h4.lang-ja,
 body.ja ul.lang-ja,
-body.ja li.lang-ja {
-    display: block;
+body.ja li.lang-ja,
+body.ja .lang-input-ja {
+    display: block !important;
 }
 
-body.en span.lang-en,
-body.ja span.lang-ja {
-    display: inline;
-}
-
-body.en .lang-flex-en,
 body.ja .lang-flex-ja {
-    display: flex;
+    display: flex !important;
+}
+
+body.ja .lang-en,
+body.ja div.lang-en,
+body.ja section.lang-en,
+body.ja p.lang-en,
+body.ja span.lang-en,
+body.ja h1.lang-en,
+body.ja h2.lang-en,
+body.ja h3.lang-en,
+body.ja h4.lang-en,
+body.ja ul.lang-en,
+body.ja li.lang-en,
+body.ja .lang-input-en,
+body.ja .lang-flex-en {
+    display: none !important;
+}
+
+/* English Mode */
+body.en .lang-en,
+body.en span.lang-en {
+    display: inline !important;
+}
+
+body.en div.lang-en,
+body.en section.lang-en,
+body.en p.lang-en,
+body.en h1.lang-en,
+body.en h2.lang-en,
+body.en h3.lang-en,
+body.en h4.lang-en,
+body.en ul.lang-en,
+body.en li.lang-en,
+body.en .lang-input-en {
+    display: block !important;
+}
+
+body.en .lang-flex-en {
+    display: flex !important;
+}
+
+body.en .lang-ja,
+body.en div.lang-ja,
+body.en section.lang-ja,
+body.en p.lang-ja,
+body.en span.lang-ja,
+body.en h1.lang-ja,
+body.en h2.lang-ja,
+body.en h3.lang-ja,
+body.en h4.lang-ja,
+body.en ul.lang-ja,
+body.en li.lang-ja,
+body.en .lang-input-ja,
+body.en .lang-flex-ja {
+    display: none !important;
 }
 
 /* ===================================================
