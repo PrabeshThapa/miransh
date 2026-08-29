@@ -1,8 +1,10 @@
 import express from 'express';
 import session from 'express-session';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import {
   initDatabase,
   getAllData,
@@ -32,11 +34,97 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// Ensure public/uploads directory exists for actual image uploads
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    const cleanBaseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e6);
+    cb(null, `${cleanBaseName || 'img'}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedExts = /jpeg|jpg|png|webp|gif|svg/;
+  const isExtAllowed = allowedExts.test(path.extname(file.originalname).toLowerCase());
+  const isMimeAllowed = allowedExts.test(file.mimetype) || file.mimetype.startsWith('image/');
+  if (isExtAllowed || isMimeAllowed) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files (JPG, PNG, WEBP, GIF, SVG) are allowed'));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 15 * 1024 * 1024 } // 15MB limit
+});
+
+// Helper to list all available media assets
+function getAvailableMedia() {
+  const mediaList = [];
+  const publicDir = path.join(__dirname, 'public');
+  
+  // 1. Preset images in /public/images
+  const imagesDir = path.join(publicDir, 'images');
+  if (fs.existsSync(imagesDir)) {
+    const files = fs.readdirSync(imagesDir);
+    files.forEach(f => {
+      if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(f)) {
+        mediaList.push({
+          url: `/images/${f}`,
+          name: f,
+          isUploaded: false,
+          size: 'Built-in',
+          category: 'プリセット (Preset)'
+        });
+      }
+    });
+  }
+
+  // 2. User uploaded images in /public/uploads
+  if (fs.existsSync(uploadsDir)) {
+    const uFiles = fs.readdirSync(uploadsDir);
+    uFiles.forEach(f => {
+      if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(f)) {
+        try {
+          const stat = fs.statSync(path.join(uploadsDir, f));
+          mediaList.push({
+            url: `/uploads/${f}`,
+            name: f,
+            isUploaded: true,
+            size: Math.round(stat.size / 1024) + ' KB',
+            createdAt: stat.mtime,
+            category: 'アップロード済 (Uploaded)'
+          });
+        } catch (e) {
+          // ignore stat errors
+        }
+      }
+    });
+  }
+
+  return mediaList;
+}
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Admin Session Middleware
@@ -188,6 +276,7 @@ app.get('/admin/logout', (req, res) => {
 app.get('/admin', requireAdmin, async (req, res) => {
   try {
     const data = await getAllData();
+    const mediaList = getAvailableMedia();
     const message = req.session.flashMessage || null;
     req.session.flashMessage = null;
     res.render('admin/dashboard', {
@@ -197,6 +286,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
       stories: data.stories,
       inquiries: data.inquiries,
       dbStatus: data.dbStatus,
+      mediaList,
       message
     });
   } catch (err) {
@@ -205,21 +295,97 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-// 7. Admin Update Company Info & Photos
-app.post('/admin/company', requireAdmin, async (req, res) => {
+// 6.1 Admin Direct AJAX Image Upload Endpoint
+app.post('/admin/upload-image', requireAdmin, (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('Upload Error:', err);
+      return res.status(400).json({ success: false, error: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file received' });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    return res.json({
+      success: true,
+      url: imageUrl,
+      filename: req.file.filename,
+      size: `${Math.round(req.file.size / 1024)} KB`
+    });
+  });
+});
+
+// 6.2 Admin Media API
+app.get('/admin/api/media', requireAdmin, (req, res) => {
   try {
-    await updateCompanyInfo(req.body);
-    req.session.flashMessage = {
-      type: 'success',
-      text: 'Company Profile & Executive Media updated successfully!'
-    };
+    const media = getAvailableMedia();
+    res.json({ success: true, media });
   } catch (err) {
-    req.session.flashMessage = {
-      type: 'error',
-      text: 'Failed to update company info: ' + err.message
-    };
+    res.status(500).json({ success: false, error: err.message });
   }
-  res.redirect('/admin#company-tab');
+});
+
+app.post('/admin/api/media/delete', requireAdmin, (req, res) => {
+  try {
+    const { filename } = req.body;
+    if (!filename || filename.includes('..') || filename.includes('/')) {
+      return res.status(400).json({ success: false, error: 'Invalid filename' });
+    }
+    const targetPath = path.join(uploadsDir, filename);
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+      return res.json({ success: true, message: 'Image deleted successfully' });
+    }
+    return res.status(404).json({ success: false, error: 'File not found' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7. Admin Update Company Info & Photos
+app.post('/admin/company', requireAdmin, (req, res) => {
+  const uploadFields = upload.fields([
+    { name: 'ceo_image_file', maxCount: 1 },
+    { name: 'hero_image_file', maxCount: 1 }
+  ]);
+
+  uploadFields(req, res, async (err) => {
+    if (err) {
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Image upload failed: ' + err.message
+      };
+      return res.redirect('/admin#company-tab');
+    }
+
+    try {
+      const payload = { ...req.body };
+
+      // If a new CEO image was uploaded via file input
+      if (req.files && req.files.ceo_image_file && req.files.ceo_image_file[0]) {
+        payload.ceo_image = `/uploads/${req.files.ceo_image_file[0].filename}`;
+      }
+
+      // If a new Hero banner was uploaded via file input
+      if (req.files && req.files.hero_image_file && req.files.hero_image_file[0]) {
+        payload.hero_image = `/uploads/${req.files.hero_image_file[0].filename}`;
+      }
+
+      await updateCompanyInfo(payload);
+      req.session.flashMessage = {
+        type: 'success',
+        text: '会社情報・写真・ヒーロー設定を更新しました。(Company Profile & Images Saved!)'
+      };
+    } catch (dbErr) {
+      console.error('Error updating company:', dbErr);
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Failed to update company info: ' + dbErr.message
+      };
+    }
+    res.redirect('/admin#company-tab');
+  });
 });
 
 // 8. Admin Update About
@@ -318,37 +484,69 @@ app.post('/admin/services/:id/delete', requireAdmin, async (req, res) => {
   res.redirect('/admin#services-tab');
 });
 
-// 10. Admin Stories CRUD
-app.post('/admin/stories', requireAdmin, async (req, res) => {
-  try {
-    await addStory(req.body);
-    req.session.flashMessage = {
-      type: 'success',
-      text: 'New Story / Case Study published successfully!'
-    };
-  } catch (err) {
-    req.session.flashMessage = {
-      type: 'error',
-      text: 'Failed to create story: ' + err.message
-    };
-  }
-  res.redirect('/admin#stories-tab');
+// 10. Admin Stories CRUD (with image file upload support)
+app.post('/admin/stories', requireAdmin, (req, res) => {
+  upload.single('image_file')(req, res, async (err) => {
+    if (err) {
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Image upload failed: ' + err.message
+      };
+      return res.redirect('/admin#stories-tab');
+    }
+
+    try {
+      const payload = { ...req.body };
+      if (req.file) {
+        payload.image = `/uploads/${req.file.filename}`;
+      }
+
+      await addStory(payload);
+      req.session.flashMessage = {
+        type: 'success',
+        text: '採用事例・ニュースを投稿しました。(Story Published!)'
+      };
+    } catch (dbErr) {
+      console.error('Error creating story:', dbErr);
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Failed to create story: ' + dbErr.message
+      };
+    }
+    res.redirect('/admin#stories-tab');
+  });
 });
 
-app.post('/admin/stories/:id', requireAdmin, async (req, res) => {
-  try {
-    await updateStory(req.params.id, req.body);
-    req.session.flashMessage = {
-      type: 'success',
-      text: 'Story updated successfully!'
-    };
-  } catch (err) {
-    req.session.flashMessage = {
-      type: 'error',
-      text: 'Failed to update story: ' + err.message
-    };
-  }
-  res.redirect('/admin#stories-tab');
+app.post('/admin/stories/:id', requireAdmin, (req, res) => {
+  upload.single('image_file')(req, res, async (err) => {
+    if (err) {
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Image upload failed: ' + err.message
+      };
+      return res.redirect('/admin#stories-tab');
+    }
+
+    try {
+      const payload = { ...req.body };
+      if (req.file) {
+        payload.image = `/uploads/${req.file.filename}`;
+      }
+
+      await updateStory(req.params.id, payload);
+      req.session.flashMessage = {
+        type: 'success',
+        text: '記事を更新しました。(Story updated!)'
+      };
+    } catch (dbErr) {
+      console.error('Error updating story:', dbErr);
+      req.session.flashMessage = {
+        type: 'error',
+        text: 'Failed to update story: ' + dbErr.message
+      };
+    }
+    res.redirect('/admin#stories-tab');
+  });
 });
 
 app.post('/admin/stories/:id/delete', requireAdmin, async (req, res) => {

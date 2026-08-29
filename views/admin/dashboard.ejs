@@ -19,6 +19,10 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
         .sidebar-brand {
             display: flex;
@@ -59,6 +63,7 @@
         .admin-main {
             padding: 32px 40px;
             overflow-y: auto;
+            max-width: 1300px;
         }
         .admin-topbar {
             display: flex;
@@ -78,6 +83,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .admin-sidebar { height: auto; position: static; }
+            .form-grid-2 { grid-template-columns: 1fr; }
         }
         .tab-pane {
             display: none;
@@ -113,6 +123,189 @@
             background: #EFF6FF;
             color: #1D4ED8;
         }
+
+        /* Rich Image Uploader & Live Preview Styles */
+        .image-uploader-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .image-uploader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .image-preview-flex {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        @media (max-width: 640px) {
+            .image-preview-flex { flex-direction: column; }
+        }
+        .image-preview-box {
+            position: relative;
+            background: #0B1C38;
+            border: 2px solid #CBD5E1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .image-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+        .image-preview-box:hover img {
+            transform: scale(1.03);
+        }
+        .image-preview-box .preview-zoom-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+        .image-dropzone {
+            flex-grow: 1;
+            border: 2px dashed #94A3B8;
+            border-radius: 10px;
+            padding: 24px;
+            text-align: center;
+            background: #FFFFFF;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 160px;
+        }
+        .image-dropzone:hover,
+        .image-dropzone.dragover {
+            border-color: #2563EB;
+            background: #EFF6FF;
+        }
+        .upload-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-upload-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            color: #334155;
+        }
+        .btn-upload-action:hover {
+            background: #F1F5F9;
+            border-color: #94A3B8;
+        }
+        .btn-upload-primary {
+            background: #2563EB;
+            color: #FFFFFF;
+            border-color: #1D4ED8;
+        }
+        .btn-upload-primary:hover {
+            background: #1D4ED8;
+        }
+        .upload-status-text {
+            font-size: 12px;
+            margin-top: 6px;
+            color: #64748B;
+            word-break: break-all;
+        }
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .media-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .media-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1);
+        }
+        .media-card-thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #0B1C38;
+            cursor: pointer;
+        }
+        .media-card-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+        .media-card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1E293B;
+            word-break: break-all;
+            line-height: 1.3;
+        }
+        .media-card-meta {
+            font-size: 11px;
+            color: #64748B;
+        }
+        .media-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: auto;
+            padding-top: 8px;
+            border-top: 1px solid #F1F5F9;
+        }
+        .media-card-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+            background: #F8FAFC;
+            color: #334155;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .media-card-btn:hover {
+            background: #E2E8F0;
+        }
     </style>
 </head>
 <body>
@@ -133,6 +326,7 @@
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('about', this)">📖 About (会社紹介)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('services', this)">💼 事業内容 (Services)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this)">📰 採用事例 (Stories)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('media', this)">📸 メディア管理 (Media Library)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this)">📬 お問い合わせ (<%= inquiries ? inquiries.length : 0 %>)</button></li>
             </ul>
 
@@ -156,20 +350,96 @@
             </div>
 
             <% if (message) { %>
-            <div style="background: <%= message.type === 'success' ? '#ECFDF5' : '#FEF2F2' %>; border: 1px solid <%= message.type === 'success' ? '#10B981' : '#EF4444' %>; color: <%= message.type === 'success' ? '#065F46' : '#991B1B' %>; padding: 14px 20px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; font-size: 14px;">
-                <%= message.text %>
+            <div style="background: <%= message.type === 'success' ? '#ECFDF5' : '#FEF2F2' %>; border: 1px solid <%= message.type === 'success' ? '#10B981' : '#EF4444' %>; color: <%= message.type === 'success' ? '#065F46' : '#991B1B' %>; padding: 14px 20px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px;">
+                <span><%= message.type === 'success' ? '✅' : '⚠️' %></span>
+                <span><%= message.text %></span>
             </div>
             <% } %>
 
-            <!-- TAB 1: COMPANY INFO & CEO PICTURE -->
+            <!-- ===================================================
+                 TAB 1: COMPANY INFO & CEO PICTURE
+            =================================================== -->
             <div id="pane-company" class="tab-pane active">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
                         会社基本情報・代表写真・ヒーロー設定
                     </h2>
 
-                    <form action="/admin/company" method="POST">
-                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）写真・代表メッセージ</h3>
+                    <form action="/admin/company" method="POST" enctype="multipart/form-data">
+                        
+                        <!-- 1. CEO Portrait & Live Image Upload -->
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px; display: flex; align-items: center; gap: 8px;">
+                            <span>1. 代表者（CEO）写真・代表メッセージ</span>
+                        </h3>
+
+                        <div class="image-uploader-card">
+                            <div class="image-uploader-header">
+                                <label class="form-label" style="margin: 0; font-weight: 700; color: #1E293B;">
+                                    📷 代表者 顔写真 (CEO Portrait Photo)
+                                </label>
+                                <span style="font-size: 12px; color: #64748B;">推奨: 正方形または縦長 (JPG, PNG, WEBP)</span>
+                            </div>
+
+                            <div class="image-preview-flex">
+                                <!-- Actual Live Image Preview -->
+                                <div class="image-preview-box" style="width: 150px; height: 180px;">
+                                    <img id="ceo_preview_img" 
+                                         src="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>" 
+                                         alt="CEO Preview"
+                                         onerror="this.src='/images/ceo_portrait.jpg'">
+                                    <button type="button" class="preview-zoom-btn" onclick="openImageLightbox(document.getElementById('ceo_preview_img').src)">🔍 拡大</button>
+                                </div>
+
+                                <!-- Upload Controls & Dropzone -->
+                                <div style="flex-grow: 1;">
+                                    <div class="image-dropzone" 
+                                         id="ceo_dropzone"
+                                         onclick="document.getElementById('ceo_file_input').click()">
+                                        <div style="font-size: 32px; margin-bottom: 8px;">📤</div>
+                                        <div style="font-weight: 700; color: #1E293B; font-size: 14px;">クリックまたは写真をここにドラッグ＆ドロップ</div>
+                                        <div style="font-size: 12px; color: #64748B; margin-top: 4px;">お使いのパソコンから実際の写真ファイルを選択してアップロードできます</div>
+                                    </div>
+
+                                    <input type="file" 
+                                           id="ceo_file_input" 
+                                           name="ceo_image_file" 
+                                           accept="image/*" 
+                                           style="display: none;"
+                                           onchange="handleImageFileSelect(this, 'ceo_preview_img', 'ceo_image_url_input', 'ceo_upload_status')">
+
+                                    <input type="hidden" 
+                                           name="ceo_image" 
+                                           id="ceo_image_url_input" 
+                                           value="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>">
+
+                                    <div class="upload-controls">
+                                        <button type="button" class="btn-upload-action btn-upload-primary" onclick="document.getElementById('ceo_file_input').click()">
+                                            📁 写真ファイルを選択
+                                        </button>
+                                        <button type="button" class="btn-upload-action" onclick="openMediaSelectorModal('ceo_image_url_input', 'ceo_preview_img', 'ceo_upload_status')">
+                                            🖼️ プリセット・メディア一覧から選択
+                                        </button>
+                                        <button type="button" class="btn-upload-action" onclick="toggleManualUrlInput('ceo_manual_url_row')">
+                                            🔗 URL直接入力
+                                        </button>
+                                    </div>
+
+                                    <div id="ceo_upload_status" class="upload-status-text">
+                                        現在設定中: <code><%= company.ceo_image || '/images/ceo_portrait.jpg' %></code>
+                                    </div>
+
+                                    <!-- Collapsible manual URL input -->
+                                    <div id="ceo_manual_url_row" style="display: none; margin-top: 12px;">
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="https://... または /images/..." 
+                                               value="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>"
+                                               oninput="updatePreviewFromText(this.value, 'ceo_preview_img', 'ceo_image_url_input', 'ceo_upload_status')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">代表者 役職 (日本語)</label>
@@ -187,9 +457,8 @@
                                 <input type="text" name="ceo_name" class="form-input" value="<%= company.ceo_name || 'ギリ ラム クリシュナ (Giri Ram Krishna)' %>">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">代表者 顔写真 画像URL</label>
-                                <input type="text" name="ceo_image" class="form-input" value="<%= company.ceo_image || '/images/ceo_portrait.jpg' %>">
-                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/ceo_portrait.jpg</code></div>
+                                <label class="form-label">許認可番号バッジ表示</label>
+                                <input type="text" name="license" class="form-input" value="<%= company.license || '有料職業紹介事業許可：13-ユ-319558' %>">
                             </div>
                         </div>
 
@@ -204,15 +473,73 @@
                             </div>
                         </div>
 
-                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">2. ヒーローバナー（トップ大画面）</h3>
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">トップバナー画像URL</label>
-                                <input type="text" name="hero_image" class="form-input" value="<%= company.hero_image || '/images/hero_banner.jpg' %>">
+                        <!-- 2. Hero Banner & Live Image Upload -->
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px;">2. ヒーローバナー（トップ大画面）</h3>
+
+                        <div class="image-uploader-card">
+                            <div class="image-uploader-header">
+                                <label class="form-label" style="margin: 0; font-weight: 700; color: #1E293B;">
+                                    🌄 トップページ ヒーロー背景写真 (Hero Banner Background)
+                                </label>
+                                <span style="font-size: 12px; color: #64748B;">推奨: 横長 1920x800px 程度 (JPG, PNG, WEBP)</span>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">許認可番号バッジ表示</label>
-                                <input type="text" name="license" class="form-input" value="<%= company.license || '有料職業紹介事業許可：13-ユ-319558' %>">
+
+                            <div class="image-preview-flex">
+                                <!-- Actual Live Banner Preview -->
+                                <div class="image-preview-box" style="width: 260px; height: 140px; background: #0F172A;">
+                                    <img id="hero_preview_img" 
+                                         src="<%= company.hero_image || '/images/hero_banner.jpg' %>" 
+                                         alt="Hero Banner Preview"
+                                         onerror="this.src='/images/hero_banner.jpg'">
+                                    <button type="button" class="preview-zoom-btn" onclick="openImageLightbox(document.getElementById('hero_preview_img').src)">🔍 拡大</button>
+                                </div>
+
+                                <!-- Upload Controls & Dropzone -->
+                                <div style="flex-grow: 1;">
+                                    <div class="image-dropzone" 
+                                         id="hero_dropzone"
+                                         onclick="document.getElementById('hero_file_input').click()">
+                                        <div style="font-size: 28px; margin-bottom: 6px;">🌄</div>
+                                        <div style="font-weight: 700; color: #1E293B; font-size: 14px;">バナー写真をここにドラッグ＆ドロップ</div>
+                                        <div style="font-size: 12px; color: #64748B; margin-top: 4px;">トップ画面のメインビジュアルを変更できます</div>
+                                    </div>
+
+                                    <input type="file" 
+                                           id="hero_file_input" 
+                                           name="hero_image_file" 
+                                           accept="image/*" 
+                                           style="display: none;"
+                                           onchange="handleImageFileSelect(this, 'hero_preview_img', 'hero_image_url_input', 'hero_upload_status')">
+
+                                    <input type="hidden" 
+                                           name="hero_image" 
+                                           id="hero_image_url_input" 
+                                           value="<%= company.hero_image || '/images/hero_banner.jpg' %>">
+
+                                    <div class="upload-controls">
+                                        <button type="button" class="btn-upload-action btn-upload-primary" onclick="document.getElementById('hero_file_input').click()">
+                                            📁 バナー写真ファイルを選択
+                                        </button>
+                                        <button type="button" class="btn-upload-action" onclick="openMediaSelectorModal('hero_image_url_input', 'hero_preview_img', 'hero_upload_status')">
+                                            🖼️ プリセット・メディア一覧から選択
+                                        </button>
+                                        <button type="button" class="btn-upload-action" onclick="toggleManualUrlInput('hero_manual_url_row')">
+                                            🔗 URL直接入力
+                                        </button>
+                                    </div>
+
+                                    <div id="hero_upload_status" class="upload-status-text">
+                                        現在設定中: <code><%= company.hero_image || '/images/hero_banner.jpg' %></code>
+                                    </div>
+
+                                    <div id="hero_manual_url_row" style="display: none; margin-top: 12px;">
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="https://... または /images/..." 
+                                               value="<%= company.hero_image || '/images/hero_banner.jpg' %>"
+                                               oninput="updatePreviewFromText(this.value, 'hero_preview_img', 'hero_image_url_input', 'hero_upload_status')">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -227,7 +554,7 @@
                             </div>
                         </div>
 
-                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">3. 会社概要・登記情報</h3>
+                        <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px;">3. 会社概要・登記情報</h3>
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">会社名 (日本語)</label>
@@ -273,13 +600,15 @@
                         </div>
 
                         <div style="margin-top: 24px;">
-                            <button type="submit" class="btn-primary">保存して反映する (Save Changes)</button>
+                            <button type="submit" class="btn-primary" style="padding: 12px 28px; font-size: 15px;">💾 変更を保存して反映する (Save All Changes)</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- TAB 2: ABOUT US -->
+            <!-- ===================================================
+                 TAB 2: ABOUT US
+            =================================================== -->
             <div id="pane-about" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
@@ -338,7 +667,9 @@
                 </div>
             </div>
 
-            <!-- TAB 3: SERVICES -->
+            <!-- ===================================================
+                 TAB 3: SERVICES
+            =================================================== -->
             <div id="pane-services" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
@@ -372,7 +703,7 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <button type="button" onclick="editServiceModal(<%= JSON.stringify(s) %>)" class="btn-outline-white" style="color: #0F172A; border-color: #CBD5E1; padding: 6px 12px; font-size: 12px;">
+                                    <button type="button" onclick="editServiceModal(<%= JSON.stringify(s) %>)" class="btn-outline-white" style="color: #0F172A; border-color: #CBD5E1; padding: 6px 12px; font-size: 12px; cursor: pointer;">
                                         編集
                                     </button>
                                 </td>
@@ -444,7 +775,9 @@
                 </div>
             </div>
 
-            <!-- TAB 4: STORIES -->
+            <!-- ===================================================
+                 TAB 4: STORIES & CASE STUDIES
+            =================================================== -->
             <div id="pane-stories" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
@@ -454,38 +787,106 @@
                     <table class="table-custom" style="margin-bottom: 32px;">
                         <thead>
                             <tr>
-                                <th>画像</th>
+                                <th>アイキャッチ</th>
                                 <th>カテゴリ</th>
                                 <th>タイトル (日本語)</th>
                                 <th>日付</th>
-                                <th>詳細</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% stories.forEach(function(st) { %>
                             <tr>
-                                <td style="width: 70px;">
-                                    <img src="<%= st.image %>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                <td style="width: 80px;">
+                                    <img src="<%= st.image || '/images/story1.jpg' %>" 
+                                         alt="<%= st.title_ja %>" 
+                                         style="width: 70px; height: 48px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #CBD5E1;"
+                                         onclick="openImageLightbox('<%= st.image || '/images/story1.jpg' %>')">
                                 </td>
                                 <td><span class="badge-status"><%= st.category_ja %></span></td>
                                 <td>
                                     <strong><%= st.title_ja %></strong><br>
                                     <span style="font-size: 12px; color: #64748B;"><%= st.title_en %></span>
                                 </td>
-                                <td style="font-size: 12px; color: #64748B;"><%= st.published_date %></td>
+                                <td style="font-size: 12px; color: #64748B; white-space: nowrap;"><%= st.published_date %></td>
                                 <td>
-                                    <a href="/stories/<%= st.id %>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 13px;">
-                                        ↗ 記事確認
-                                    </a>
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <a href="/stories/<%= st.id %>" target="_blank" style="color: #2563EB; font-weight: 700; font-size: 12px;">
+                                            ↗ 確認
+                                        </a>
+                                        <button type="button" onclick="openStoryEditModal(<%= JSON.stringify(st) %>)" class="media-card-btn" style="color: #0F172A;">
+                                            ✏️ 編集
+                                        </button>
+                                        <form action="/admin/stories/<%= st.id %>/delete" method="POST" onsubmit="return confirm('本当にこの記事を削除しますか？');" style="display: inline;">
+                                            <button type="submit" class="media-card-btn" style="color: #EF4444; border-color: #FCA5A5;">
+                                                🗑️ 削除
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <% }); %>
                         </tbody>
                     </table>
 
-                    <!-- Add Story Form -->
+                    <!-- Add Story Form with Live Image Uploader -->
                     <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">➕ 新規事例・記事の投稿</h3>
-                    <form action="/admin/stories" method="POST">
+                    <form action="/admin/stories" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="image-uploader-card">
+                            <div class="image-uploader-header">
+                                <label class="form-label" style="margin: 0; font-weight: 700; color: #1E293B;">
+                                    📰 記事アイキャッチ画像 (Story Cover Image)
+                                </label>
+                                <span style="font-size: 12px; color: #64748B;">実際の写真を選択またはアップロードできます</span>
+                            </div>
+
+                            <div class="image-preview-flex">
+                                <div class="image-preview-box" style="width: 180px; height: 120px;">
+                                    <img id="new_story_preview_img" 
+                                         src="/images/story1.jpg" 
+                                         alt="Story Preview">
+                                    <button type="button" class="preview-zoom-btn" onclick="openImageLightbox(document.getElementById('new_story_preview_img').src)">🔍 拡大</button>
+                                </div>
+
+                                <div style="flex-grow: 1;">
+                                    <div class="image-dropzone" 
+                                         id="new_story_dropzone"
+                                         style="min-height: 120px; padding: 16px;"
+                                         onclick="document.getElementById('new_story_file_input').click()">
+                                        <div style="font-size: 24px; margin-bottom: 4px;">📸</div>
+                                        <div style="font-weight: 700; color: #1E293B; font-size: 13px;">アイキャッチ画像をアップロード</div>
+                                        <div style="font-size: 11px; color: #64748B;">ファイルを選択またはドラッグ＆ドロップ</div>
+                                    </div>
+
+                                    <input type="file" 
+                                           id="new_story_file_input" 
+                                           name="image_file" 
+                                           accept="image/*" 
+                                           style="display: none;"
+                                           onchange="handleImageFileSelect(this, 'new_story_preview_img', 'new_story_image_url_input', 'new_story_upload_status')">
+
+                                    <input type="hidden" 
+                                           name="image" 
+                                           id="new_story_image_url_input" 
+                                           value="/images/story1.jpg">
+
+                                    <div class="upload-controls">
+                                        <button type="button" class="btn-upload-action btn-upload-primary" onclick="document.getElementById('new_story_file_input').click()">
+                                            📁 写真を選択
+                                        </button>
+                                        <button type="button" class="btn-upload-action" onclick="openMediaSelectorModal('new_story_image_url_input', 'new_story_preview_img', 'new_story_upload_status')">
+                                            🖼️ メディア一覧から選択
+                                        </button>
+                                    </div>
+
+                                    <div id="new_story_upload_status" class="upload-status-text">
+                                        現在設定中: <code>/images/story1.jpg</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">カテゴリ (日本語)</label>
@@ -530,23 +931,99 @@
                             </div>
                         </div>
 
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">アイキャッチ画像URL</label>
-                                <input type="text" name="image" class="form-input" value="/images/story1.jpg">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" name="published_date" class="form-input" value="<%= new Date().toISOString().slice(0,10).replace(/-/g, '.') %>">
-                            </div>
+                        <div class="form-group" style="max-width: 300px;">
+                            <label class="form-label">公開日</label>
+                            <input type="text" name="published_date" class="form-input" value="<%= new Date().toISOString().slice(0,10).replace(/-/g, '.') %>">
                         </div>
 
-                        <button type="submit" class="btn-primary">記事を公開 (Publish Story)</button>
+                        <button type="submit" class="btn-primary" style="margin-top: 16px;">記事を公開 (Publish Story)</button>
                     </form>
                 </div>
             </div>
 
-            <!-- TAB 5: INQUIRIES -->
+            <!-- ===================================================
+                 TAB 5: MEDIA LIBRARY & DIRECT FILE UPLOADER
+            =================================================== -->
+            <div id="pane-media" class="tab-pane">
+                <div class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
+                                📸 メディアギャラリー・画像アップロード管理
+                            </h2>
+                            <p style="font-size: 13px; color: #64748B; margin-top: 4px;">
+                                サーバー上の画像資産を一覧プレビュー、新規アップロード、ワンクリックでの反映が可能です。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Direct Drag & Drop Upload Zone -->
+                    <div class="image-dropzone" 
+                         id="global_media_dropzone"
+                         style="background: #F8FAFC; border: 2px dashed #3B82F6; padding: 36px; margin-bottom: 28px;"
+                         onclick="document.getElementById('global_media_file_input').click()">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📤</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #1E293B;">ここをクリックまたは画像ファイルをドラッグ＆ドロップしてアップロード</div>
+                        <div style="font-size: 13px; color: #64748B; margin-top: 6px;">PNG, JPG, JPEG, WEBP, GIF, SVG に対応（最大15MB）</div>
+                        <input type="file" 
+                               id="global_media_file_input" 
+                               accept="image/*" 
+                               multiple 
+                               style="display: none;"
+                               onchange="handleGlobalMediaUpload(this)">
+                        <div id="global_upload_progress" style="margin-top: 12px; font-size: 13px; font-weight: 700; color: #2563EB; display: none;">
+                            ⏳ 画像をアップロード中...
+                        </div>
+                    </div>
+
+                    <!-- Media Grid -->
+                    <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 16px;">
+                        登録中メディア一覧 (<%= mediaList ? mediaList.length : 0 %>件)
+                    </h3>
+
+                    <div class="media-grid" id="mediaGalleryContainer">
+                        <% if (mediaList && mediaList.length > 0) { %>
+                            <% mediaList.forEach(function(m) { %>
+                            <div class="media-card" id="media-card-<%= m.name.replace(/[^a-zA-Z0-9_-]/g, '_') %>">
+                                <img src="<%= m.url %>" 
+                                     alt="<%= m.name %>" 
+                                     class="media-card-thumb"
+                                     onclick="openImageLightbox('<%= m.url %>')">
+                                <div class="media-card-body">
+                                    <div class="media-card-title" title="<%= m.name %>"><%= m.name %></div>
+                                    <div class="media-card-meta">
+                                        <span><%= m.category %></span>
+                                        <% if (m.size) { %> • <span><%= m.size %></span><% } %>
+                                    </div>
+                                    <div class="media-card-actions">
+                                        <button type="button" class="media-card-btn" onclick="copyToClipboard('<%= m.url %>')">
+                                            📋 URLコピー
+                                        </button>
+                                        <button type="button" class="media-card-btn" onclick="quickApplyImage('<%= m.url %>', 'ceo')">
+                                            👤 CEO写真に設定
+                                        </button>
+                                        <button type="button" class="media-card-btn" onclick="quickApplyImage('<%= m.url %>', 'hero')">
+                                            🌄 ヒーローに設定
+                                        </button>
+                                        <% if (m.isUploaded) { %>
+                                        <button type="button" class="media-card-btn" style="color: #EF4444;" onclick="deleteUploadedMedia('<%= m.name %>')">
+                                            🗑️
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p style="color: #64748B; padding: 20px;">画像がまだありません。</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================================================
+                 TAB 6: INQUIRIES
+            =================================================== -->
             <div id="pane-inquiries" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
@@ -594,7 +1071,9 @@
         </main>
     </div>
 
-    <!-- Edit Service Modal -->
+    <!-- ===================================================
+         MODAL 1: Edit Service Modal
+    =================================================== -->
     <div id="serviceEditModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
         <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -630,7 +1109,155 @@
         </div>
     </div>
 
+    <!-- ===================================================
+         MODAL 2: Edit Story Modal (with Live Image Uploader)
+    =================================================== -->
+    <div id="storyEditModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;">記事・採用事例の編集</h3>
+                <button type="button" onclick="closeStoryModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+            <form id="storyEditForm" method="POST" enctype="multipart/form-data">
+                
+                <div class="image-uploader-card">
+                    <div class="image-preview-flex">
+                        <div class="image-preview-box" style="width: 160px; height: 110px;">
+                            <img id="edit_story_preview_img" src="/images/story1.jpg" alt="Edit Story Preview">
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <label class="form-label" style="font-weight: 700;">アイキャッチ写真の変更</label>
+                            <input type="file" 
+                                   id="edit_story_file_input" 
+                                   name="image_file" 
+                                   accept="image/*" 
+                                   style="display: none;"
+                                   onchange="handleImageFileSelect(this, 'edit_story_preview_img', 'edit_story_image_input', 'edit_story_status')">
+                            
+                            <input type="hidden" name="image" id="edit_story_image_input">
+                            
+                            <div class="upload-controls">
+                                <button type="button" class="btn-upload-action btn-upload-primary" onclick="document.getElementById('edit_story_file_input').click()">
+                                    📁 写真を変更
+                                </button>
+                                <button type="button" class="btn-upload-action" onclick="openMediaSelectorModal('edit_story_image_input', 'edit_story_preview_img', 'edit_story_status')">
+                                    🖼️ ギャラリーから選択
+                                </button>
+                            </div>
+                            <div id="edit_story_status" class="upload-status-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">カテゴリ (日本語)</label>
+                        <input type="text" name="category_ja" id="edit_story_cat_ja" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">カテゴリ (英語)</label>
+                        <input type="text" name="category_en" id="edit_story_cat_en" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">タイトル (日本語)</label>
+                        <input type="text" name="title_ja" id="edit_story_title_ja" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">タイトル (英語)</label>
+                        <input type="text" name="title_en" id="edit_story_title_en" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">概要要約 (日本語)</label>
+                        <textarea name="summary_ja" id="edit_story_sum_ja" class="form-textarea" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">概要要約 (英語)</label>
+                        <textarea name="summary_en" id="edit_story_sum_en" class="form-textarea" rows="2" required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">記事本文 (日本語)</label>
+                        <textarea name="content_ja" id="edit_story_content_ja" class="form-textarea" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">記事本文 (英語)</label>
+                        <textarea name="content_en" id="edit_story_content_en" class="form-textarea" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group" style="max-width: 260px;">
+                    <label class="form-label">公開日</label>
+                    <input type="text" name="published_date" id="edit_story_date" class="form-input">
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                    <button type="submit" class="btn-primary">記事の変更を保存</button>
+                    <button type="button" onclick="closeStoryModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         MODAL 3: Media Selector Modal (Choose from Gallery)
+    =================================================== -->
+    <div id="mediaSelectorModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 28px; max-width: 860px; width: 100%; max-height: 85vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 800; color: #0F172A;">🖼️ メディア一覧から画像を選択</h3>
+                    <p style="font-size: 12px; color: #64748B;">使用したい画像をクリックすると即座に反映されます。</p>
+                </div>
+                <button type="button" onclick="closeMediaSelectorModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+
+            <div class="media-grid" id="modalMediaGrid">
+                <% if (mediaList && mediaList.length > 0) { %>
+                    <% mediaList.forEach(function(m) { %>
+                    <div class="media-card" style="cursor: pointer;" onclick="selectImageForTarget('<%= m.url %>')">
+                        <img src="<%= m.url %>" alt="<%= m.name %>" class="media-card-thumb">
+                        <div class="media-card-body" style="padding: 10px;">
+                            <div class="media-card-title"><%= m.name %></div>
+                            <div class="media-card-meta"><%= m.category %></div>
+                            <button type="button" class="btn-upload-primary" style="font-size: 11px; padding: 4px 8px; border-radius: 4px; margin-top: 6px; width: 100%;">
+                                この画像を選択
+                            </button>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         MODAL 4: Full Size Image Lightbox
+    =================================================== -->
+    <div id="imageLightboxModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 20px;" onclick="closeImageLightbox()">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+            <img id="lightboxImg" src="" alt="Full view" style="max-width: 100%; max-height: 85vh; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain;">
+            <div style="text-align: center; color: #FFFFFF; font-size: 13px; margin-top: 8px;">クリックして閉じる (Click to close)</div>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         CLIENT-SIDE SCRIPTS FOR TAB NAVIGATION & UPLOADS
+    =================================================== -->
     <script>
+        // State for media picker modal
+        let activeTargetInputId = null;
+        let activeTargetPreviewId = null;
+        let activeTargetStatusId = null;
+
+        // 1. Admin Tab Navigation
         function switchAdminTab(tabName, btnElement) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-item-btn').forEach(el => el.classList.remove('active'));
@@ -642,6 +1269,225 @@
             window.location.hash = tabName;
         }
 
+        // 2. Real-time Client-Side File Selection & Instant AJAX Upload
+        async function handleImageFileSelect(fileInput, previewImgId, hiddenInputId, statusElemId) {
+            if (!fileInput.files || fileInput.files.length === 0) return;
+            const file = fileInput.files[0];
+
+            // 1) Instant local preview via Object URL
+            const previewEl = document.getElementById(previewImgId);
+            if (previewEl) {
+                previewEl.src = URL.createObjectURL(file);
+            }
+
+            const statusEl = document.getElementById(statusElemId);
+            if (statusEl) {
+                statusEl.innerHTML = `⏳ <strong>${file.name}</strong> (${Math.round(file.size / 1024)} KB) をサーバーにアップロード中...`;
+                statusEl.style.color = '#2563EB';
+            }
+
+            // 2) Asynchronous server upload for immediate persistence
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const res = await fetch('/admin/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    const hiddenInput = document.getElementById(hiddenInputId);
+                    if (hiddenInput) {
+                        hiddenInput.value = data.url;
+                    }
+                    if (statusEl) {
+                        statusEl.innerHTML = `✅ <strong>実ファイルアップロード完了:</strong> <code>${data.url}</code>`;
+                        statusEl.style.color = '#059669';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.innerHTML = `⚠️ アップロード注意: ${data.error || '通常フォーム送信時に保存されます'}`;
+                        statusEl.style.color = '#D97706';
+                    }
+                }
+            } catch (err) {
+                console.error('AJAX Upload error:', err);
+                if (statusEl) {
+                    statusEl.innerHTML = `ℹ️ 選択中: <strong>${file.name}</strong> (フォーム保存時に反映されます)`;
+                    statusEl.style.color = '#334155';
+                }
+            }
+        }
+
+        // 3. Update preview from manual text input
+        function updatePreviewFromText(url, previewImgId, hiddenInputId, statusElemId) {
+            if (!url) return;
+            const previewEl = document.getElementById(previewImgId);
+            if (previewEl) {
+                previewEl.src = url;
+            }
+            const hiddenInput = document.getElementById(hiddenInputId);
+            if (hiddenInput) {
+                hiddenInput.value = url;
+            }
+            const statusEl = document.getElementById(statusElemId);
+            if (statusEl) {
+                statusEl.innerHTML = `URL指定: <code>${url}</code>`;
+            }
+        }
+
+        // 4. Toggle manual URL field
+        function toggleManualUrlInput(rowId) {
+            const el = document.getElementById(rowId);
+            if (el) {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // 5. Media Selector Modal Handling
+        function openMediaSelectorModal(targetInputId, targetPreviewId, targetStatusId) {
+            activeTargetInputId = targetInputId;
+            activeTargetPreviewId = targetPreviewId;
+            activeTargetStatusId = targetStatusId;
+            document.getElementById('mediaSelectorModal').style.display = 'flex';
+        }
+
+        function closeMediaSelectorModal() {
+            document.getElementById('mediaSelectorModal').style.display = 'none';
+        }
+
+        function selectImageForTarget(imageUrl) {
+            if (activeTargetInputId) {
+                const hiddenInput = document.getElementById(activeTargetInputId);
+                if (hiddenInput) hiddenInput.value = imageUrl;
+            }
+            if (activeTargetPreviewId) {
+                const previewImg = document.getElementById(activeTargetPreviewId);
+                if (previewImg) previewImg.src = imageUrl;
+            }
+            if (activeTargetStatusId) {
+                const statusEl = document.getElementById(activeTargetStatusId);
+                if (statusEl) {
+                    statusEl.innerHTML = `✅ ギャラリーから選択: <code>${imageUrl}</code>`;
+                    statusEl.style.color = '#059669';
+                }
+            }
+            closeMediaSelectorModal();
+        }
+
+        // 6. Full Size Image Lightbox
+        function openImageLightbox(src) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('imageLightboxModal').style.display = 'flex';
+        }
+
+        function closeImageLightbox() {
+            document.getElementById('imageLightboxModal').style.display = 'none';
+        }
+
+        // 7. Global Media Gallery Upload Handling
+        async function handleGlobalMediaUpload(fileInput) {
+            if (!fileInput.files || fileInput.files.length === 0) return;
+            const progressEl = document.getElementById('global_upload_progress');
+            if (progressEl) progressEl.style.display = 'block';
+
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const res = await fetch('/admin/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        // Reload or dynamically append card
+                    }
+                } catch (e) {
+                    console.error('Error uploading file:', e);
+                }
+            }
+
+            // Reload admin media tab to display fresh items
+            window.location.hash = 'media';
+            window.location.reload();
+        }
+
+        // 8. Delete Uploaded Image
+        async function deleteUploadedMedia(filename) {
+            if (!confirm(`本当に「${filename}」を削除しますか？`)) return;
+            try {
+                const res = await fetch('/admin/api/media/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.hash = 'media';
+                    window.location.reload();
+                } else {
+                    alert('削除に失敗しました: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('通信エラーが発生しました');
+            }
+        }
+
+        // 9. Quick Apply from Media Library to CEO or Hero
+        function quickApplyImage(imageUrl, targetType) {
+            if (targetType === 'ceo') {
+                document.getElementById('ceo_image_url_input').value = imageUrl;
+                document.getElementById('ceo_preview_img').src = imageUrl;
+                document.getElementById('ceo_upload_status').innerHTML = `✅ ギャラリーから適用: <code>${imageUrl}</code>（下の「変更を保存」を押してください）`;
+                document.getElementById('ceo_upload_status').style.color = '#059669';
+                switchAdminTab('company', document.querySelector('[onclick*="company"]'));
+            } else if (targetType === 'hero') {
+                document.getElementById('hero_image_url_input').value = imageUrl;
+                document.getElementById('hero_preview_img').src = imageUrl;
+                document.getElementById('hero_upload_status').innerHTML = `✅ ギャラリーから適用: <code>${imageUrl}</code>（下の「変更を保存」を押してください）`;
+                document.getElementById('hero_upload_status').style.color = '#059669';
+                switchAdminTab('company', document.querySelector('[onclick*="company"]'));
+            }
+        }
+
+        // 10. Copy URL to Clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('URLをクリップボードにコピーしました: ' + text);
+            });
+        }
+
+        // 11. Story Edit Modal
+        function openStoryEditModal(story) {
+            document.getElementById('storyEditForm').action = '/admin/stories/' + story.id;
+            document.getElementById('edit_story_title_ja').value = story.title_ja || '';
+            document.getElementById('edit_story_title_en').value = story.title_en || '';
+            document.getElementById('edit_story_cat_ja').value = story.category_ja || '';
+            document.getElementById('edit_story_cat_en').value = story.category_en || '';
+            document.getElementById('edit_story_sum_ja').value = story.summary_ja || '';
+            document.getElementById('edit_story_sum_en').value = story.summary_en || '';
+            document.getElementById('edit_story_content_ja').value = story.content_ja || '';
+            document.getElementById('edit_story_content_en').value = story.content_en || '';
+            document.getElementById('edit_story_date').value = story.published_date || '';
+            
+            const storyImg = story.image || '/images/story1.jpg';
+            document.getElementById('edit_story_image_input').value = storyImg;
+            document.getElementById('edit_story_preview_img').src = storyImg;
+            document.getElementById('edit_story_status').innerHTML = `設定中: <code>${storyImg}</code>`;
+            
+            document.getElementById('storyEditModal').style.display = 'flex';
+        }
+
+        function closeStoryModal() {
+            document.getElementById('storyEditModal').style.display = 'none';
+        }
+
+        // 12. Service Edit Modal
         function editServiceModal(service) {
             document.getElementById('serviceEditForm').action = '/admin/services/' + service.id;
             document.getElementById('edit_title_ja').value = service.title_ja || '';
@@ -655,10 +1501,49 @@
             document.getElementById('serviceEditModal').style.display = 'none';
         }
 
+        // Drag & drop highlight helpers
+        ['ceo_dropzone', 'hero_dropzone', 'new_story_dropzone', 'global_media_dropzone'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            ['dragenter', 'dragover'].forEach(eventName => {
+                el.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    el.classList.add('dragover');
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                el.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    el.classList.remove('dragover');
+                }, false);
+            });
+            el.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (!files || files.length === 0) return;
+                
+                if (id === 'ceo_dropzone') {
+                    document.getElementById('ceo_file_input').files = files;
+                    handleImageFileSelect(document.getElementById('ceo_file_input'), 'ceo_preview_img', 'ceo_image_url_input', 'ceo_upload_status');
+                } else if (id === 'hero_dropzone') {
+                    document.getElementById('hero_file_input').files = files;
+                    handleImageFileSelect(document.getElementById('hero_file_input'), 'hero_preview_img', 'hero_image_url_input', 'hero_upload_status');
+                } else if (id === 'new_story_dropzone') {
+                    document.getElementById('new_story_file_input').files = files;
+                    handleImageFileSelect(document.getElementById('new_story_file_input'), 'new_story_preview_img', 'new_story_image_url_input', 'new_story_upload_status');
+                } else if (id === 'global_media_dropzone') {
+                    document.getElementById('global_media_file_input').files = files;
+                    handleGlobalMediaUpload(document.getElementById('global_media_file_input'));
+                }
+            });
+        });
+
         // Initialize tab based on hash
         (function() {
             const hash = window.location.hash.replace('#', '').replace('-tab', '');
-            if (['company', 'about', 'services', 'stories', 'inquiries'].includes(hash)) {
+            if (['company', 'about', 'services', 'stories', 'media', 'inquiries'].includes(hash)) {
                 const btn = document.querySelector(`[onclick*="${hash}"]`);
                 switchAdminTab(hash, btn);
             }
