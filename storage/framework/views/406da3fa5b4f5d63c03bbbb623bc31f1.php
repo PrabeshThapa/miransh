@@ -808,7 +808,7 @@
     </footer>
 
     <!-- Sakana AI Consultant Floating Button -->
-    <button id="sakana-float-btn" class="sakana-float-btn" onclick="toggleSakanaChat()" title="Sakana AI 採用・在留資格AI相談">
+    <button id="sakana-float-btn" class="admin-float-btn" onclick="toggleSakanaChat()" title="Sakana AI 採用・在留資格AI相談">
         <div class="sakana-badge-pulse"></div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.755-1.2L2 22l1.2-5.245A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"></path>
