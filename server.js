@@ -25,6 +25,14 @@ import {
   updateStory,
   deleteStory
 } from './db.js';
+import {
+  getSakanaConfig,
+  updateSakanaConfig,
+  testSakanaConnection,
+  chatWithSakana,
+  generateAiInquiryReply,
+  evaluateCandidateMatch
+} from './sakana.js';
 
 dotenv.config();
 
@@ -277,6 +285,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
   try {
     const data = await getAllData();
     const mediaList = getAvailableMedia();
+    const sakanaConfig = getSakanaConfig();
     const message = req.session.flashMessage || null;
     req.session.flashMessage = null;
     res.render('admin/dashboard', {
@@ -287,6 +296,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
       inquiries: data.inquiries,
       dbStatus: data.dbStatus,
       mediaList,
+      sakanaConfig,
       message
     });
   } catch (err) {
@@ -563,6 +573,84 @@ app.post('/admin/stories/:id/delete', requireAdmin, async (req, res) => {
     };
   }
   res.redirect('/admin#stories-tab');
+});
+
+// =========================================================================
+// 11. SAKANA AI INTEGRATION API ENDPOINTS (Public & Admin)
+// =========================================================================
+
+// Public AI Chat Endpoint (for interactive website consultant)
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { messages, language = 'ja', context = {} } = req.body;
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ success: false, error: 'Messages array is required' });
+    }
+
+    const result = await chatWithSakana({ messages, language, context });
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (err) {
+    console.error('Public AI Chat Error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'AI consultation service is currently unavailable. Please use the contact form.'
+    });
+  }
+});
+
+// Admin API: Test Sakana AI Connection & Retrieve Models
+app.get('/admin/api/sakana/test', requireAdmin, async (req, res) => {
+  try {
+    const result = await testSakanaConnection();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin API: Save / Update Sakana AI Configuration
+app.post('/admin/api/sakana/config', requireAdmin, async (req, res) => {
+  try {
+    const { apiKey, model, baseUrl } = req.body;
+    const updated = updateSakanaConfig({ apiKey, model, baseUrl });
+    const testResult = await testSakanaConnection(apiKey, model);
+    res.json({
+      success: true,
+      config: updated,
+      testResult,
+      message: 'Sakana AI configuration updated successfully.'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin API: Generate Inquiry Response Draft with Sakana AI
+app.post('/admin/api/sakana/generate-reply', requireAdmin, async (req, res) => {
+  try {
+    const { inquiry, tone = 'polite', language = 'ja' } = req.body;
+    if (!inquiry) {
+      return res.status(400).json({ success: false, error: 'Inquiry details required' });
+    }
+    const result = await generateAiInquiryReply({ inquiry, tone, language });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin API: Candidate & Job Requirement Analysis
+app.post('/admin/api/sakana/candidate-match', requireAdmin, async (req, res) => {
+  try {
+    const { sector, jlptLevel, headcount, timeline, specialNotes } = req.body;
+    const result = await evaluateCandidateMatch({ sector, jlptLevel, headcount, timeline, specialNotes });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Start Server

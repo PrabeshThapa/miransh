@@ -328,6 +328,7 @@
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this)">📰 採用事例 (Stories)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('media', this)">📸 メディア管理 (Media Library)</button></li>
                 <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this)">📬 お問い合わせ (<%= inquiries ? inquiries.length : 0 %>)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('sakana', this)">🐟 Sakana AI 連携 (AI Suite)</button></li>
             </ul>
 
             <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
@@ -1039,6 +1040,7 @@
                                 <th>連絡先</th>
                                 <th>ご相談分野</th>
                                 <th>メッセージ内容</th>
+                                <th>AI対応</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1059,6 +1061,15 @@
                                 <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">
                                     <%= inq.message %>
                                 </td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn-outline-white" 
+                                            style="font-size: 11px; padding: 6px 10px; color: #0284C7; border-color: #BAE6FD; background: #F0F9FF; display: flex; align-items: center; gap: 4px; white-space: nowrap;" 
+                                            onclick='openAiReplyModal(<%- JSON.stringify(inq).replace(/'/g, "\\'") %>)'>
+                                        <span>🐟</span>
+                                        <span>AI返信案を作成</span>
+                                    </button>
+                                </td>
                             </tr>
                             <% }); %>
                         </tbody>
@@ -1066,6 +1077,156 @@
                     <% } else { %>
                     <p style="color: #64748B; font-size: 14px; text-align: center; padding: 40px;">現在、新しいお問い合わせはありません。</p>
                     <% } %>
+                </div>
+            </div>
+
+            <!-- ===================================================
+                 TAB 7: SAKANA AI SUITE & CONFIGURATION
+            =================================================== -->
+            <div id="pane-sakana" class="tab-pane">
+                <div class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #0284C7, #0369A1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">🐟</div>
+                                <div>
+                                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin: 0;">Sakana AI 連携スイート (Sakana AI Hub)</h2>
+                                    <p style="font-size: 13px; color: #64748B; margin: 2px 0 0 0;">東京発の次世代AI研究企業「Sakana AI」のNamazu・Fuguモデルを統合しています。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary" onclick="testSakanaApiConnection()" id="btn-sakana-test" style="display: flex; align-items: center; gap: 6px;">
+                            <span>⚡ API接続テストを実行</span>
+                        </button>
+                    </div>
+
+                    <!-- 1. Live Connection Status Card -->
+                    <div id="sakana-status-card" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                                <strong style="font-size: 14px; color: #0F172A;">現在のAPI設定ステータス:</strong>
+                                <span class="badge-status" style="background: #E0F2FE; color: #0369A1; font-family: monospace;" id="sakana-active-model-badge">
+                                    <%= sakanaConfig.model || 'sakana-namazu' %>
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; color: #64748B;">
+                                エンドポイント: <code style="background: #E2E8F0; padding: 2px 6px; border-radius: 4px;"><%= sakanaConfig.baseUrl %></code>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 13px;">
+                            <div style="background: #FFFFFF; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                                <div style="color: #64748B; font-size: 11px;">登録済みAPIキー</div>
+                                <div style="font-weight: 700; color: #0F172A; font-family: monospace;"><%= sakanaConfig.maskedApiKey %></div>
+                            </div>
+                            <div style="background: #FFFFFF; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                                <div style="color: #64748B; font-size: 11px;">主要モデル</div>
+                                <div style="font-weight: 700; color: #0F172A;">Sakana Namazu (日本語特化)</div>
+                            </div>
+                            <div style="background: #FFFFFF; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                                <div style="color: #64748B; font-size: 11px;">フェイルオーバー機構</div>
+                                <div style="font-weight: 700; color: #059669;">自動ナレッジエンジン常備</div>
+                            </div>
+                        </div>
+
+                        <div id="sakana-test-result-box" style="margin-top: 16px; display: none; padding: 14px; border-radius: 8px; font-size: 13px; line-height: 1.6;"></div>
+                    </div>
+
+                    <!-- 2. AI Tool 1: Candidate Matching & Job Requirement Analysis -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; margin-bottom: 28px;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>🎯 1. 採用要件・候補者適合度AI分析 (Candidate Matcher)</span>
+                        </h3>
+                        <p style="font-size: 13px; color: #64748B; margin-bottom: 16px;">
+                            企業からの求人要件を入力すると、Sakana AIがネパール等の母集団状況、採用難易度、面接質問3選、受入れスケジュールを即時算出します。
+                        </p>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">採用職種 / 分野</label>
+                                <select id="ai-match-sector" class="form-input">
+                                    <option value="介護分野（特別養護老人ホーム・デイサービス）">介護分野 (Nursing Care)</option>
+                                    <option value="建設分野（型枠・土木・内装仕上げ）">建設分野 (Construction)</option>
+                                    <option value="ビルクリーニング・清掃分野">ビルクリーニング (Facility Cleaning)</option>
+                                    <option value="外食業・食品製造業分野">外食・飲食料品製造業 (Food Service)</option>
+                                    <option value="農業・畜産業分野">農業 (Agriculture)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">要求日本語レベル</label>
+                                <select id="ai-match-jlpt" class="form-input">
+                                    <option value="JLPT N4 / JFT-Basic合格（特定技能標準）">JLPT N4 / JFT-Basic（標準）</option>
+                                    <option value="JLPT N3（日常会話スムーズ・介護記録可）">JLPT N3（実務即戦力）</option>
+                                    <option value="JLPT N2（高度な指示・コミュニケーション可）">JLPT N2（リーダー候補）</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">採用予定人数</label>
+                                <input type="text" id="ai-match-headcount" class="form-input" value="2〜3名" placeholder="例: 2名">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">就労開始目標時期</label>
+                                <input type="text" id="ai-match-timeline" class="form-input" value="3〜4ヶ月後" placeholder="例: 2026年秋頃">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">特記事項・求める人物像</label>
+                            <input type="text" id="ai-match-notes" class="form-input" value="夜勤対応可能な方、協調性と挨拶ができる誠実な人材" placeholder="例: 夜勤シフトあり、体力重視">
+                        </div>
+
+                        <button type="button" class="btn-primary" onclick="runCandidateMatching()" id="btn-run-match">
+                            <span>🤖 Sakana AIで適合度を分析・提案書作成</span>
+                        </button>
+
+                        <div id="ai-match-result-container" style="display: none; margin-top: 20px; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <strong style="font-size: 15px; color: #0F172A;">📊 分析レポート</strong>
+                                <button type="button" class="btn-outline-white" style="font-size: 11px; padding: 4px 8px;" onclick="copyElementText('ai-match-result-content')">📋 結果をコピー</button>
+                            </div>
+                            <div id="ai-match-result-content" style="font-size: 13.5px; line-height: 1.7; color: #1E293B; white-space: pre-line;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. API Key & Model Settings Form -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>⚙️ 2. Sakana AI 接続・モデル詳細設定</span>
+                        </h3>
+
+                        <form onsubmit="saveSakanaConfig(event)">
+                            <div class="form-group">
+                                <label class="form-label">Sakana AI API Key (fish_...)</label>
+                                <input type="text" id="sakana-config-key" class="form-input" value="<%= sakanaConfig.apiKey %>" placeholder="fish_...">
+                                <small style="color: #64748B; font-size: 12px; display: block; margin-top: 4px;">
+                                    Sakana AI コンソール (console.sakana.ai) で発行されたAPIキーを入力します。
+                                </small>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">デフォルトAIモデル</label>
+                                    <select id="sakana-config-model" class="form-input">
+                                        <option value="sakana-namazu" <%= sakanaConfig.model === 'sakana-namazu' ? 'selected' : '' %>>sakana-namazu (日本語特化・推論・翻訳 / 推奨)</option>
+                                        <option value="fugu" <%= sakanaConfig.model === 'fugu' ? 'selected' : '' %>>fugu (マルチエージェントオーケストレーション)</option>
+                                        <option value="fugu-ultra" <%= sakanaConfig.model === 'fugu-ultra' ? 'selected' : '' %>>fugu-ultra (超高精度エージェント)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">API Base URL</label>
+                                    <input type="text" id="sakana-config-url" class="form-input" value="<%= sakanaConfig.baseUrl %>" placeholder="https://api.sakana.ai/v1">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="btn-save-sakana-config">
+                                <span>💾 設定を保存して反映</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>
@@ -1540,14 +1701,284 @@
             });
         });
 
+    <!-- ===================================================
+         MODAL 5: Sakana AI Inquiry Reply Generator Modal
+    =================================================== -->
+    <div id="aiReplyModal" class="admin-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 32px; max-width: 760px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🐟</span>
+                    <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">Sakana AI 返信メール作成アシスタント</h3>
+                </div>
+                <button type="button" onclick="closeAiReplyModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748B;">✕</button>
+            </div>
+
+            <!-- Inquiry Summary -->
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-bottom: 18px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #64748B;">差出人: <strong id="modal-inq-name" style="color: #0F172A;"></strong>（<span id="modal-inq-company"></span>）</span>
+                    <span id="modal-inq-email" style="color: #0284C7; font-weight: 600;"></span>
+                </div>
+                <div style="margin-bottom: 6px; color: #64748B;">
+                    ご相談分野: <span id="modal-inq-service" class="badge-status"></span>
+                </div>
+                <div style="border-top: 1px dashed #CBD5E1; padding-top: 8px; color: #334155; max-height: 100px; overflow-y: auto;" id="modal-inq-msg"></div>
+            </div>
+
+            <!-- AI Tone & Model Selection -->
+            <div class="form-grid-2" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label class="form-label" style="font-weight: 700;">返信トーン / スタイル</label>
+                    <select id="modal-ai-tone" class="form-input">
+                        <option value="polite">最高級ビジネス敬語（丁寧・安心感重視）</option>
+                        <option value="proposal">提案型（ネパール特定技能の強み・費用・日程を明記）</option>
+                        <option value="english">英語対応 (English Professional Reply)</option>
+                        <option value="concise">簡潔・迅速（面談日程の提示）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="font-weight: 700;">使用AIモデル</label>
+                    <input type="text" class="form-input" value="Sakana Namazu (日本語推論)" readonly style="background: #F1F5F9; color: #475569;">
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="generateAiReplyWithSakana()" id="btn-generate-ai-reply" style="width: 100%; justify-content: center; margin-bottom: 16px;">
+                <span>✨ Sakana AIで返信メール文案を生成</span>
+            </button>
+
+            <!-- Generated Draft Textarea -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label class="form-label" style="margin: 0; font-weight: 700;">生成された返信文案 (編集可能)</label>
+                    <span id="ai-reply-status-text" style="font-size: 12px; color: #64748B;"></span>
+                </div>
+                <textarea id="modal-ai-draft" class="form-textarea" rows="9" placeholder="「Sakana AIで返信メール文案を生成」ボタンをクリックするとここに文案が表示されます。"></textarea>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+                <button type="button" class="btn-primary" onclick="copyAiReplyToClipboard()" style="background: #0284C7;">
+                    📋 文案をコピー
+                </button>
+                <button type="button" class="btn-primary" onclick="openMailerWithDraft()" style="background: #10B981;">
+                    📧 メーラーを起動
+                </button>
+                <button type="button" onclick="closeAiReplyModal()" class="btn-outline-white" style="color: #334155; border-color: #CBD5E1;">
+                    閉じる
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript & Interactive Controllers -->
+    <script>
+        let currentInquiryForAi = null;
+
+        // 13. Sakana AI Connection Diagnostics
+        async function testSakanaApiConnection() {
+            const btn = document.getElementById('btn-sakana-test');
+            const resultBox = document.getElementById('sakana-test-result-box');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Sakana API 接続テスト中...</span>';
+            resultBox.style.display = 'block';
+            resultBox.style.background = '#EFF6FF';
+            resultBox.style.border = '1px solid #93C5FD';
+            resultBox.style.color = '#1E40AF';
+            resultBox.innerHTML = 'Sakana AI API エンドポイントへヘルスチェック通信中...';
+
+            try {
+                const res = await fetch('/admin/api/sakana/test');
+                const data = await res.json();
+
+                if (data.success) {
+                    resultBox.style.background = '#ECFDF5';
+                    resultBox.style.border = '1px solid #10B981';
+                    resultBox.style.color = '#065F46';
+                    resultBox.innerHTML = `
+                        <strong>✅ Sakana AI API接続 正常稼働中</strong><br>
+                        • 接続モデル: <code>${data.model}</code><br>
+                        • 応答レイテンシ: <strong>${data.latencyMs} ms</strong><br>
+                        • サポートモデル: ${data.availableModels ? data.availableModels.join(', ') : 'sakana-namazu, fugu, fugu-ultra'}
+                    `;
+                } else {
+                    resultBox.style.background = '#FEF2F2';
+                    resultBox.style.border = '1px solid #EF4444';
+                    resultBox.style.color = '#991B1B';
+                    resultBox.innerHTML = `
+                        <strong>⚠️ Sakana AI API ステータス通知</strong><br>
+                        ${data.message || data.error}<br>
+                        <small style="margin-top: 4px; display: block; color: #7F1D1D;">
+                            ※ APIクォータ超過または一時制限時は、自動フェイルオーバー（MIRANSH独自ナレッジエンジン）が作動し、公開サイトのチャットボットは無停止で稼働します。
+                        </small>
+                    `;
+                }
+            } catch (err) {
+                resultBox.style.background = '#FEF2F2';
+                resultBox.style.border = '1px solid #EF4444';
+                resultBox.style.color = '#991B1B';
+                resultBox.innerHTML = '⚠️ 接続テスト中にエラーが発生しました: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>⚡ API接続テストを実行</span>';
+            }
+        }
+
+        // 14. Save Sakana AI Config
+        async function saveSakanaConfig(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-sakana-config');
+            const apiKey = document.getElementById('sakana-config-key').value.trim();
+            const model = document.getElementById('sakana-config-model').value;
+            const baseUrl = document.getElementById('sakana-config-url').value.trim();
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>💾 保存中...</span>';
+
+            try {
+                const res = await fetch('/admin/api/sakana/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey, model, baseUrl })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('sakana-active-model-badge').innerText = model;
+                    alert('Sakana AI の設定を保存しました。');
+                } else {
+                    alert('保存に失敗しました: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('通信エラーが発生しました: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>💾 設定を保存して反映</span>';
+            }
+        }
+
+        // 15. Candidate Matching Tool
+        async function runCandidateMatching() {
+            const btn = document.getElementById('btn-run-match');
+            const resultContainer = document.getElementById('ai-match-result-container');
+            const resultContent = document.getElementById('ai-match-result-content');
+
+            const sector = document.getElementById('ai-match-sector').value;
+            const jlptLevel = document.getElementById('ai-match-jlpt').value;
+            const headcount = document.getElementById('ai-match-headcount').value;
+            const timeline = document.getElementById('ai-match-timeline').value;
+            const notes = document.getElementById('ai-match-notes').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>🤖 Sakana AI 分析実行中...</span>';
+
+            resultContainer.style.display = 'block';
+            resultContent.innerHTML = 'Sakana AIが特定技能母集団データおよび採用要件を照合・推論中...';
+
+            try {
+                const res = await fetch('/admin/api/sakana/candidate-match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jobRequirements: { sector, jlptLevel, headcount, timeline, notes }
+                    })
+                });
+                const data = await res.json();
+                resultContent.innerHTML = data.analysis;
+            } catch (err) {
+                resultContent.innerHTML = '分析処理中にエラーが発生しました: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🤖 Sakana AIで適合度を分析・提案書作成</span>';
+            }
+        }
+
+        // 16. Inquiry AI Reply Modal Handlers
+        function openAiReplyModal(inquiry) {
+            currentInquiryForAi = inquiry;
+            document.getElementById('modal-inq-name').innerText = inquiry.name || 'お客様';
+            document.getElementById('modal-inq-company').innerText = inquiry.company_name || '法人未記入';
+            document.getElementById('modal-inq-email').innerText = inquiry.email || '';
+            document.getElementById('modal-inq-service').innerText = inquiry.service_interest || '全般';
+            document.getElementById('modal-inq-msg').innerText = inquiry.message || 'なし';
+            document.getElementById('modal-ai-draft').value = '';
+            document.getElementById('ai-reply-status-text').innerText = '';
+            document.getElementById('aiReplyModal').style.display = 'flex';
+        }
+
+        function closeAiReplyModal() {
+            document.getElementById('aiReplyModal').style.display = 'none';
+        }
+
+        async function generateAiReplyWithSakana() {
+            if (!currentInquiryForAi) return;
+            const btn = document.getElementById('btn-generate-ai-reply');
+            const draftTextarea = document.getElementById('modal-ai-draft');
+            const statusText = document.getElementById('ai-reply-status-text');
+            const tone = document.getElementById('modal-ai-tone').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Sakana AI 文案推論中...</span>';
+            statusText.innerText = '生成中...';
+
+            try {
+                const res = await fetch('/admin/api/sakana/generate-reply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        inquiry: currentInquiryForAi,
+                        tone: tone
+                    })
+                });
+                const data = await res.json();
+                draftTextarea.value = data.draftReply;
+                statusText.innerText = `生成完了 (${data.provider || 'Sakana AI'})`;
+            } catch (err) {
+                draftTextarea.value = '生成中にエラーが発生しました。';
+                statusText.innerText = 'エラー';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨ Sakana AIで返信メール文案を生成</span>';
+            }
+        }
+
+        function copyAiReplyToClipboard() {
+            const text = document.getElementById('modal-ai-draft').value;
+            if (!text) {
+                alert('文案がまだ生成されていません。');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert('返信文案をクリップボードにコピーしました！');
+            });
+        }
+
+        function openMailerWithDraft() {
+            if (!currentInquiryForAi) return;
+            const to = currentInquiryForAi.email || '';
+            const subject = encodeURIComponent(`【MIRANSH合同会社】お問い合わせへのご回答（${currentInquiryForAi.service_interest || '採用・ビザ相談'}）`);
+            const body = encodeURIComponent(document.getElementById('modal-ai-draft').value || '');
+            window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+        }
+
+        function copyElementText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('レポートをコピーしました！');
+            });
+        }
+
         // Initialize tab based on hash
         (function() {
             const hash = window.location.hash.replace('#', '').replace('-tab', '');
-            if (['company', 'about', 'services', 'stories', 'media', 'inquiries'].includes(hash)) {
+            if (['company', 'about', 'services', 'stories', 'media', 'inquiries', 'sakana'].includes(hash)) {
                 const btn = document.querySelector(`[onclick*="${hash}"]`);
-                switchAdminTab(hash, btn);
+                if (btn) {
+                    switchAdminTab(hash, btn);
+                }
             }
         })();
     </script>
 </body>
 </html>
+

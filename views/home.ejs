@@ -903,12 +903,255 @@
         </div>
     </footer>
 
+    <!-- Sakana AI Consultant Floating Button -->
+    <button id="sakana-float-btn" class="sakana-float-btn" onclick="toggleSakanaChat()" title="Sakana AI 採用・在留資格AI相談">
+        <div class="sakana-badge-pulse"></div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.755-1.2L2 22l1.2-5.245A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"></path>
+            <path d="M8 12h.01M12 12h.01M16 12h.01"></path>
+        </svg>
+        <span class="lang-ja">AI 採用・在留資格相談</span>
+        <span class="lang-en">AI Visa & Job Advisor</span>
+    </button>
+
+    <!-- Sakana AI Interactive Chat Modal / Drawer -->
+    <div id="sakana-modal-overlay" class="sakana-modal-overlay" onclick="closeSakanaOnBackdrop(event)">
+        <div class="sakana-chat-window" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="sakana-chat-header">
+                <div class="sakana-chat-header-info">
+                    <div class="sakana-icon-avatar">🐟</div>
+                    <div>
+                        <div class="sakana-chat-title">
+                            <span class="lang-ja">MIRANSH AIコンサルタント</span>
+                            <span class="lang-en">MIRANSH AI Consultant</span>
+                        </div>
+                        <div class="sakana-chat-subtitle">
+                            <span class="sakana-status-dot"></span>
+                            <span>Powered by Sakana AI (Namazu / Fugu)</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="sakana-btn-close" onclick="toggleSakanaChat()" aria-label="Close Chat">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="sakana-quick-prompts">
+                <button class="sakana-chip" onclick="sendQuickPrompt('介護分野での特定技能の採用要件や流れを教えてください')">
+                    <span class="lang-ja">🏥 介護分野の特定技能要件</span>
+                    <span class="lang-en">🏥 Caregiving SSW Requirements</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('ネパール人材の特徴や日本語レベルについて')">
+                    <span class="lang-ja">🇳🇵 ネパール人材の強み</span>
+                    <span class="lang-en">🇳🇵 Nepali Talent Advantages</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('特定技能1号の受入れ費用と入社までのスケジュール')">
+                    <span class="lang-ja">💰 採用費用とスケジュール</span>
+                    <span class="lang-en">💰 Cost & Timeline</span>
+                </button>
+                <button class="sakana-chip" onclick="sendQuickPrompt('建設分野の受入れ手続きについて教えてください')">
+                    <span class="lang-ja">🏗️ 建設分野の受入れ</span>
+                    <span class="lang-en">🏗️ Construction Sector</span>
+                </button>
+            </div>
+
+            <!-- Message Area -->
+            <div id="sakana-messages-body" class="sakana-messages-body">
+                <div class="sakana-msg bot">
+                    <div class="sakana-msg-bubble">
+                        <span class="lang-ja">こんにちは！MIRANSH合同会社のAI採用・在留資格アシスタントです（Sakana AI 連携）。<br><br>特定技能（介護・建設・清掃・外食など）の外国人材採用、ネパール提携校ネットワーク、ビザ申請（COE）、受入れ費用など、ご不明な点をいつでもご相談ください。</span>
+                        <span class="lang-en">Hello! I am your AI Recruitment & Visa Consultant for MIRANSH LLC (Powered by Sakana AI).<br><br>Feel free to ask about Specified Skilled Worker (SSW) hiring, our Nepal talent network, visa application (COE), costs, or life support. How can I assist you today?</span>
+                    </div>
+                    <div class="sakana-msg-meta">
+                        <span>MIRANSH AI (Sakana Namazu)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Quick Action -->
+            <div class="sakana-chat-footer-action">
+                <span><span class="lang-ja">個別のご相談や求人票のご依頼</span><span class="lang-en">Direct hiring inquiries:</span></span>
+                <button class="sakana-btn-inquiry-link" onclick="transferChatToInquiry()">
+                    <span class="lang-ja">✉️ 相談内容をフォームに転記</span>
+                    <span class="lang-en">✉️ Fill Contact Form</span>
+                </button>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="sakana-chat-input-wrap">
+                <input type="text" id="sakana-user-input" class="sakana-input-field" placeholder="質問を入力してください (例: 介護の採用要件は？)" onkeydown="handleSakanaKey(event)">
+                <button id="sakana-btn-send" class="sakana-btn-send" onclick="sendSakanaMessage()" aria-label="Send">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Floating Launcher -->
     <a href="/admin" class="admin-float-btn" title="Admin Portal">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span class="lang-ja">管理画面</span>
         <span class="lang-en">Admin Portal</span>
     </a>
+
+    <!-- Sakana AI Chat Engine & Language Scripts -->
+    <script>
+        const sakanaChatHistory = [];
+
+        function toggleSakanaChat() {
+            const overlay = document.getElementById('sakana-modal-overlay');
+            overlay.classList.toggle('open');
+            if (overlay.classList.contains('open')) {
+                setTimeout(() => {
+                    document.getElementById('sakana-user-input')?.focus();
+                }, 100);
+            }
+        }
+
+        function closeSakanaOnBackdrop(e) {
+            if (e.target.id === 'sakana-modal-overlay') {
+                toggleSakanaChat();
+            }
+        }
+
+        function handleSakanaKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendSakanaMessage();
+            }
+        }
+
+        function sendQuickPrompt(promptText) {
+            const input = document.getElementById('sakana-user-input');
+            input.value = promptText;
+            sendSakanaMessage();
+        }
+
+        async function sendSakanaMessage() {
+            const input = document.getElementById('sakana-user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            const msgBody = document.getElementById('sakana-messages-body');
+            const sendBtn = document.getElementById('sakana-btn-send');
+
+            // Append User Message
+            const userMsgEl = document.createElement('div');
+            userMsgEl.className = 'sakana-msg user';
+            userMsgEl.innerHTML = `
+                <div class="sakana-msg-bubble">${escapeHtml(message)}</div>
+                <div class="sakana-msg-meta"><span>${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+            `;
+            msgBody.appendChild(userMsgEl);
+            msgBody.scrollTop = msgBody.scrollHeight;
+
+            sakanaChatHistory.push({ role: 'user', content: message });
+
+            // Show Typing Indicator
+            const typingEl = document.createElement('div');
+            typingEl.className = 'sakana-typing';
+            typingEl.id = 'sakana-typing-indicator';
+            typingEl.innerHTML = `
+                <div class="sakana-typing-dot"></div>
+                <div class="sakana-typing-dot"></div>
+                <div class="sakana-typing-dot"></div>
+            `;
+            msgBody.appendChild(typingEl);
+            msgBody.scrollTop = msgBody.scrollHeight;
+
+            sendBtn.disabled = true;
+
+            const activeLang = document.body.classList.contains('en') ? 'en' : 'ja';
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: sakanaChatHistory,
+                        language: activeLang
+                    })
+                });
+
+                const data = await response.json();
+                const typing = document.getElementById('sakana-typing-indicator');
+                if (typing) typing.remove();
+
+                const botMsgEl = document.createElement('div');
+                botMsgEl.className = 'sakana-msg bot';
+                
+                const formattedReply = renderMarkdown(data.reply || 'ご質問ありがとうございます。詳細につきましてはMIRANSH担当者よりご案内いたします。');
+                const providerBadge = data.provider || 'Sakana AI (Namazu)';
+
+                botMsgEl.innerHTML = `
+                    <div class="sakana-msg-bubble">${formattedReply}</div>
+                    <div class="sakana-msg-meta">
+                        <span>${providerBadge}</span>
+                        <span>• ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                `;
+                msgBody.appendChild(botMsgEl);
+                msgBody.scrollTop = msgBody.scrollHeight;
+
+                if (data.reply) {
+                    sakanaChatHistory.push({ role: 'assistant', content: data.reply });
+                }
+            } catch (err) {
+                console.error('Chat error:', err);
+                const typing = document.getElementById('sakana-typing-indicator');
+                if (typing) typing.remove();
+
+                const botMsgEl = document.createElement('div');
+                botMsgEl.className = 'sakana-msg bot';
+                botMsgEl.innerHTML = `
+                    <div class="sakana-msg-bubble" style="border-left: 3px solid #EF4444;">
+                        申し訳ございません。通信が一時的に混み合っております。お急ぎの場合はお問い合わせフォームまたはお電話（042-409-8256）をご利用ください。
+                    </div>
+                `;
+                msgBody.appendChild(botMsgEl);
+                msgBody.scrollTop = msgBody.scrollHeight;
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function transferChatToInquiry() {
+            if (sakanaChatHistory.length === 0) {
+                alert('まだ会話履歴がありません。ご質問を入力してから転記してください。');
+                return;
+            }
+
+            const summary = sakanaChatHistory.map(m => (m.role === 'user' ? '【ご相談】' : '【AI回答要約】') + '\n' + m.content).join('\n\n');
+            const msgInput = document.getElementById('contact-message');
+            if (msgInput) {
+                msgInput.value = '【Sakana AI相談経由のお問い合わせ】\n' + summary;
+                toggleSakanaChat();
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                msgInput.focus();
+            }
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderMarkdown(text) {
+            if (!text) return '';
+            let html = escapeHtml(text);
+            // bold **text**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // header ### text
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h4>$1</h4>');
+            // line breaks
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+    </script>
 
     <!-- Language Switching Engine Script -->
     <script>
