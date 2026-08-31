@@ -2247,7 +2247,7 @@ app.get('/admin', (req: Request, res: Response) => {
                                             📁 ファイルを選択してアップロード
                                             <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status', 'ceo_image')">
                                         </label>
-                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/ceo_portrait.jpg', 'ceo_status', 'ceo_image')">
+                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/abc.jpeg', 'ceo_status', 'ceo_image')">
                                             🔄 デフォルト写真に戻す
                                         </button>
                                     </div>

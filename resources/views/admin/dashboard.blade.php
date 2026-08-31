@@ -406,7 +406,7 @@
                                                     📁 画像ファイルを選択
                                                     <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status', 'ceo_image')">
                                                 </label>
-                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/ceo_portrait.jpg', 'preview_ceo_status', 'ceo_image')">
+                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/abc.jpeg', 'preview_ceo_status', 'ceo_image')">
                                                     🔄 デフォルト写真に戻す
                                                 </button>
                                             </div>
