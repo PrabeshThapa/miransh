@@ -243,8 +243,8 @@ function renderHeader(company: any, activePage: string = 'home'): string {
 
             <div class="mobile-nav-footer">
                 <div class="lang-toggle-group" style="justify-content: center; width: 100%;">
-                    <button type="button" class="lang-btn active" style="flex: 1; text-align: center;" onclick="setLanguage('ja')">日本語</button>
-                    <button type="button" class="lang-btn" style="flex: 1; text-align: center;" onclick="setLanguage('en')">English</button>
+                    <button type="button" class="lang-btn active" id="btn-mobile-lang-ja" style="flex: 1; text-align: center;" onclick="setLanguage('ja')">日本語</button>
+                    <button type="button" class="lang-btn" id="btn-mobile-lang-en" style="flex: 1; text-align: center;" onclick="setLanguage('en')">English</button>
                 </div>
                 <a href="${prefix}#contact" class="btn-primary" style="width: 100%; justify-content: center;" onclick="toggleMobileNav()">
                     <span class="lang-ja">無料相談・お問い合わせ</span>
