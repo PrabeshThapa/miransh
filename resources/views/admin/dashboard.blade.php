@@ -989,19 +989,19 @@
                 </div>
             </div>
 
-            <!-- TAB 6: SAKANA AI CONFIGURATION & DIAGNOSTICS -->
+            <!-- TAB 6: AI CONFIGURATION & DIAGNOSTICS -->
             <div id="pane-ai" class="tab-pane">
                 <div class="admin-card">
                     <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        🐟 Sakana AI (Namazu / Fugu) 連携ステータス & 接続テスト
+                        🤖 MIRANSH AI 連携ステータス & 接続テスト
                     </h2>
 
                     <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
                         <div style="font-weight: 700; color: #166534; font-size: 15px; margin-bottom: 6px;">
-                            ✓ Sakana AI API & フォールバックナレッジエンジン稼働中 (Operational)
+                            ✓ AI API & ナレッジエンジン稼働中 (Operational)
                         </div>
                         <div style="font-size: 13px; color: #14532D; line-height: 1.6;">
-                            MIRANSHウェブサイト上の浮動AIコンサルタントは、Sakana AI の最新モデル（<code>sakana-namazu</code> / <code>fugu</code>）およびMIRANSH独自ナレッジベースと直接連携しています。
+                            MIRANSHウェブサイト上の浮動AIコンサルタントは、高精度推論モデルおよびMIRANSH独自ナレッジベースと直接連携しています。
                         </div>
                     </div>
 

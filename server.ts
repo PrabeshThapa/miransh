@@ -2522,10 +2522,10 @@ app.get('/admin', (req: Request, res: Response) => {
             </div>
             ` : ''}
 
-            <!-- TAB 7: Sakana AI -->
+            <!-- TAB 7: AI Consultant -->
             ${activeTab === 'ai' ? `
             <div class="admin-card">
-                <div class="admin-card-title">🐟 Sakana AI Configuration & Diagnostic Test</div>
+                <div class="admin-card-title">🤖 AI Consultant Configuration & Diagnostic Test</div>
                 <form action="/admin/api/sakana/config" method="POST">
                     <div class="form-group">
                         <label class="form-label">Sakana AI Model</label>
