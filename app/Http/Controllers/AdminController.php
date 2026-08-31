@@ -415,13 +415,35 @@ class AdminController extends Controller
         
         $destinationPath = public_path('uploads');
         if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
+            @mkdir($destinationPath, 0775, true);
         }
 
         $file->move($destinationPath, $filename);
         $fullFilePath = $destinationPath . '/' . $filename;
+        @chmod($fullFilePath, 0644);
         $size = file_exists($fullFilePath) ? filesize($fullFilePath) : 0;
         $relativePath = '/uploads/' . $filename;
+
+        // Write to all possible public web roots on various hosting environments (cPanel, Xserver, Sakura, Nginx)
+        $targetDirectories = [
+            base_path('uploads'),
+            public_path('uploads'),
+            base_path('public/uploads'),
+            storage_path('app/public/uploads'),
+            base_path('public_html/uploads'),
+            base_path('../public_html/uploads')
+        ];
+
+        foreach ($targetDirectories as $dir) {
+            if (!file_exists($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            if (file_exists($dir) && is_dir($dir)) {
+                $targetFile = $dir . '/' . $filename;
+                @copy($fullFilePath, $targetFile);
+                @chmod($targetFile, 0644);
+            }
+        }
 
         // Auto-save to company_info if target_field is specified
         if ($request->filled('target_field')) {

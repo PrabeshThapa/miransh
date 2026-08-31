@@ -59,4 +59,42 @@ Route::prefix('admin')->group(function () {
 // Image Upload API (Accessible via /api/admin/upload-image directly)
 Route::post('/api/admin/upload-image', [AdminController::class, 'uploadImage'])->name('admin.uploadImage.api');
 
+// Serve Uploaded Files with Fallback Multi-Path Resolution
+Route::get('/uploads/{filename}', function ($filename) {
+    $cleanFilename = basename($filename);
+    
+    $searchPaths = [
+        public_path('uploads/' . $cleanFilename),
+        base_path('public/uploads/' . $cleanFilename),
+        storage_path('app/public/uploads/' . $cleanFilename),
+        storage_path('app/uploads/' . $cleanFilename),
+        base_path('../public_html/uploads/' . $cleanFilename),
+        base_path('public_html/uploads/' . $cleanFilename),
+        base_path('uploads/' . $cleanFilename),
+    ];
+
+    foreach ($searchPaths as $filePath) {
+        if (file_exists($filePath) && is_file($filePath)) {
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $contentTypes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'gif' => 'image/gif',
+                'svg' => 'image/svg+xml',
+            ];
+            $contentType = $contentTypes[$ext] ?? (function_exists('mime_content_type') ? @mime_content_type($filePath) : 'image/jpeg') ?: 'image/jpeg';
+
+            return response()->file($filePath, [
+                'Content-Type' => $contentType,
+                'Cache-Control' => 'public, max-age=31536000',
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        }
+    }
+
+    abort(404, 'Image not found');
+})->where('filename', '[A-Za-z0-9_\-\.]+');
+
 

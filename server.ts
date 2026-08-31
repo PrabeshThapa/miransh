@@ -69,6 +69,22 @@ app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 
+// Explicit route handler for /uploads/:filename fallback
+app.get('/uploads/:filename', (req: Request, res: Response) => {
+  const filename = path.basename(req.params.filename);
+  const possiblePaths = [
+    path.join(__dirname, 'public', 'uploads', filename),
+    path.join(__dirname, 'storage', 'app', 'public', 'uploads', filename),
+    path.join(__dirname, 'uploads', filename)
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+      return res.sendFile(p);
+    }
+  }
+  return res.status(404).send('Image not found');
+});
+
 // Helpers to read database records with default fallbacks
 function getCompanyInfo(): any {
   const row = db.prepare('SELECT * FROM company_info LIMIT 1').get();
