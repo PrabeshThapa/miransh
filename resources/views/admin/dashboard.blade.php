@@ -304,7 +304,7 @@
                     <img src="/images/logo-icon.png" alt="MIRANSH LLC" style="width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;">
                     <div>
                         <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
-                        <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
+                        <!-- <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div> -->
                     </div>
                 </div>
                 <button type="button" class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="メニューを閉じる">✕</button>
@@ -345,7 +345,7 @@
 
             <div class="admin-topbar">
                 <div>
-                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム (Laravel)</h1>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A;">MIRANSH コンテンツ管理システム</h1>
                     <p style="font-size: 14px; color: #64748B;">ホームページ上の全テキスト・写真・事業内容・採用事例・FAQ・Sakana AIをリアルタイムに更新できます。</p>
                 </div>
             </div>
