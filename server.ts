@@ -1344,6 +1344,55 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // ----------------------------------------------------
+// XML Sitemap & Robots.txt Routes (SEO)
+// ----------------------------------------------------
+app.get('/sitemap.xml', (req: Request, res: Response) => {
+  const services = getServices();
+  const stories = getStories();
+  const today = new Date().toISOString().split('T')[0];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  xml += `  <url>\n    <loc>https://miransh.co.jp/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+
+  services.forEach((s) => {
+    xml += `  <url>\n    <loc>https://miransh.co.jp/services/${s.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+  });
+
+  stories.forEach((st) => {
+    xml += `  <url>\n    <loc>https://miransh.co.jp/stories/${st.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+  });
+
+  xml += '</urlset>';
+
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(xml);
+});
+
+app.get('/robots.txt', (req: Request, res: Response) => {
+  const txt = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://miransh.co.jp/sitemap.xml\n`;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.send(txt);
+});
+
+// ----------------------------------------------------
+// Numeric URL Redirect Handler (Fixes /1, /2, /3, /4 index errors)
+// ----------------------------------------------------
+app.get('/:id(\\d+)', (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  const service = db.prepare('SELECT id FROM services WHERE id = ?').get(id);
+  if (service) {
+    return res.redirect(301, `/services/${id}`);
+  }
+  const story = db.prepare('SELECT id FROM stories WHERE id = ?').get(id);
+  if (story) {
+    return res.redirect(301, `/stories/${id}`);
+  }
+  return res.redirect(301, '/#services');
+});
+
+// ----------------------------------------------------
 // Service Detail Route
 // ----------------------------------------------------
 app.get('/services/:id', (req: Request, res: Response) => {
@@ -1369,6 +1418,23 @@ app.get('/services/:id', (req: Request, res: Response) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(service.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</title>
     <meta name="description" content="${escapeHtml(service.desc_ja)}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://miransh.co.jp/services/${service.id}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://miransh.co.jp/services/${service.id}">
+    <meta property="og:title" content="${escapeHtml(service.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}">
+    <meta property="og:description" content="${escapeHtml(service.desc_ja)}">
+    <meta property="og:image" content="https://miransh.co.jp/images/logo-icon.png">
+    <meta property="og:site_name" content="MIRANSH合同会社">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escapeHtml(service.title_ja)} | MIRANSH合同会社">
+    <meta name="twitter:description" content="${escapeHtml(service.desc_ja)}">
+    <meta name="twitter:image" content="https://miransh.co.jp/images/logo-icon.png">
+
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
@@ -1455,6 +1521,23 @@ app.get('/stories/:id', (req: Request, res: Response) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(story.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</title>
     <meta name="description" content="${escapeHtml(story.summary_ja)}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://miransh.co.jp/stories/${story.id}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://miransh.co.jp/stories/${story.id}">
+    <meta property="og:title" content="${escapeHtml(story.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}">
+    <meta property="og:description" content="${escapeHtml(story.summary_ja)}">
+    <meta property="og:image" content="${escapeHtml(story.image || 'https://miransh.co.jp/images/hero_banner.jpg')}">
+    <meta property="og:site_name" content="MIRANSH合同会社">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escapeHtml(story.title_ja)} | MIRANSH合同会社">
+    <meta name="twitter:description" content="${escapeHtml(story.summary_ja)}">
+    <meta name="twitter:image" content="${escapeHtml(story.image || 'https://miransh.co.jp/images/hero_banner.jpg')}">
+
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>

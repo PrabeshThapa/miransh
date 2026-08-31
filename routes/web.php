@@ -10,6 +10,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/services/{id}', [HomeController::class, 'serviceDetail'])->name('services.detail');
 Route::get('/stories/{id}', [HomeController::class, 'storyDetail'])->name('stories.detail');
 Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [HomeController::class, 'robots'])->name('robots');
 
 // Sakana AI API Routes (Both /api/ai/* and /api/sakana/* supported for frontend compatibility)
 Route::post('/api/ai/chat', [SakanaController::class, 'chat'])->name('sakana.ai.chat');
@@ -96,5 +98,8 @@ Route::get('/uploads/{filename}', function ($filename) {
 
     abort(404, 'Image not found');
 })->where('filename', '[A-Za-z0-9_\-\.]+');
+
+// Numeric URL Redirect Handler (e.g. /1, /2, /3 -> 301 Permanent Redirect to /services/1, /services/2)
+Route::get('/{id}', [HomeController::class, 'numericRedirect'])->where('id', '[0-9]+');
 
 

@@ -136,4 +136,96 @@ class HomeController extends Controller
 
         return redirect('/?submitted=true#contact')->with('success', 'お問い合わせありがとうございます。担当者より近日中にご連絡申し上げます。');
     }
+
+    /**
+     * Handle numeric URL aliases (e.g. /1, /2, /3, /4) and permanently 301 redirect
+     * them to their canonical full paths (/services/1, /services/2, etc.) to fix search index errors.
+     */
+    public function numericRedirect($id)
+    {
+        $numId = (int)$id;
+
+        // 1. Check if Service exists
+        $service = Service::find($numId);
+        if ($service) {
+            return redirect()->route('services.detail', ['id' => $numId], 301);
+        }
+
+        // 2. Check if Story exists
+        $story = Story::find($numId);
+        if ($story) {
+            return redirect()->route('stories.detail', ['id' => $numId], 301);
+        }
+
+        // 3. Fallback to homepage services section
+        return redirect()->to('/#services', 301);
+    }
+
+    /**
+     * Generate dynamic XML sitemap for SEO crawlers and Google Search Console.
+     */
+    public function sitemap()
+    {
+        $services = Service::orderBy('id', 'asc')->get();
+        $stories = Story::orderBy('id', 'asc')->get();
+        $baseUrl = config('app.url', 'https://miransh.co.jp');
+        $baseUrl = rtrim($baseUrl, '/');
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+        // Homepage
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>{$baseUrl}/</loc>\n";
+        $xml .= "    <lastmod>" . date('Y-m-d') . "</lastmod>\n";
+        $xml .= "    <changefreq>weekly</changefreq>\n";
+        $xml .= "    <priority>1.0</priority>\n";
+        $xml .= "  </url>\n";
+
+        // Services
+        foreach ($services as $srv) {
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>{$baseUrl}/services/{$srv->id}</loc>\n";
+            $xml .= "    <lastmod>" . date('Y-m-d') . "</lastmod>\n";
+            $xml .= "    <changefreq>monthly</changefreq>\n";
+            $xml .= "    <priority>0.8</priority>\n";
+            $xml .= "  </url>\n";
+        }
+
+        // Stories
+        foreach ($stories as $st) {
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>{$baseUrl}/stories/{$st->id}</loc>\n";
+            $xml .= "    <lastmod>" . date('Y-m-d') . "</lastmod>\n";
+            $xml .= "    <changefreq>monthly</changefreq>\n";
+            $xml .= "    <priority>0.7</priority>\n";
+            $xml .= "  </url>\n";
+        }
+
+        $xml .= '</urlset>';
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=utf-8',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
+     * Return SEO robots.txt with sitemap reference.
+     */
+    public function robots()
+    {
+        $baseUrl = config('app.url', 'https://miransh.co.jp');
+        $baseUrl = rtrim($baseUrl, '/');
+
+        $content = "User-agent: *\n";
+        $content .= "Allow: /\n";
+        $content .= "Disallow: /admin\n";
+        $content .= "Disallow: /api/\n\n";
+        $content .= "Sitemap: {$baseUrl}/sitemap.xml\n";
+
+        return response($content, 200, [
+            'Content-Type' => 'text/plain; charset=utf-8',
+        ]);
+    }
 }
