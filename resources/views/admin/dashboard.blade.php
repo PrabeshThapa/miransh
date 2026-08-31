@@ -665,13 +665,34 @@
                 </div>
             </div>
 
-            <!-- TAB 4: STORIES -->
+            <!-- TAB 4: STORIES (採用事例・ニュース) -->
             <div id="pane-stories" class="tab-pane">
                 <div class="admin-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h2 style="font-size: 20px; font-weight: 800; color: #0F172A;">
-                            採用事例・お知らせ一覧 ({{ count($stories) }}件)
-                        </h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">
+                                📰 採用事例・お知らせ 管理 (<span id="story-count-display">{{ count($stories) }}</span>件)
+                            </h2>
+                            <p style="font-size: 13px; color: #64748B; margin: 0;">ウェブサイト上の「採用事例」セクションにリアルタイムに反映されます。記事の新規追加、写真変更、日英語コンテンツの編集が可能です。</p>
+                        </div>
+                        <button type="button" class="btn-primary" onclick="openStoryCreateModal()" style="font-size: 14px; padding: 10px 20px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            新規事例を追加
+                        </button>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #F8FAFC; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                        <div style="flex: 1; min-width: 240px; position: relative;">
+                            <input 
+                                type="text" 
+                                id="story-search-input" 
+                                oninput="filterStoryTable()" 
+                                placeholder="🔍 タイトル・概要・キーワードで検索..." 
+                                style="width: 100%; padding: 8px 12px 8px 32px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF;"
+                            >
+                            <span style="position: absolute; left: 10px; top: 9px; color: #94A3B8; pointer-events: none;">🔍</span>
+                        </div>
                     </div>
 
                     <div class="table-responsive">
@@ -682,29 +703,271 @@
                                     <th>タイトル (日本語 / 英語)</th>
                                     <th>カテゴリ</th>
                                     <th>公開日</th>
-                                    <th style="width: 120px;">操作</th>
+                                    <th>作成者</th>
+                                    <th style="width: 180px; text-align: right;">操作</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($stories as $story)
-                                <tr>
+                            <tbody id="stories-table-body">
+                                @forelse ($stories as $story)
+                                <tr class="story-row" data-search="{{ strtolower($story->title_ja . ' ' . $story->title_en . ' ' . $story->summary_ja . ' ' . $story->category_ja) }}">
                                     <td style="text-align: center;">
-                                        <img src="{{ $story->image ?? '/images/story1.jpg' }}" alt="{{ $story->title_ja }}" style="width: 54px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <img src="{{ $story->image ?? '/images/story1.jpg' }}" alt="{{ $story->title_ja }}" style="width: 58px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                     </td>
                                     <td>
-                                        <strong>{{ $story->title_ja }}</strong><br>
+                                        <strong style="color: #0F172A; font-size: 14px;">{{ $story->title_ja }}</strong>
+                                        @if ($story->featured)
+                                        <span style="font-size: 10px; background: #FEF3C7; color: #92400E; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">★ おすすめ</span>
+                                        @endif
+                                        <br>
                                         <span style="font-size: 12px; color: #64748B;">{{ $story->title_en }}</span>
                                     </td>
-                                    <td><span class="badge-status">{{ $story->category_ja }}</span></td>
-                                    <td style="font-size: 13px; color: #64748B;">{{ $story->published_date }}</td>
-                                    <td>
-                                        <a href="{{ route('stories.detail', $story->id) }}" target="_blank" class="badge-status" style="text-decoration: none;">記事確認 ↗</a>
+                                    <td><span class="badge-status" style="background: #EFF6FF; color: #1D4ED8;">{{ $story->category_ja }}</span></td>
+                                    <td style="font-size: 13px; color: #64748B; white-space: nowrap;">{{ $story->published_date }}</td>
+                                    <td style="font-size: 12px; color: #64748B; white-space: nowrap;">{{ $story->author ?? 'MIRANSH' }}</td>
+                                    <td style="text-align: right; white-space: nowrap;">
+                                        <button 
+                                            type="button" 
+                                            class="badge-status" 
+                                            style="background: #0284C7; color: #FFFFFF; border: none; cursor: pointer; padding: 5px 10px; margin-right: 4px; font-weight: 700;"
+                                            onclick='openStoryEditModal(@json($story))'
+                                        >
+                                            ✏️ 編集
+                                        </button>
+                                        
+                                        <a href="{{ route('stories.detail', $story->id) }}" target="_blank" class="badge-status" style="background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; text-decoration: none; padding: 4px 8px; margin-right: 4px;">
+                                            ↗
+                                        </a>
+
+                                        <form action="{{ route('admin.stories.delete', $story->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('本当に事例「{{ $story->title_ja }}」を削除しますか？');">
+                                            @csrf
+                                            <button type="submit" class="badge-status" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; cursor: pointer; padding: 4px 8px;">
+                                                🗑️
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
-                                @endforeach
+                                @empty
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">現在、登録された採用事例はありません。</td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- STORY CREATE MODAL -->
+            <div id="storyCreateModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div class="admin-card" style="width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">
+                            📰 新規 採用事例・記事の作成 (Add New Story)
+                        </h3>
+                        <button type="button" onclick="closeStoryCreateModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
+                    </div>
+
+                    <form action="{{ route('admin.stories.store', [], false) }}" method="POST">
+                        @csrf
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">タイトル (日本語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="create-story-title-ja" name="title_ja" class="form-input" placeholder="例: 神奈川県・特別養護老人ホーム様での特定技能介護マッチング" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">タイトル (英語) (Title in English) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="create-story-title-en" name="title_en" class="form-input" placeholder="e.g. Caregiving Placement in Special Nursing Home" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (日本語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="create-story-cat-ja" name="category_ja" class="form-input" value="介護分野 / 特定技能1号" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (英語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="create-story-cat-en" name="category_en" class="form-input" value="Nursing Care / SSW" required>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload for New Story -->
+                        <div class="form-group" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                            <label class="form-label" style="font-weight: 700;">📷 カバー写真 (Cover Image)</label>
+                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                                <div style="width: 120px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #CBD5E1; background: #E2E8F0; display: flex; align-items: center; justify-content: center;">
+                                    <img id="preview-create-story-img" src="/images/story1.jpg" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="flex: 1; min-width: 240px;">
+                                    <input type="text" id="create-story-image" name="image" class="form-input" value="/images/story1.jpg" style="margin-bottom: 8px;" oninput="updateStoryImagePreview('create-story-image', 'preview-create-story-img')">
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <label class="btn-secondary" style="font-size: 12px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                                            📁 ファイルを選択
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleStoryUpload(this, 'create-story-image', 'preview-create-story-img', 'status-create-story-upload')">
+                                        </label>
+                                        <span id="status-create-story-upload" style="font-size: 12px; color: #64748B;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">概要文 (日本語) <span style="color: #EF4444;">*</span></label>
+                            <textarea id="create-story-summary-ja" name="summary_ja" class="form-textarea" rows="3" placeholder="事例の要約・背景・導入前の課題..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">概要文 (英語) (Summary in English) <span style="color: #EF4444;">*</span></label>
+                            <textarea id="create-story-summary-en" name="summary_en" class="form-textarea" rows="3" placeholder="Summary of the success story..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">本文・詳細記事 (日本語) (Full Article in Japanese)</label>
+                            <textarea id="create-story-content-ja" name="content_ja" class="form-textarea" rows="6" placeholder="詳しい導入経緯、ネパール人材の活躍の様子、施設長様からのコメントなど..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">本文・詳細記事 (英語) (Full Article in English)</label>
+                            <textarea id="create-story-content-en" name="content_en" class="form-textarea" rows="6" placeholder="Full details of the story in English..."></textarea>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">公開日 (Published Date)</label>
+                                <input type="text" name="published_date" class="form-input" value="{{ date('Y.m.d') }}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">執筆者・編集部 (Author)</label>
+                                <input type="text" name="author" class="form-input" value="MIRANSH 編集部">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2" style="align-items: center;">
+                            <div class="form-group">
+                                <label class="form-label">表示順序 (Sort Order)</label>
+                                <input type="number" name="sort_order" class="form-input" value="0" min="0">
+                            </div>
+                            <div style="padding-top: 14px;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                                    <input type="checkbox" name="featured" value="1" checked style="width: 18px; height: 18px;">
+                                    ★ トップページのおすすめ事例に掲載する
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #E2E8F0; padding-top: 16px;">
+                            <button type="button" onclick="closeStoryCreateModal()" class="btn-outline-white" style="color: #475569; border-color: #CBD5E1; padding: 10px 20px;">キャンセル</button>
+                            <button type="submit" class="btn-primary" style="padding: 10px 24px;">✓ 事例を公開・登録する</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- STORY EDIT MODAL -->
+            <div id="storyEditModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div class="admin-card" style="width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">
+                            ✏️ 採用事例の編集 (Edit Story <span id="edit-story-id-badge" class="badge-status" style="background: #EFF6FF; color: #1D4ED8;"></span>)
+                        </h3>
+                        <button type="button" onclick="closeStoryEditModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
+                    </div>
+
+                    <form id="form-edit-story" action="" method="POST">
+                        @csrf
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">タイトル (日本語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="edit-story-title-ja" name="title_ja" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">タイトル (英語) (Title in English) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="edit-story-title-en" name="title_en" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (日本語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="edit-story-cat-ja" name="category_ja" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">カテゴリ (英語) <span style="color: #EF4444;">*</span></label>
+                                <input type="text" id="edit-story-cat-en" name="category_en" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload for Edit Story -->
+                        <div class="form-group" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                            <label class="form-label" style="font-weight: 700;">📷 カバー写真 (Cover Image)</label>
+                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                                <div style="width: 120px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #CBD5E1; background: #E2E8F0; display: flex; align-items: center; justify-content: center;">
+                                    <img id="preview-edit-story-img" src="/images/story1.jpg" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="flex: 1; min-width: 240px;">
+                                    <input type="text" id="edit-story-image" name="image" class="form-input" style="margin-bottom: 8px;" oninput="updateStoryImagePreview('edit-story-image', 'preview-edit-story-img')">
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <label class="btn-secondary" style="font-size: 12px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                                            📁 ファイルを選択して置換
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleStoryUpload(this, 'edit-story-image', 'preview-edit-story-img', 'status-edit-story-upload')">
+                                        </label>
+                                        <span id="status-edit-story-upload" style="font-size: 12px; color: #64748B;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">概要文 (日本語) <span style="color: #EF4444;">*</span></label>
+                            <textarea id="edit-story-summary-ja" name="summary_ja" class="form-textarea" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">概要文 (英語) (Summary in English) <span style="color: #EF4444;">*</span></label>
+                            <textarea id="edit-story-summary-en" name="summary_en" class="form-textarea" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">本文・詳細記事 (日本語) (Full Article in Japanese)</label>
+                            <textarea id="edit-story-content-ja" name="content_ja" class="form-textarea" rows="6"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">本文・詳細記事 (英語) (Full Article in English)</label>
+                            <textarea id="edit-story-content-en" name="content_en" class="form-textarea" rows="6"></textarea>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">公開日 (Published Date)</label>
+                                <input type="text" id="edit-story-published-date" name="published_date" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">執筆者・編集部 (Author)</label>
+                                <input type="text" id="edit-story-author" name="author" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2" style="align-items: center;">
+                            <div class="form-group">
+                                <label class="form-label">表示順序 (Sort Order)</label>
+                                <input type="number" id="edit-story-sort-order" name="sort_order" class="form-input" min="0">
+                            </div>
+                            <div style="padding-top: 14px;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                                    <input type="checkbox" id="edit-story-featured" name="featured" value="1" style="width: 18px; height: 18px;">
+                                    ★ トップページのおすすめ事例に掲載する
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #E2E8F0; padding-top: 16px;">
+                            <button type="button" onclick="closeStoryEditModal()" class="btn-outline-white" style="color: #475569; border-color: #CBD5E1; padding: 10px 20px;">キャンセル</button>
+                            <button type="submit" class="btn-primary" style="padding: 10px 24px;">✓ 事例の変更を保存する</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -1292,12 +1555,135 @@
             }
         }
 
+        // --- STORY MANAGEMENT JAVASCRIPT ---
+        function openStoryCreateModal() {
+            document.getElementById('storyCreateModal').style.display = 'flex';
+            document.getElementById('create-story-title-ja').focus();
+        }
+
+        function closeStoryCreateModal() {
+            document.getElementById('storyCreateModal').style.display = 'none';
+        }
+
+        function openStoryEditModal(story) {
+            if (!story) return;
+            const modal = document.getElementById('storyEditModal');
+            const form = document.getElementById('form-edit-story');
+            
+            // Set form action URL to /admin/stories/{id}
+            form.action = `/admin/stories/${story.id}`;
+            
+            document.getElementById('edit-story-id-badge').textContent = `#${story.id}`;
+            document.getElementById('edit-story-title-ja').value = story.title_ja || '';
+            document.getElementById('edit-story-title-en').value = story.title_en || '';
+            document.getElementById('edit-story-cat-ja').value = story.category_ja || '';
+            document.getElementById('edit-story-cat-en').value = story.category_en || '';
+            document.getElementById('edit-story-summary-ja').value = story.summary_ja || '';
+            document.getElementById('edit-story-summary-en').value = story.summary_en || '';
+            document.getElementById('edit-story-content-ja').value = story.content_ja || '';
+            document.getElementById('edit-story-content-en').value = story.content_en || '';
+            document.getElementById('edit-story-image').value = story.image || '/images/story1.jpg';
+            document.getElementById('preview-edit-story-img').src = story.image || '/images/story1.jpg';
+            document.getElementById('edit-story-published-date').value = story.published_date || '';
+            document.getElementById('edit-story-author').value = story.author || 'MIRANSH';
+            document.getElementById('edit-story-sort-order').value = story.sort_order ?? 0;
+            document.getElementById('edit-story-featured').checked = Boolean(story.featured);
+            
+            modal.style.display = 'flex';
+            document.getElementById('edit-story-title-ja').focus();
+        }
+
+        function closeStoryEditModal() {
+            document.getElementById('storyEditModal').style.display = 'none';
+        }
+
+        function updateStoryImagePreview(inputId, imgId) {
+            const input = document.getElementById(inputId);
+            const img = document.getElementById(imgId);
+            if (input && img && input.value.trim()) {
+                img.src = input.value.trim();
+            }
+        }
+
+        async function handleStoryUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId) {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById(statusBadgeId);
+            if (statusEl) {
+                statusEl.style.color = '#92400E';
+                statusEl.innerHTML = '⏳ アップロード中... (' + Math.round(file.size / 1024) + ' KB)';
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/api/admin/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.url) {
+                    const hiddenInput = document.getElementById(targetHiddenInputId);
+                    if (hiddenInput) hiddenInput.value = data.url;
+
+                    const previewImg = document.getElementById(previewImgId);
+                    if (previewImg) previewImg.src = data.url + '?t=' + Date.now();
+
+                    if (statusEl) {
+                        statusEl.style.color = '#166534';
+                        statusEl.innerHTML = '✓ 画像反映完了';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.style.color = '#DC2626';
+                        statusEl.innerHTML = '❌ ' + (data.error || 'Failed');
+                    }
+                }
+            } catch (err) {
+                if (statusEl) {
+                    statusEl.style.color = '#DC2626';
+                    statusEl.innerHTML = '❌ アップロードエラー';
+                }
+            }
+        }
+
+        function filterStoryTable() {
+            const query = (document.getElementById('story-search-input').value || '').toLowerCase().trim();
+            const rows = document.querySelectorAll('#stories-table-body .story-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowSearch = row.getAttribute('data-search') || '';
+                if (!query || rowSearch.includes(query)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const countDisplay = document.getElementById('story-count-display');
+            if (countDisplay) countDisplay.textContent = visibleCount;
+        }
+
         // Close modals on Escape key or backdrop click
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeFaqCreateModal();
                 closeFaqEditModal();
+                closeStoryCreateModal();
+                closeStoryEditModal();
             }
+        });
+
+        document.getElementById('storyCreateModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'storyCreateModal') closeStoryCreateModal();
+        });
+
+        document.getElementById('storyEditModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'storyEditModal') closeStoryEditModal();
         });
 
         document.getElementById('faqCreateModal')?.addEventListener('click', (e) => {
