@@ -1250,21 +1250,28 @@
                         </form>
                     </div>
                 </div>
-            </div>
 
             <!-- TAB 6: AI CONFIGURATION & DIAGNOSTICS -->
             <div id="pane-ai" class="tab-pane">
                 <div class="admin-card">
-                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        🤖 MIRANSH AI 連携ステータス & 接続テスト
-                    </h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">
+                                🤖 MIRANSH AI 連携ステータス & 接続テスト
+                            </h2>
+                            <p style="font-size: 13px; color: #64748B; margin: 0;">MIRANSHウェブサイト上の浮動AIコンサルタントの稼働状態、モデル設定、API接続テストを管理します。</p>
+                        </div>
+                        <span class="badge-status" style="background: #DCFCE7; color: #15803D; font-size: 13px; padding: 6px 14px; font-weight: 700;">
+                            ● 稼働中 (Active Engine)
+                        </span>
+                    </div>
 
-                    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
-                        <div style="font-weight: 700; color: #166534; font-size: 15px; margin-bottom: 6px;">
-                            ✓ AI API & ナレッジエンジン稼働中 (Operational)
+                    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+                        <div style="font-weight: 700; color: #166534; font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                            <span>✓</span> AI推論エンジン & ナレッジベース稼働中
                         </div>
                         <div style="font-size: 13px; color: #14532D; line-height: 1.6;">
-                            MIRANSHウェブサイト上の浮動AIコンサルタントは、高精度推論モデルおよびMIRANSH独自ナレッジベースと直接連携しています。
+                            MIRANSH公式ウェブサイト右下に常駐するAIエージェントは、Sakana AI 推論モデルおよびMIRANSH独自データ（会社概要、事業内容、特定技能、介護・建設支援実績、FAQ）とリアルタイム連携しています。
                         </div>
                     </div>
 
@@ -1274,9 +1281,9 @@
                             <input type="text" id="ai-baseUrl" class="form-input" value="{{ env('SAKANA_AI_BASE_URL', 'https://api.sakana.ai/v1') }}" readonly>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">アクティブモデル (Active Model)</label>
+                            <label class="form-label">推論モデル (Active Model)</label>
                             <select id="ai-model" class="form-select">
-                                <option value="sakana-namazu" selected>sakana-namazu (日本語特化・推論モデル)</option>
+                                <option value="sakana-namazu" selected>sakana-namazu (日本語特化・高速推論モデル)</option>
                                 <option value="fugu">fugu (マルチエージェント推論モデル)</option>
                                 <option value="fugu-ultra">fugu-ultra (超高精度エージェント)</option>
                             </select>
@@ -1284,17 +1291,17 @@
                     </div>
 
                     <div class="form-group" style="margin-bottom: 24px;">
-                        <label class="form-label">API Key (現在設定中のキー: <code>fish_5417ad43...3eb84e</code>)</label>
-                        <input type="password" id="ai-apiKey" class="form-input" placeholder="新しいAPIキーを入力して上書きテストが可能です">
+                        <label class="form-label">API Key 設定 (現在設定中のキー: <code>fish_5417ad43...3eb84e</code>)</label>
+                        <input type="password" id="ai-apiKey" class="form-input" placeholder="新しいAPIキーを入力して上書きテストが可能です (空欄の場合はデフォルトキーを使用)">
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-                        <button type="button" class="btn-primary" onclick="testSakanaConnection()" id="btn-test-ai">
-                            ⚡ API 接続テストを実行
+                        <button type="button" class="btn-primary" onclick="testSakanaConnection()" id="btn-test-ai" style="padding: 10px 24px; font-size: 14px;">
+                            ⚡ Sakana AI 接続テストを実行
                         </button>
                     </div>
 
-                    <div id="ai-test-results" style="display: none; background: #0F172A; color: #F8FAFC; border-radius: 8px; padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.6;">
+                    <div id="ai-test-results" style="display: none; background: #0F172A; color: #F8FAFC; border-radius: 8px; padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.6; border: 1px solid #334155;">
                     </div>
                 </div>
             </div>
@@ -1302,39 +1309,65 @@
             <!-- TAB 7: INQUIRIES -->
             <div id="pane-inquiries" class="tab-pane">
                 <div class="admin-card">
-                    <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        お問い合わせ・相談受付一覧 ({{ count($inquiries) }}件)
-                    </h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">
+                                📬 お問い合わせ・相談受付一覧 ({{ count($inquiries) }}件)
+                            </h2>
+                            <p style="font-size: 13px; color: #64748B; margin: 0;">ウェブサイトのお問い合わせフォームから送信されたメッセージ一覧です。ステータス更新や削除が可能です。</p>
+                        </div>
+                    </div>
 
                     @if (count($inquiries) > 0)
                     <div class="table-responsive">
                         <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th>受信日時</th>
+                                    <th style="width: 140px;">受信日時</th>
                                     <th>企業名 / お名前</th>
                                     <th>連絡先</th>
                                     <th>ご相談分野</th>
                                     <th>メッセージ内容</th>
+                                    <th style="width: 130px; text-align: center;">対応状況</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($inquiries as $inq)
                                 <tr>
-                                    <td style="font-size: 12px; color: #64748B; white-space: nowrap;">{{ $inq->created_at }}</td>
+                                    <td style="font-size: 12px; color: #64748B; white-space: nowrap;">
+                                        {{ $inq->created_at ?? '受付完了' }}
+                                    </td>
                                     <td>
-                                        <strong>{{ $inq->name }}</strong><br>
+                                        <strong style="color: #0F172A; font-size: 14px;">{{ $inq->name }}</strong><br>
                                         <span style="font-size: 12px; color: #64748B;">{{ $inq->company_name ?? '個人・未記入' }}</span>
                                     </td>
                                     <td style="font-size: 13px;">
-                                        <div>📧 {{ $inq->email }}</div>
-                                        <div>📞 {{ $inq->phone ?? '-' }}</div>
+                                        <div>📧 <a href="mailto:{{ $inq->email }}" style="color: #2563EB; text-decoration: none;">{{ $inq->email }}</a></div>
+                                        @if ($inq->phone)
+                                        <div>📞 <a href="tel:{{ $inq->phone }}" style="color: #475569; text-decoration: none;">{{ $inq->phone }}</a></div>
+                                        @endif
                                     </td>
                                     <td>
-                                        <span class="badge-status">{{ $inq->service_interest ?? '全般' }}</span>
+                                        <span class="badge-status" style="background: #EFF6FF; color: #1D4ED8;">{{ $inq->service_interest ?? '全般' }}</span>
                                     </td>
-                                    <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">
+                                    <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line; line-height: 1.5;">
                                         {{ $inq->message }}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <form action="/admin/inquiries/{{ $inq->id }}/status" method="POST" style="margin: 0 0 6px 0;">
+                                            @csrf
+                                            <select name="status" onchange="this.form.submit()" class="form-select" style="padding: 4px 8px; font-size: 12px; font-weight: 700; width: 100%; border-radius: 6px; cursor: pointer; background: {{ ($inq->status ?? '新規') === '新規' ? '#FEF2F2' : (($inq->status ?? '') === '連絡済み' ? '#EFF6FF' : (($inq->status ?? '') === '対応中' ? '#FFFBEB' : (($inq->status ?? '') === '成約' ? '#ECFDF5' : '#F1F5F9'))) }}; color: {{ ($inq->status ?? '新規') === '新規' ? '#DC2626' : (($inq->status ?? '') === '連絡済み' ? '#1D4ED8' : (($inq->status ?? '') === '対応中' ? '#D97706' : (($inq->status ?? '') === '成約' ? '#059669' : '#475569'))) }};">
+                                                <option value="新規" {{ ($inq->status ?? '新規') === '新規' ? 'selected' : '' }}>🔴 新規</option>
+                                                <option value="連絡済み" {{ ($inq->status ?? '') === '連絡済み' ? 'selected' : '' }}>🔵 連絡済み</option>
+                                                <option value="対応中" {{ ($inq->status ?? '') === '対応中' ? 'selected' : '' }}>🟡 対応中</option>
+                                                <option value="成約" {{ ($inq->status ?? '') === '成約' ? 'selected' : '' }}>🟢 成約</option>
+                                                <option value="アーカイブ" {{ ($inq->status ?? '') === 'アーカイブ' ? 'selected' : '' }}>⚪ アーカイブ</option>
+                                            </select>
+                                        </form>
+                                        <form action="/admin/inquiries/{{ $inq->id }}/delete" method="POST" onsubmit="return confirm('お問い合わせ「{{ addslashes($inq->name) }}」を削除しますか？');" style="margin: 0;">
+                                            @csrf
+                                            <button type="submit" style="background: none; border: none; color: #94A3B8; font-size: 11px; cursor: pointer; text-decoration: underline;">削除</button>
+                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
