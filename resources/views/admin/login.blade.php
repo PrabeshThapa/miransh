@@ -149,12 +149,12 @@
                 @csrf
                 <div class="form-group">
                     <label for="email">Username or Email</label>
-                    <input type="text" id="email" name="email" class="form-control" required placeholder="admin@miransh.jp" value="{{ old('email', 'admin@miransh.jp') }}" autofocus>
+                    <input type="text" id="email" name="email" class="form-control" required placeholder="Enter Email">
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••" value="admin123">
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Enter password">
                 </div>
 
                 <button type="submit" class="btn-submit">

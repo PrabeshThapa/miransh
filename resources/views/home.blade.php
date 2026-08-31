@@ -987,9 +987,9 @@
                 <div>
                     &copy; {{ date('Y') }} {{ $company->name_ja ?? 'MIRANSH合同会社' }} (MIRANSH LLC). All Rights Reserved.
                 </div>
-                <div>
+                <!-- <div>
                     <a href="{{ route('admin.login') }}" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a>
-                </div>
+                </div> -->
             </div>
         </div>
     </footer>
