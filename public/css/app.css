@@ -55,9 +55,12 @@ img {
 }
 
 .container {
-    width: 92%;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(16px, 4vw, 32px);
+    padding-right: clamp(16px, 4vw, 32px);
 }
 
 /* ===================================================
@@ -441,14 +444,15 @@ header {
 }
 
 .hero-stats-row {
-    display: flex;
-    gap: 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: clamp(14px, 2.5vw, 28px);
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     padding-top: 24px;
 }
 
 .stat-item-num {
-    font-size: 20px;
+    font-size: clamp(18px, 2.5vw, 22px);
     font-weight: 800;
     color: #FFFFFF;
 }
@@ -461,31 +465,38 @@ header {
 
 .hero-image-wrapper {
     position: relative;
+    width: 100%;
 }
 
 .hero-image-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-lg);
-    padding: 12px;
+    padding: clamp(8px, 2vw, 14px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
 }
 
 .hero-image-card img {
     border-radius: var(--radius-md);
     width: 100%;
-    height: 380px;
+    aspect-ratio: 16/11;
+    min-height: 240px;
+    max-height: 420px;
     object-fit: cover;
 }
 
 .hero-floating-badge {
     position: absolute;
-    bottom: -16px;
-    left: -16px;
-    background: #FFFFFF;
+    bottom: clamp(10px, 2.5vw, 20px);
+    left: clamp(10px, 2.5vw, 20px);
+    max-width: calc(100% - 32px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
     color: var(--text-main);
-    padding: 12px 18px;
+    padding: 10px 16px;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-xl);
     display: flex;
@@ -2257,8 +2268,10 @@ footer {
 }
 
 /* ===================================================
-   MEDIA QUERIES FOR ALL BREAKPOINTS
+   MEDIA QUERIES FOR ALL BREAKPOINTS (Mobile-First System)
 =================================================== */
+
+/* Tablet and Small Laptops (max-width: 1024px) */
 @media (max-width: 1024px) {
     .hero-grid,
     .about-grid,
@@ -2267,19 +2280,36 @@ footer {
     .contact-grid,
     .detail-content-layout {
         grid-template-columns: 1fr;
-        gap: 36px;
+        gap: clamp(24px, 4vw, 40px);
     }
 
-    .strengths-pillars-grid,
+    .strengths-pillars-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
     .industries-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .commitments-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .stories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
     }
 
     .lifecycle-steps {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
     }
 }
 
+/* Tablet & Mobile Admin Viewport (max-width: 900px) */
 @media (max-width: 900px) {
     .admin-layout {
         display: flex;
@@ -2288,29 +2318,40 @@ footer {
 
     .admin-sidebar {
         padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .sidebar-menu {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 8px;
+        display: none; /* Replaced by sticky mobile tabs scroller */
     }
 
     .admin-mobile-tabs-scroller {
         display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .admin-main {
-        padding: 20px 16px;
+        padding: 20px 14px;
+    }
+
+    .admin-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 }
 
+/* Standard Mobile & Phablet (max-width: 768px) */
 @media (max-width: 768px) {
-    .container {
-        width: 94%;
+    .nav-links {
+        display: none !important;
     }
 
-    .nav-links {
+    .btn-header-cta {
         display: none !important;
     }
 
@@ -2319,7 +2360,7 @@ footer {
     }
 
     .brand-title {
-        font-size: 17px;
+        font-size: clamp(15px, 4vw, 18px);
     }
 
     .brand-subtitle {
@@ -2327,16 +2368,16 @@ footer {
     }
 
     .hero-section {
-        padding: 44px 0 60px;
+        padding: clamp(36px, 6vw, 56px) 0 clamp(48px, 8vw, 68px);
     }
 
     .hero-title {
-        font-size: 26px;
-        line-height: 1.3;
+        font-size: clamp(24px, 5.5vw, 32px);
+        line-height: 1.25;
     }
 
     .hero-desc {
-        font-size: 14px;
+        font-size: clamp(14px, 3.5vw, 16px);
         margin-bottom: 24px;
     }
 
@@ -2355,15 +2396,9 @@ footer {
     }
 
     .hero-stats-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-        margin-top: 32px;
-    }
-
-    .hero-floating-badge {
-        bottom: 12px;
-        right: 12px;
-        padding: 8px 12px;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+        margin-top: 24px;
     }
 
     .services-grid,
@@ -2372,7 +2407,7 @@ footer {
     .strengths-pillars-grid,
     .industries-grid {
         grid-template-columns: 1fr;
-        gap: 18px;
+        gap: 16px;
     }
 
     .form-grid-2 {
@@ -2385,16 +2420,27 @@ footer {
         gap: 28px;
     }
 
+    .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
     .lifecycle-steps {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
     .strengths-callout {
-        padding: 28px 16px;
+        padding: clamp(24px, 5vw, 36px) clamp(16px, 4vw, 24px);
+    }
+
+    .strengths-tagline {
+        font-size: clamp(18px, 4vw, 22px);
     }
 
     .company-profile-wrapper {
-        padding: 16px;
+        padding: clamp(14px, 3vw, 20px);
         border-radius: var(--radius-md);
     }
 
@@ -2404,15 +2450,45 @@ footer {
         font-size: 13px;
     }
 
+    .vision-card {
+        padding: clamp(24px, 4vw, 36px) clamp(16px, 3vw, 24px);
+    }
+
+    .vision-ceo-photo {
+        width: 160px;
+        height: 160px;
+    }
+
+    .contact-section {
+        padding: clamp(48px, 8vw, 72px) 0;
+    }
+
+    .contact-form-box {
+        padding: clamp(20px, 4vw, 32px) clamp(16px, 3vw, 24px);
+    }
+
     .admin-card {
-        padding: 20px 16px;
+        padding: clamp(16px, 3vw, 24px) clamp(12px, 2.5vw, 18px);
     }
 
     .sakana-float-btn {
         bottom: 16px;
         right: 16px;
-        padding: 10px 16px;
+        padding: 9px 14px;
         font-size: 12px;
+    }
+
+    .sakana-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .sakana-chat-window {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
     }
 
     .faq-grid {
@@ -2420,26 +2496,94 @@ footer {
     }
 }
 
+/* Compact Smartphones (max-width: 480px) */
 @media (max-width: 480px) {
+    .container {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .brand-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    .brand-logo-img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .hero-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+
+    .hero-title {
+        font-size: 22px;
+    }
+
     .hero-stats-row {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     .stat-item-num {
-        font-size: 24px;
+        font-size: 18px;
+    }
+
+    .profile-table {
+        display: block;
+        width: 100%;
+    }
+
+    .profile-table tbody,
+    .profile-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .profile-table tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
     }
 
     .profile-table th {
-        width: 40%;
+        display: block;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        background: #F1F5F9;
+        font-size: 12px;
+    }
+
+    .profile-table td {
+        display: block;
+        width: 100%;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+    .map-container,
+    .map-container iframe {
+        min-height: 260px;
+        height: 260px;
     }
 
     .admin-image-preview-card {
         flex-direction: column;
+        align-items: stretch;
     }
 
     .admin-preview-thumbnail {
         width: 100%;
         height: 160px;
+    }
+
+    .lifecycle-steps {
+        grid-template-columns: 1fr;
     }
 }
 
