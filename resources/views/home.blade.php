@@ -289,23 +289,68 @@
             </div>
 
             <div class="services-grid">
-                @foreach($services as $service)
-                <div class="service-card">
-                    <div class="service-card-icon">
-                        <span style="font-size: 26px;">{{ $service->icon ?? '💼' }}</span>
+                @php
+                    $themeClasses = ['theme-blue', 'theme-emerald', 'theme-indigo', 'theme-teal'];
+                    $categoryPillsJa = ['外国人材紹介', '特定技能・受入支援', '生活・定着伴走', 'ネパール現地連携'];
+                    $categoryPillsEn = ['Global Recruitment', 'SSW Onboarding', 'Living & Retention', 'Nepali Network'];
+                @endphp
+                @foreach($services as $index => $service)
+                @php
+                    $theme = $themeClasses[$index % count($themeClasses)];
+                    $catJa = $categoryPillsJa[$index % count($categoryPillsJa)];
+                    $catEn = $categoryPillsEn[$index % count($categoryPillsEn)];
+                    $numLabel = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                @endphp
+                <div class="service-card" id="service-card-{{ $service->id }}">
+                    <div class="service-card-top">
+                        <div class="service-icon-wrap {{ $theme }}">
+                            @if(strtolower(trim($service->icon ?? '')) === 'users')
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            @elseif(strtolower(trim($service->icon ?? '')) === 'award' || strtolower(trim($service->icon ?? '')) === 'shield')
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                            @elseif(strtolower(trim($service->icon ?? '')) === 'heart-handshake' || strtolower(trim($service->icon ?? '')) === 'heart')
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/></svg>
+                            @elseif(strtolower(trim($service->icon ?? '')) === 'globe')
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            @else
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            @endif
+                        </div>
+                        <div class="service-badge-row">
+                            <span class="service-category-tag">
+                                <span class="lang-ja">{{ $catJa }}</span>
+                                <span class="lang-en">{{ $catEn }}</span>
+                            </span>
+                            <span class="service-num-pill">{{ $numLabel }}</span>
+                        </div>
                     </div>
-                    <h3 class="service-card-title">
-                        <span class="lang-ja">{{ $service->title_ja }}</span>
-                        <span class="lang-en">{{ $service->title_en }}</span>
-                    </h3>
-                    <p class="service-card-desc">
-                        <span class="lang-ja">{{ $service->description_ja }}</span>
-                        <span class="lang-en">{{ $service->description_en }}</span>
-                    </p>
-                    <a href="{{ route('services.detail', $service->id) }}" class="service-read-more">
-                        <span class="lang-ja">詳しく見る →</span>
-                        <span class="lang-en">Learn More →</span>
-                    </a>
+
+                    <div class="service-card-content">
+                        <h3 class="service-card-title">
+                            <span class="lang-ja">{{ $service->title_ja }}</span>
+                            <span class="lang-en">{{ $service->title_en }}</span>
+                        </h3>
+                        @if(!empty($service->subtitle_ja) || !empty($service->subtitle_en))
+                        <div class="service-card-subtitle">
+                            <span class="lang-ja">{{ $service->subtitle_ja }}</span>
+                            <span class="lang-en">{{ $service->subtitle_en }}</span>
+                        </div>
+                        @endif
+                        <p class="service-card-desc">
+                            <span class="lang-ja">{{ $service->description_ja ?? $service->desc_ja }}</span>
+                            <span class="lang-en">{{ $service->description_en ?? $service->desc_en }}</span>
+                        </p>
+                    </div>
+
+                    <div class="service-card-action">
+                        <a href="{{ route('services.detail', $service->id) }}" class="btn-service-link">
+                            <span class="btn-label">
+                                <span class="lang-ja">詳しく見る</span>
+                                <span class="lang-en">Learn More</span>
+                            </span>
+                            <span class="arrow-icon">→</span>
+                        </a>
+                    </div>
                 </div>
                 @endforeach
             </div>

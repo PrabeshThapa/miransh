@@ -12,7 +12,90 @@
             grid-template-columns: 260px 1fr;
             min-height: 100vh;
             background: #F1F5F9;
+            position: relative;
         }
+
+        /* Mobile Header */
+        .admin-mobile-header {
+            display: none;
+            background: #0B1C38;
+            color: #FFFFFF;
+            padding: 12px 16px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 990;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .admin-hamburger-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            border-radius: 8px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Mobile Quick Tab Bar */
+        .admin-mobile-tab-bar {
+            display: none;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 8px 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            position: sticky;
+            top: 62px;
+            z-index: 980;
+        }
+        .admin-mobile-tab-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .admin-mobile-tab-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            text-decoration: none;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .admin-mobile-tab-pill.active {
+            background: #2563EB;
+            color: #FFFFFF;
+            border-color: #2563EB;
+        }
+
+        /* Backdrop Overlay */
+        .admin-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .admin-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
         .admin-sidebar {
             background: #0B1C38;
             color: #FFFFFF;
@@ -27,6 +110,15 @@
             padding-bottom: 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 24px;
+        }
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
         }
         .sidebar-menu {
             list-style: none;
@@ -113,32 +205,122 @@
             background: #EFF6FF;
             color: #1D4ED8;
         }
+
+        /* Mobile Layout & Responsiveness */
+        @media (max-width: 1023px) {
+            .admin-layout {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                min-height: 100vh;
+            }
+            .admin-mobile-header {
+                display: flex;
+            }
+            .admin-mobile-tab-bar {
+                display: flex;
+            }
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                max-width: 85vw;
+                height: 100vh;
+                z-index: 999;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+                overflow-y: auto;
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-close-btn {
+                display: block;
+            }
+            .admin-main {
+                padding: 16px 14px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .admin-topbar {
+                display: none;
+            }
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .admin-card {
+                padding: 18px 14px;
+                border-radius: 10px;
+            }
+            .upload-preview-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Mobile Top Header -->
+    <header class="admin-mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="ナビゲーションメニューを開く">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 26px; height: 26px; filter: brightness(0) invert(1);">
+                <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="/" target="_blank" style="font-size: 12px; color: #93C5FD; text-decoration: none; font-weight: 700;">サイト表示 ↗</a>
+            <a href="{{ route('admin.logout', [], false) }}" style="font-size: 12px; color: #FCA5A5; text-decoration: none; font-weight: 700;">退出</a>
+        </div>
+    </header>
+
+    <!-- Mobile Horizontal Quick Tab Bar -->
+    <nav class="admin-mobile-tab-bar">
+        <button type="button" class="admin-mobile-tab-pill active" onclick="switchAdminTab('company', this)">🏢 会社・代表者</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('about', this)">📖 About</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('services', this)">💼 事業内容</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('stories', this)">📰 採用事例</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('faqs', this)">❓ FAQ ({{ count($faqs) }})</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('ai', this)">🐟 AI設定</button>
+        <button type="button" class="admin-mobile-tab-pill" onclick="switchAdminTab('inquiries', this)">📬 問合せ ({{ count($inquiries) }})</button>
+    </nav>
+
+    <!-- Offcanvas Backdrop Overlay -->
+    <div id="adminBackdrop" class="admin-backdrop" onclick="closeAdminSidebar()"></div>
+
     <div class="admin-layout">
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar">
-            <div class="sidebar-brand">
-                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;">
-                <div>
-                    <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
-                    <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
+            <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;">
+                    <div>
+                        <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
+                        <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
+                    </div>
                 </div>
+                <button type="button" class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="メニューを閉じる">✕</button>
             </div>
 
             <ul class="sidebar-menu">
-                <li><button class="sidebar-item-btn active" onclick="switchAdminTab('company', this)">🏢 会社情報・CEO設定</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('about', this)">📖 About (会社紹介)</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('services', this)">💼 事業内容 (Services)</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this)">📰 採用事例 (Stories)</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('faqs', this)">❓ FAQ・よくある質問 ({{ count($faqs) }})</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('ai', this)">🐟 Sakana AI 設定・テスト</button></li>
-                <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this)">📬 お問い合わせ ({{ count($inquiries) }})</button></li>
+                <li><button class="sidebar-item-btn active" onclick="switchAdminTab('company', this); closeAdminSidebar();">🏢 会社情報・CEO設定</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('about', this); closeAdminSidebar();">📖 About (会社紹介)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('services', this); closeAdminSidebar();">💼 事業内容 (Services)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('stories', this); closeAdminSidebar();">📰 採用事例 (Stories)</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('faqs', this); closeAdminSidebar();">❓ FAQ・よくある質問 ({{ count($faqs) }})</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('ai', this); closeAdminSidebar();">🐟 Sakana AI 設定・テスト</button></li>
+                <li><button class="sidebar-item-btn" onclick="switchAdminTab('inquiries', this); closeAdminSidebar();">📬 お問い合わせ ({{ count($inquiries) }})</button></li>
             </ul>
 
-            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
                 <a href="/" target="_blank" style="color: #93C5FD; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                     <span>↗ 公開サイトを確認</span>
                 </a>
@@ -1227,6 +1409,20 @@
                 statusEl.style.color = '#166534';
                 statusEl.innerHTML = '✓ デフォルト画像に設定しました';
             }
+        }
+
+        function toggleAdminSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const backdrop = document.getElementById('adminBackdrop');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (backdrop) backdrop.classList.toggle('active');
+        }
+
+        function closeAdminSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const backdrop = document.getElementById('adminBackdrop');
+            if (sidebar) sidebar.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('active');
         }
 
         // --- INITIALIZE TAB ON LOAD ---

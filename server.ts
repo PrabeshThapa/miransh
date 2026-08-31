@@ -168,6 +168,32 @@ function nl2br(text: any): string {
   return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
+function getServiceIconSvg(iconName: string): string {
+  switch ((iconName || '').toLowerCase().trim()) {
+    case 'users':
+    case 'user-check':
+    case 'user-group':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+    case 'award':
+    case 'shield':
+    case 'shield-check':
+    case 'badge':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+    case 'heart-handshake':
+    case 'handshake':
+    case 'heart':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/></svg>`;
+    case 'globe':
+    case 'map-pin':
+    case 'compass':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`;
+    case 'briefcase':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+    default:
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+  }
+}
+
 // Render Header HTML
 function renderHeader(company: any, activePage: string = 'home'): string {
   const isDetail = activePage !== 'home';
@@ -460,24 +486,88 @@ app.get('/', (req: Request, res: Response) => {
   const stories = getStories();
   const faqs = getFaqs();
 
-  // Render Services Cards
+  // Render Services Cards (Redesigned with SVG icons, pills, highlights, and CTA)
   let servicesHtml = '';
-  services.forEach((s) => {
+  const themeClasses = ['theme-blue', 'theme-emerald', 'theme-indigo', 'theme-teal'];
+  const categoryPillsJa = ['外国人材紹介', '特定技能・受入支援', '生活・定着伴走', 'ネパール現地連携'];
+  const categoryPillsEn = ['Global Recruitment', 'SSW Onboarding', 'Living & Retention', 'Nepali Network'];
+
+  services.forEach((s, idx) => {
+    const themeClass = themeClasses[idx % themeClasses.length];
+    const catJa = categoryPillsJa[idx % categoryPillsJa.length];
+    const catEn = categoryPillsEn[idx % categoryPillsEn.length];
+    const numLabel = s.number_label || String(idx + 1).padStart(2, '0');
+    const iconSvg = getServiceIconSvg(s.icon);
+
+    let itemsJa: string[] = [];
+    let itemsEn: string[] = [];
+    try {
+      if (s.items_ja) itemsJa = JSON.parse(s.items_ja);
+      if (s.items_en) itemsEn = JSON.parse(s.items_en);
+    } catch (e) {}
+
+    const highlightsJa = itemsJa.slice(0, 3);
+    const highlightsEn = itemsEn.slice(0, 3);
+
+    let highlightsHtml = '';
+    if (highlightsJa.length > 0) {
+      highlightsHtml = '<ul class="service-highlights-list">';
+      highlightsJa.forEach((item, i) => {
+        const itemEn = highlightsEn[i] || item;
+        highlightsHtml += `
+          <li class="service-highlight-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <div>
+              <span class="lang-ja">${escapeHtml(item)}</span>
+              <span class="lang-en">${escapeHtml(itemEn)}</span>
+            </div>
+          </li>
+        `;
+      });
+      highlightsHtml += '</ul>';
+    }
+
     servicesHtml += `
-      <div class="service-card">
-          <div class="service-icon-box">${escapeHtml(s.icon || '💼')}</div>
-          <h3 class="service-card-title">
-              <span class="lang-ja">${escapeHtml(s.title_ja)}</span>
-              <span class="lang-en">${escapeHtml(s.title_en)}</span>
-          </h3>
-          <p class="service-card-desc">
-              <span class="lang-ja">${escapeHtml(s.desc_ja)}</span>
-              <span class="lang-en">${escapeHtml(s.desc_en)}</span>
-          </p>
-          <a href="/services/${s.id}" class="service-card-link">
-              <span class="lang-ja">詳しく見る →</span>
-              <span class="lang-en">View Details →</span>
-          </a>
+      <div class="service-card" id="service-card-${s.id}">
+          <div class="service-card-top">
+              <div class="service-icon-wrap ${themeClass}">
+                  ${iconSvg}
+              </div>
+              <div class="service-badge-row">
+                  <span class="service-category-tag">
+                      <span class="lang-ja">${escapeHtml(catJa)}</span>
+                      <span class="lang-en">${escapeHtml(catEn)}</span>
+                  </span>
+                  <span class="service-num-pill">${escapeHtml(numLabel)}</span>
+              </div>
+          </div>
+          
+          <div class="service-card-content">
+              <h3 class="service-card-title">
+                  <span class="lang-ja">${escapeHtml(s.title_ja)}</span>
+                  <span class="lang-en">${escapeHtml(s.title_en)}</span>
+              </h3>
+              ${s.subtitle_ja || s.subtitle_en ? `
+              <div class="service-card-subtitle">
+                  <span class="lang-ja">${escapeHtml(s.subtitle_ja || '')}</span>
+                  <span class="lang-en">${escapeHtml(s.subtitle_en || '')}</span>
+              </div>` : ''}
+              <p class="service-card-desc">
+                  <span class="lang-ja">${escapeHtml(s.desc_ja)}</span>
+                  <span class="lang-en">${escapeHtml(s.desc_en)}</span>
+              </p>
+              ${highlightsHtml}
+          </div>
+
+          <div class="service-card-action">
+              <a href="/services/${s.id}" class="btn-service-link">
+                  <span class="btn-label">
+                      <span class="lang-ja">詳しく見る</span>
+                      <span class="lang-en">Learn More</span>
+                  </span>
+                  <span class="arrow-icon">→</span>
+              </a>
+          </div>
       </div>
     `;
   });
@@ -1211,7 +1301,7 @@ app.get('/services/:id', (req: Request, res: Response) => {
                     <a href="/#services" style="display: inline-flex; align-items: center; gap: 6px; color: #2563EB; font-weight: 700; text-decoration: none; margin-bottom: 20px;">
                         ← <span class="lang-ja">事業一覧に戻る</span><span class="lang-en">Back to Services</span>
                     </a>
-                    <div class="service-icon-box" style="font-size: 40px; width: 72px; height: 72px; margin-bottom: 20px;">${escapeHtml(service.icon || '💼')}</div>
+                    <div class="service-icon-wrap theme-blue" style="width: 64px; height: 64px; margin-bottom: 20px; border-radius: 16px;">${getServiceIconSvg(service.icon)}</div>
                     <h1 style="font-size: 28px; font-weight: 800; color: #0F172A; margin-bottom: 12px;">
                         <span class="lang-ja">${escapeHtml(service.title_ja)}</span>
                         <span class="lang-en">${escapeHtml(service.title_en)}</span>
@@ -1707,7 +1797,89 @@ app.get('/admin', (req: Request, res: Response) => {
             grid-template-columns: 260px 1fr;
             min-height: 100vh;
             background: #F1F5F9;
+            position: relative;
         }
+
+        /* Mobile Header */
+        .admin-mobile-header {
+            display: none;
+            background: #0B1C38;
+            color: #FFFFFF;
+            padding: 12px 16px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 990;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .admin-hamburger-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            border-radius: 8px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Mobile Quick Tab Bar */
+        .admin-mobile-tab-bar {
+            display: none;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 8px 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            position: sticky;
+            top: 62px;
+            z-index: 980;
+        }
+        .admin-mobile-tab-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .admin-mobile-tab-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .admin-mobile-tab-pill.active {
+            background: #2563EB;
+            color: #FFFFFF;
+            border-color: #2563EB;
+        }
+
+        /* Backdrop Overlay */
+        .admin-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .admin-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
         .admin-sidebar {
             background: #0B1C38;
             color: #FFFFFF;
@@ -1722,6 +1894,15 @@ app.get('/admin', (req: Request, res: Response) => {
             padding-bottom: 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 24px;
+        }
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
         }
         .sidebar-menu {
             list-style: none;
@@ -1879,28 +2060,128 @@ app.get('/admin', (req: Request, res: Response) => {
             background: #FEF3C7;
             color: #92400E;
         }
+        .admin-table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        /* Mobile Layout & Responsiveness */
+        @media (max-width: 1023px) {
+            .admin-layout {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                min-height: 100vh;
+            }
+            .admin-mobile-header {
+                display: flex;
+            }
+            .admin-mobile-tab-bar {
+                display: flex;
+            }
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                max-width: 85vw;
+                height: 100vh;
+                z-index: 999;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+                overflow-y: auto;
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-close-btn {
+                display: block;
+            }
+            .admin-main {
+                padding: 16px 14px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .admin-desktop-title-bar {
+                display: none;
+            }
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .upload-preview-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .preview-portrait-box {
+                width: 100px;
+                height: 100px;
+            }
+            .preview-banner-box {
+                max-width: 100%;
+                height: 120px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Top Header -->
+    <header class="admin-mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="ナビゲーションメニューを開く">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 26px; height: 26px; filter: brightness(0) invert(1);">
+                <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="/" target="_blank" style="font-size: 12px; color: #93C5FD; text-decoration: none; font-weight: 700;">サイト表示 ↗</a>
+            <a href="/admin/logout" style="font-size: 12px; color: #FCA5A5; text-decoration: none; font-weight: 700;">退出</a>
+        </div>
+    </header>
+
+    <!-- Mobile Horizontal Quick Tab Bar -->
+    <nav class="admin-mobile-tab-bar">
+        <a href="/admin?tab=company" class="admin-mobile-tab-pill ${activeTab === 'company' ? 'active' : ''}">🏢 会社・画像</a>
+        <a href="/admin?tab=about" class="admin-mobile-tab-pill ${activeTab === 'about' ? 'active' : ''}">📖 会社紹介</a>
+        <a href="/admin?tab=services" class="admin-mobile-tab-pill ${activeTab === 'services' ? 'active' : ''}">💼 事業内容</a>
+        <a href="/admin?tab=stories" class="admin-mobile-tab-pill ${activeTab === 'stories' ? 'active' : ''}">📰 採用事例</a>
+        <a href="/admin?tab=faqs" class="admin-mobile-tab-pill ${activeTab === 'faqs' ? 'active' : ''}">❓ FAQs</a>
+        <a href="/admin?tab=inquiries" class="admin-mobile-tab-pill ${activeTab === 'inquiries' ? 'active' : ''}">📬 問合せ (${inquiries.length})</a>
+        <a href="/admin?tab=ai" class="admin-mobile-tab-pill ${activeTab === 'ai' ? 'active' : ''}">🐟 Sakana AI</a>
+    </nav>
+
+    <!-- Offcanvas Backdrop Overlay -->
+    <div id="adminBackdrop" class="admin-backdrop" onclick="closeAdminSidebar()"></div>
+
     <div class="admin-layout">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar Navigation (Responsive Drawer on Mobile) -->
         <aside class="admin-sidebar">
-            <div class="sidebar-brand">
-                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 32px; height: 32px; filter: brightness(0) invert(1);">
-                <div>
-                    <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
-                    <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>
+            <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 32px; height: 32px; filter: brightness(0) invert(1);">
+                    <div>
+                        <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
+                        <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>
+                    </div>
                 </div>
+                <button type="button" class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="メニューを閉じる">✕</button>
             </div>
 
             <ul class="sidebar-menu">
-                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}">🏢 会社情報・画像 (Company)</a></li>
-                <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}">📖 会社紹介・約束 (About)</a></li>
-                <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}">💼 事業内容 (Services)</a></li>
-                <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}">📰 採用事例 (Stories)</a></li>
-                <li><a href="/admin?tab=faqs" class="sidebar-item-btn ${activeTab === 'faqs' ? 'active' : ''}">❓ よくある質問 (FAQs)</a></li>
-                <li><a href="/admin?tab=inquiries" class="sidebar-item-btn ${activeTab === 'inquiries' ? 'active' : ''}">📬 お問い合わせ (${inquiries.length})</a></li>
-                <li><a href="/admin?tab=ai" class="sidebar-item-btn ${activeTab === 'ai' ? 'active' : ''}">🐟 Sakana AI 設定</a></li>
+                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}" onclick="closeAdminSidebar()">🏢 会社情報・画像 (Company)</a></li>
+                <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}" onclick="closeAdminSidebar()">📖 会社紹介・約束 (About)</a></li>
+                <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}" onclick="closeAdminSidebar()">💼 事業内容 (Services)</a></li>
+                <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}" onclick="closeAdminSidebar()">📰 採用事例 (Stories)</a></li>
+                <li><a href="/admin?tab=faqs" class="sidebar-item-btn ${activeTab === 'faqs' ? 'active' : ''}" onclick="closeAdminSidebar()">❓ よくある質問 (FAQs)</a></li>
+                <li><a href="/admin?tab=inquiries" class="sidebar-item-btn ${activeTab === 'inquiries' ? 'active' : ''}" onclick="closeAdminSidebar()">📬 お問い合わせ (${inquiries.length})</a></li>
+                <li><a href="/admin?tab=ai" class="sidebar-item-btn ${activeTab === 'ai' ? 'active' : ''}" onclick="closeAdminSidebar()">🐟 Sakana AI 設定</a></li>
             </ul>
 
             <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
@@ -1911,8 +2192,8 @@ app.get('/admin', (req: Request, res: Response) => {
 
         <!-- Main Content Panel -->
         <main class="admin-main">
-            <!-- Top bar -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <!-- Top bar for desktop -->
+            <div class="admin-desktop-title-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Management Portal</h1>
                     <p style="font-size: 14px; color: #64748B; margin: 0;">Update company profile, CEO portrait, Hero banner, services, and Sakana AI parameters</p>
@@ -2317,6 +2598,20 @@ app.get('/admin', (req: Request, res: Response) => {
             statusEl.className = 'upload-status-tag success';
             statusEl.innerHTML = '✓ デフォルト画像に設定しました';
         }
+    }
+
+    function toggleAdminSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const backdrop = document.getElementById('adminBackdrop');
+        if (sidebar) sidebar.classList.toggle('open');
+        if (backdrop) backdrop.classList.toggle('active');
+    }
+
+    function closeAdminSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const backdrop = document.getElementById('adminBackdrop');
+        if (sidebar) sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
     }
     </script>
 </body>
