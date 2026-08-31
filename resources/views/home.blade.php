@@ -951,7 +951,8 @@
                         </div>
                         <div class="sakana-chat-subtitle">
                             <span class="sakana-status-dot"></span>
-                            <span>Powered by Sakana AI (Namazu / Fugu)</span>
+                            <span class="lang-ja">オンライン・即時回答</span>
+                            <span class="lang-en">Online • Instant Support</span>
                         </div>
                     </div>
                 </div>
@@ -984,11 +985,11 @@
             <div id="sakana-messages-body" class="sakana-messages-body">
                 <div class="sakana-msg bot">
                     <div class="sakana-msg-bubble">
-                        <span class="lang-ja">こんにちは！MIRANSH合同会社のAI採用・在留資格アシスタントです（Sakana AI 連携）。<br><br>特定技能（介護・建設・清掃・外食など）の外国人材採用、ネパール提携校ネットワーク、ビザ申請（COE）、受入れ費用など、ご不明な点をいつでもご相談ください。</span>
-                        <span class="lang-en">Hello! I am your AI Recruitment & Visa Consultant for MIRANSH LLC (Powered by Sakana AI).<br><br>Feel free to ask about Specified Skilled Worker (SSW) hiring, our Nepal talent network, visa application (COE), costs, or life support. How can I assist you today?</span>
+                        <span class="lang-ja">こんにちは！MIRANSH合同会社のAI採用・在留資格アシスタントです。<br><br>特定技能（介護・建設・清掃・外食など）の外国人材採用、ネパール提携校ネットワーク、ビザ申請（COE）、受入れ費用など、ご不明な点をいつでもご相談ください。</span>
+                        <span class="lang-en">Hello! I am your AI Recruitment & Visa Consultant for MIRANSH LLC.<br><br>Feel free to ask about Specified Skilled Worker (SSW) hiring, our Nepal talent network, visa application (COE), costs, or life support. How can I assist you today?</span>
                     </div>
                     <div class="sakana-msg-meta">
-                        <span>MIRANSH AI (Sakana Namazu)</span>
+                        <span>MIRANSH AI</span>
                     </div>
                 </div>
             </div>
@@ -1158,7 +1159,7 @@
                 botMsgEl.className = 'sakana-msg bot';
                 
                 const formattedReply = renderMarkdown(data.reply || 'ご質問ありがとうございます。詳細につきましてはMIRANSH担当者よりご案内いたします。');
-                const providerBadge = data.provider || 'Sakana AI (Namazu)';
+                const providerBadge = 'MIRANSH AI';
 
                 botMsgEl.innerHTML = `
                     <div class="sakana-msg-bubble">${formattedReply}</div>

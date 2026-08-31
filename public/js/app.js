@@ -76,8 +76,8 @@ function resetSakanaChat() {
         <div class="sakana-msg sakana-bot">
             <div class="sakana-msg-avatar">🐟</div>
             <div class="sakana-msg-bubble">
-                <p class="lang-ja">こんにちは！<strong>MIRANSH合同会社（Sakana AI）</strong>採用コンサルタントです。</p>
-                <p class="lang-en">Hello! I am the <strong>MIRANSH LLC (Sakana AI)</strong> talent consultant.</p>
+                <p class="lang-ja">こんにちは！<strong>MIRANSH合同会社</strong>採用コンサルタントです。</p>
+                <p class="lang-en">Hello! I am the <strong>MIRANSH LLC</strong> talent consultant.</p>
                 <p class="lang-ja" style="margin-top: 8px;">会話をリセットしました。外国人材の採用や在留資格について、何でもお尋ねください。</p>
                 <p class="lang-en" style="margin-top: 8px;">Chat has been reset. Feel free to ask any question regarding international talent recruitment!</p>
                 <div class="sakana-quick-chips">
@@ -130,7 +130,7 @@ async function handleSakanaSubmit(event) {
         <div class="sakana-msg-avatar">🐟</div>
         <div class="sakana-msg-bubble" style="display: flex; align-items: center; gap: 8px; color: #64748B;">
             <span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span>
-            <span>思考中 / Analyzing with Sakana AI...</span>
+            <span>回答を生成中... / Generating response...</span>
         </div>
     `;
     body.appendChild(loadingDiv);
@@ -252,6 +252,94 @@ function searchFaq(event) {
     });
 }
 
+// ==========================================================================
+// Image Zoom Lightbox Modal (Up to 90% Viewport)
+// ==========================================================================
+function initImageZoomLightbox() {
+    let overlay = document.getElementById("image-zoom-overlay");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "image-zoom-overlay";
+        overlay.className = "image-zoom-overlay";
+        overlay.innerHTML = `
+            <div class="image-zoom-container" onclick="event.stopPropagation()">
+                <button type="button" class="image-zoom-close-btn" aria-label="画像を閉じる / Close" onclick="closeImageZoom()">✕</button>
+                <img id="image-zoom-modal-img" class="image-zoom-img" src="" alt="Zoomed Image">
+                <div id="image-zoom-caption" class="image-zoom-caption" style="display: none;"></div>
+            </div>
+        `;
+        overlay.addEventListener("click", closeImageZoom);
+        document.body.appendChild(overlay);
+    }
+
+    // Attach click listeners to all meaningful content images
+    const targetImages = document.querySelectorAll(`
+        .hero-image-wrap img,
+        .ceo-photo-wrap img,
+        .detail-banner-img,
+        .story-card-img,
+        .service-card-img,
+        .admin-card img,
+        .about-image-col img,
+        .message-image-col img,
+        .content-img,
+        img.zoomable,
+        main img
+    `);
+
+    targetImages.forEach(img => {
+        // Skip tiny icons, flags, and logo icons
+        if (img.classList.contains("brand-logo-img") || img.closest(".brand-wrapper") || img.closest(".lang-btn") || img.width < 50) {
+            return;
+        }
+
+        img.classList.add("zoomable");
+        img.setAttribute("title", "クリックで拡大表示 (Click to Zoom up to 90%)");
+
+        img.addEventListener("click", function (e) {
+            e.stopPropagation();
+            openImageZoom(this.src, this.alt || this.getAttribute("title") || "");
+        });
+    });
+
+    // Close on Escape key
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeImageZoom();
+        }
+    });
+}
+
+function openImageZoom(imgSrc, captionText) {
+    const overlay = document.getElementById("image-zoom-overlay");
+    const zoomImg = document.getElementById("image-zoom-modal-img");
+    const captionEl = document.getElementById("image-zoom-caption");
+
+    if (!overlay || !zoomImg) return;
+
+    zoomImg.src = imgSrc;
+
+    if (captionEl) {
+        const cleanCaption = (captionText || "").replace(/クリックで拡大表示.*$/i, "").trim();
+        if (cleanCaption) {
+            captionEl.textContent = cleanCaption;
+            captionEl.style.display = "block";
+        } else {
+            captionEl.style.display = "none";
+        }
+    }
+
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden"; // Prevent background scroll
+}
+
+function closeImageZoom() {
+    const overlay = document.getElementById("image-zoom-overlay");
+    if (!overlay) return;
+    overlay.classList.remove("active");
+    document.body.style.overflow = "";
+}
+
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", function () {
     let savedLanguage = "ja";
@@ -260,4 +348,5 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (e) {}
 
     setLanguage(savedLanguage);
+    initImageZoomLightbox();
 });

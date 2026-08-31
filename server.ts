@@ -434,12 +434,11 @@ function renderSakanaWidget(): string {
                         <div class="sakana-avatar">🐟</div>
                         <div>
                             <div class="sakana-bot-title">
-                                <span>Sakana AI ナビゲーター</span>
-                                <span class="sakana-powered-tag">Powered by Sakana AI</span>
+                                <span>MIRANSH AI ナビゲーター</span>
                             </div>
                             <div class="sakana-bot-status">
                                 <span class="sakana-online-indicator"></span>
-                                <span class="lang-ja">バイリンガル即時相談受付中 (モデル: sakana-namazu)</span>
+                                <span class="lang-ja">バイリンガル即時相談受付中</span>
                                 <span class="lang-en">Online: Japanese & English Recruitment AI</span>
                             </div>
                         </div>
@@ -456,8 +455,8 @@ function renderSakanaWidget(): string {
                     <div class="sakana-msg sakana-bot">
                         <div class="sakana-msg-avatar">🐟</div>
                         <div class="sakana-msg-bubble">
-                            <p class="lang-ja">こんにちは！<strong>MIRANSH合同会社（Sakana AI）</strong>採用コンサルタントです。</p>
-                            <p class="lang-en">Hello! I am the <strong>MIRANSH LLC (Sakana AI)</strong> talent consultant.</p>
+                            <p class="lang-ja">こんにちは！<strong>MIRANSH合同会社</strong>採用コンサルタントです。</p>
+                            <p class="lang-en">Hello! I am the <strong>MIRANSH LLC</strong> talent consultant.</p>
                             
                             <p class="lang-ja" style="margin-top: 8px;">外国人材の採用、特定技能（介護など）の受入、在留資格手続き、費用感など、どのようなことでもお気軽にご質問ください。</p>
                             <p class="lang-en" style="margin-top: 8px;">Feel free to ask anything about international recruitment, Specified Skilled Worker visas (caregiving, etc.), procedures, or costs!</p>
@@ -483,7 +482,7 @@ function renderSakanaWidget(): string {
                         </div>
                     </form>
                     <div class="sakana-disclaimer">
-                        <span>⚡ Sakana Namazu AI Engine • 日本語／英語対応</span>
+                        <span>⚡ MIRANSH AI Consultant • 日本語／英語対応</span>
                     </div>
                 </div>
             </div>
@@ -2649,6 +2648,7 @@ app.get('/admin', (req: Request, res: Response) => {
         if (backdrop) backdrop.classList.remove('active');
     }
     </script>
+    <script src="/js/app.js"></script>
 </body>
 </html>`;
 
