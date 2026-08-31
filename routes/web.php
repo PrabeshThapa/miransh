@@ -48,8 +48,15 @@ Route::prefix('admin')->group(function () {
     // Inquiries
     Route::post('/inquiries/{id}/status', [AdminController::class, 'updateInquiryStatus'])->name('admin.inquiries.status');
 
+    // Image Upload
+    Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.uploadImage');
+
     // Sakana AI Management
     Route::post('/api/sakana/config', [SakanaController::class, 'updateConfig'])->name('admin.sakana.config');
     Route::post('/api/sakana/test', [SakanaController::class, 'testConnection'])->name('admin.sakana.test');
 });
+
+// Image Upload API (Accessible via /api/admin/upload-image directly)
+Route::post('/api/admin/upload-image', [AdminController::class, 'uploadImage'])->name('admin.uploadImage.api');
+
 

@@ -378,4 +378,55 @@ class AdminController extends Controller
 
         return redirect()->route('admin.dashboard', ['tab' => 'inquiries'])->with('success', 'Inquiry marked as ' . $inquiry->status);
     }
+
+    /**
+     * Handle Image Upload API for CEO portrait, hero banner, service icons, etc.
+     */
+    public function uploadImage(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized access. Please login first.'
+            ], 401);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp,svg|max:10240',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => $validator->errors()->first('image')
+            ], 422);
+        }
+
+        if (!$request->hasFile('image')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'No image file provided in request.'
+            ], 400);
+        }
+
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension() ?: 'png';
+        $filename = 'img_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.' . strtolower($extension);
+        
+        $destinationPath = public_path('uploads');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $file->move($destinationPath, $filename);
+        $fullFilePath = $destinationPath . '/' . $filename;
+        $size = file_exists($fullFilePath) ? filesize($fullFilePath) : 0;
+
+        return response()->json([
+            'success' => true,
+            'url' => '/uploads/' . $filename,
+            'filename' => $filename,
+            'size' => $size
+        ]);
+    }
 }
