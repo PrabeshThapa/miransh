@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,13 +14,46 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// Ensure upload directories exist
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    const cleanBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e6);
+    cb(null, `${cleanBase}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp|gif|svg\+xml|svg/;
+    const isMime = allowed.test(file.mimetype);
+    const isExt = allowed.test(path.extname(file.originalname).toLowerCase().replace('.', ''));
+    if (isMime || isExt) {
+      return cb(null, true);
+    }
+    cb(new Error('Invalid image file format. Allowed: JPG, PNG, WEBP, GIF, SVG.'));
+  }
+});
+
 // Database Connection
 const dbPath = path.join(__dirname, 'database', 'database.sqlite');
 const db = new Database(dbPath);
 
 // Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(cookieParser());
 app.use(session({
   secret: 'miransh-secret-key-2026',
@@ -30,6 +64,7 @@ app.use(session({
 
 // Serve static assets from public folder
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(uploadsDir));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
@@ -1769,6 +1804,81 @@ app.get('/admin', (req: Request, res: Response) => {
             border-color: #2563EB;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
+        .admin-image-upload-card {
+            background: #F8FAFC;
+            border: 2px dashed #CBD5E1;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .admin-image-upload-card:hover, .admin-image-upload-card.dragover {
+            border-color: #2563EB;
+            background: #EFF6FF;
+        }
+        .upload-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .preview-portrait-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #E2E8F0;
+            background: #FFFFFF;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .preview-banner-box {
+            width: 100%;
+            max-width: 380px;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #E2E8F0;
+            background: #0B1C38;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .upload-controls {
+            flex: 1;
+            min-width: 220px;
+        }
+        .file-upload-btn-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #2563EB;
+            color: #FFFFFF;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .file-upload-btn-label:hover {
+            background: #1D4ED8;
+        }
+        .upload-status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        .upload-status-tag.success {
+            background: #DCFCE7;
+            color: #166534;
+        }
+        .upload-status-tag.uploading {
+            background: #FEF3C7;
+            color: #92400E;
+        }
     </style>
 </head>
 <body>
@@ -1784,7 +1894,7 @@ app.get('/admin', (req: Request, res: Response) => {
             </div>
 
             <ul class="sidebar-menu">
-                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}">🏢 会社情報 (Company)</a></li>
+                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}">🏢 会社情報・画像 (Company)</a></li>
                 <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}">📖 会社紹介・約束 (About)</a></li>
                 <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}">💼 事業内容 (Services)</a></li>
                 <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}">📰 採用事例 (Stories)</a></li>
@@ -1805,18 +1915,162 @@ app.get('/admin', (req: Request, res: Response) => {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Management Portal</h1>
-                    <p style="font-size: 14px; color: #64748B; margin: 0;">Update company profile, services, stories, FAQs, and Sakana AI parameters</p>
+                    <p style="font-size: 14px; color: #64748B; margin: 0;">Update company profile, CEO portrait, Hero banner, services, and Sakana AI parameters</p>
                 </div>
                 <div>
                     <a href="/" target="_blank" class="btn-secondary" style="display: inline-flex; font-size: 13px;">View Live Site ↗</a>
                 </div>
             </div>
 
-            <!-- TAB 1: Company Profile -->
+            <!-- TAB 1: Company Profile & Images -->
             ${activeTab === 'company' ? `
             <div class="admin-card">
-                <div class="admin-card-title">🏢 Company Information & Executive Profile</div>
+                <div class="admin-card-title">🏢 会社基本情報・代表者設定・トップバナー設定</div>
                 <form action="/admin/company" method="POST">
+                    
+                    <!-- 1. Executive / CEO Profile & Image Upload -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                        1. 代表者（CEO）情報 & 顔写真アップロード
+                    </h3>
+
+                    <!-- CEO IMAGE UPLOADER -->
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
+                            📷 代表者（CEO）顔写真 (CEO Portrait Photo)
+                        </label>
+                        <div class="admin-image-upload-card" id="ceo_upload_card">
+                            <div class="upload-preview-container">
+                                <img id="preview_ceo_img" src="${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')}" alt="CEO Photo" class="preview-portrait-box" onerror="this.src='/images/ceo_portrait.jpg'">
+                                <div class="upload-controls">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">画像をアップロード (Upload CEO Portrait)</div>
+                                    <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP, SVG形式対応。ファイルを選択すると自動的にアップロード・即時プレビューされます。</div>
+                                    
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <label class="file-upload-btn-label">
+                                            📁 ファイルを選択してアップロード
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status')">
+                                        </label>
+                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/ceo_portrait.jpg', 'ceo_status')">
+                                            🔄 デフォルト写真に戻す
+                                        </button>
+                                    </div>
+
+                                    <div id="ceo_status" class="upload-status-tag success" style="display: ${company.ceo_image ? 'inline-flex' : 'none'};">
+                                        ✓ 写真が設定されています (${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')})
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="input_ceo_image" name="ceo_image" value="${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">代表社員 日本語氏名 (CEO Name - Japanese)</label>
+                            <input type="text" name="ceo_name_ja" class="form-input" value="${escapeHtml(company.ceo_name_ja || 'ギリ ラム クリシュナ')}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">代表社員 英語氏名 (CEO Name - English)</label>
+                            <input type="text" name="ceo_name_en" class="form-input" value="${escapeHtml(company.ceo_name_en || 'Giri Ram Krishna')}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">代表役職名 (日本語)</label>
+                            <input type="text" name="ceo_role_ja" class="form-input" value="${escapeHtml(company.ceo_role_ja || '代表社員')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">代表役職名 (英語)</label>
+                            <input type="text" name="ceo_role_en" class="form-input" value="${escapeHtml(company.ceo_role_en || 'Representative Member')}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">代表挨拶 (CEO Message - Japanese)</label>
+                            <textarea name="ceo_message_ja" class="form-textarea" rows="6">${escapeHtml(company.ceo_message_ja)}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">代表挨拶 (CEO Message - English)</label>
+                            <textarea name="ceo_message_en" class="form-textarea" rows="6">${escapeHtml(company.ceo_message_en)}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- 2. Hero Banner & Image Upload -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                        2. トップヒーローバナー & 背景画像アップロード
+                    </h3>
+
+                    <!-- HERO BANNER IMAGE UPLOADER -->
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
+                            🖼️ トップヒーローバナー画像 (Hero Banner Image)
+                        </label>
+                        <div class="admin-image-upload-card" id="hero_upload_card">
+                            <div class="upload-preview-container">
+                                <img id="preview_hero_img" src="${escapeHtml(company.hero_image || '/images/hero_banner.jpg')}" alt="Hero Banner" class="preview-banner-box" onerror="this.src='/images/hero_banner.jpg'">
+                                <div class="upload-controls">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">バナー画像をアップロード (Upload Hero Banner)</div>
+                                    <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP, SVG形式対応（推奨サイズ: 1920×1080 または 16:9横長比率）。ファイルを選択すると自動的にアップロードされます。</div>
+                                    
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <label class="file-upload-btn-label">
+                                            📁 バナー画像を選択してアップロード
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_img', 'hero_status')">
+                                        </label>
+                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_img', '/images/hero_banner.jpg', 'hero_status')">
+                                            🔄 デフォルトバナーに戻す
+                                        </button>
+                                    </div>
+
+                                    <div id="hero_status" class="upload-status-tag success" style="display: ${company.hero_image ? 'inline-flex' : 'none'};">
+                                        ✓ バナー画像が設定されています (${escapeHtml(company.hero_image || '/images/hero_banner.jpg')})
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="input_hero_image" name="hero_image" value="${escapeHtml(company.hero_image || '/images/hero_banner.jpg')}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">キャッチコピー (日本語)</label>
+                            <input type="text" name="hero_title_ja" class="form-input" value="${escapeHtml(company.hero_title_ja || '日本企業と海外人材をつなぐ、')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">強調ワード (日本語)</label>
+                            <input type="text" name="hero_title_accent_ja" class="form-input" value="${escapeHtml(company.hero_title_accent_ja || '信頼の架け橋。')}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">キャッチコピー (英語)</label>
+                            <input type="text" name="hero_title_en" class="form-input" value="${escapeHtml(company.hero_title_en || 'Bridging Japanese Enterprises and')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">強調ワード (英語)</label>
+                            <input type="text" name="hero_title_accent_en" class="form-input" value="${escapeHtml(company.hero_title_accent_en || 'Global Talent with Trust.')}">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">リード文 (日本語)</label>
+                            <textarea name="hero_desc_ja" class="form-textarea" rows="3">${escapeHtml(company.hero_desc_ja)}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">リード文 (英語)</label>
+                            <textarea name="hero_desc_en" class="form-textarea" rows="3">${escapeHtml(company.hero_desc_en)}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- 3. Corporate Info -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                        3. 会社基本概要 & 連絡先情報
+                    </h3>
+
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label class="form-label">会社名 (日本語)</label>
@@ -1841,22 +2095,6 @@ app.get('/admin', (req: Request, res: Response) => {
 
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">代表社員名 (CEO Name)</label>
-                            <input type="text" name="ceo_name_ja" class="form-input" value="${escapeHtml(company.ceo_name_ja)}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">代表役職名 (CEO Role Title)</label>
-                            <input type="text" name="ceo_role_ja" class="form-input" value="${escapeHtml(company.ceo_role_ja)}">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">代表挨拶 (CEO Message - Japanese)</label>
-                        <textarea name="ceo_message_ja" class="form-textarea" rows="5">${escapeHtml(company.ceo_message_ja)}</textarea>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
                             <label class="form-label">電話番号 (Telephone)</label>
                             <input type="text" name="phone" class="form-input" value="${escapeHtml(company.phone)}">
                         </div>
@@ -1866,12 +2104,22 @@ app.get('/admin', (req: Request, res: Response) => {
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">所在地住所 (Headquarters Address)</label>
-                        <input type="text" name="address_ja" class="form-input" value="${escapeHtml(company.address_ja)}">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">所在地住所 (日本語)</label>
+                            <input type="text" name="address_ja" class="form-input" value="${escapeHtml(company.address_ja)}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Headquarters Address (English)</label>
+                            <input type="text" name="address_en" class="form-input" value="${escapeHtml(company.address_en)}">
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-primary">Save Company Information</button>
+                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
+                        <button type="submit" class="btn-primary" style="padding: 12px 28px; font-size: 15px;">
+                            💾 設定を保存する (Save All Changes)
+                        </button>
+                    </div>
                 </form>
             </div>
             ` : ''}
@@ -1923,9 +2171,12 @@ app.get('/admin', (req: Request, res: Response) => {
                 <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
                     ${stories.map(st => `
                     <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${escapeHtml(st.title_ja)}</strong>
-                            <div style="font-size: 13px; color: #64748B; margin-top: 4px;">${escapeHtml(st.summary_ja)}</div>
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <img src="${escapeHtml(st.image || '/images/hero_banner.jpg')}" alt="Story" style="width: 54px; height: 54px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1;">
+                            <div>
+                                <strong>${escapeHtml(st.title_ja)}</strong>
+                                <div style="font-size: 13px; color: #64748B; margin-top: 4px;">${escapeHtml(st.summary_ja)}</div>
+                            </div>
                         </div>
                         <a href="/stories/${st.id}" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 4px 10px;">View →</a>
                     </div>
@@ -2000,6 +2251,74 @@ app.get('/admin', (req: Request, res: Response) => {
             ` : ''}
         </main>
     </div>
+
+    <!-- Admin Image Upload JS -->
+    <script>
+    async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId) {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        const statusEl = document.getElementById(statusBadgeId);
+        if (statusEl) {
+            statusEl.style.display = 'inline-flex';
+            statusEl.className = 'upload-status-tag uploading';
+            statusEl.innerHTML = '⏳ アップロード中 / Uploading...';
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const res = await fetch('/api/admin/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success && data.url) {
+                const hiddenInput = document.getElementById(targetHiddenInputId);
+                if (hiddenInput) hiddenInput.value = data.url;
+
+                const previewImg = document.getElementById(previewImgId);
+                if (previewImg) previewImg.src = data.url;
+
+                if (statusEl) {
+                    statusEl.className = 'upload-status-tag success';
+                    statusEl.innerHTML = '✓ アップロード完了 / Uploaded: ' + (data.filename || 'OK');
+                }
+            } else {
+                if (statusEl) {
+                    statusEl.className = 'upload-status-tag uploading';
+                    statusEl.style.background = '#FEE2E2';
+                    statusEl.style.color = '#991B1B';
+                    statusEl.innerHTML = '❌ エラー: ' + (data.error || 'Upload failed');
+                }
+            }
+        } catch (err) {
+            console.error('Upload error:', err);
+            if (statusEl) {
+                statusEl.className = 'upload-status-tag uploading';
+                statusEl.style.background = '#FEE2E2';
+                statusEl.style.color = '#991B1B';
+                statusEl.innerHTML = '❌ 通信エラーが発生しました';
+            }
+        }
+    }
+
+    function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId) {
+        const hiddenInput = document.getElementById(targetHiddenInputId);
+        if (hiddenInput) hiddenInput.value = defaultUrl;
+
+        const previewImg = document.getElementById(previewImgId);
+        if (previewImg) previewImg.src = defaultUrl;
+
+        const statusEl = document.getElementById(statusBadgeId);
+        if (statusEl) {
+            statusEl.style.display = 'inline-flex';
+            statusEl.className = 'upload-status-tag success';
+            statusEl.innerHTML = '✓ デフォルト画像に設定しました';
+        }
+    }
+    </script>
 </body>
 </html>`;
 
@@ -2007,18 +2326,54 @@ app.get('/admin', (req: Request, res: Response) => {
   res.send(html);
 });
 
+// Admin Image Upload API Route
+app.post('/api/admin/upload-image', (req: Request, res: Response) => {
+  if (!(req.session as any).user) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  upload.single('image')(req, res, (err: any) => {
+    if (err) {
+      console.error('Image upload error:', err);
+      return res.status(400).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const relativePath = `/uploads/${req.file.filename}`;
+    return res.json({
+      success: true,
+      url: relativePath,
+      filename: req.file.filename,
+      size: req.file.size
+    });
+  });
+});
+
 // Admin Post Handlers
 app.post('/admin/company', (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
-  const { name_ja, name_en, corporate_number, license, ceo_name_ja, ceo_role_ja, ceo_message_ja, phone, email, address_ja } = req.body;
+  const { 
+    name_ja, name_en, corporate_number, license, 
+    ceo_name_ja, ceo_name_en, ceo_role_ja, ceo_role_en, ceo_image, ceo_message_ja, ceo_message_en, 
+    hero_title_ja, hero_title_accent_ja, hero_desc_ja, hero_title_en, hero_title_accent_en, hero_desc_en, hero_image,
+    phone, email, address_ja, address_en 
+  } = req.body;
   
   db.prepare(`
     UPDATE company_info SET 
       name_ja = ?, name_en = ?, corporate_number = ?, license = ?, 
-      ceo_name_ja = ?, ceo_role_ja = ?, ceo_message_ja = ?, 
-      phone = ?, email = ?, address_ja = ?
+      ceo_name_ja = ?, ceo_name_en = ?, ceo_role_ja = ?, ceo_role_en = ?, ceo_image = ?, ceo_message_ja = ?, ceo_message_en = ?, 
+      hero_title_ja = ?, hero_title_accent_ja = ?, hero_desc_ja = ?, hero_title_en = ?, hero_title_accent_en = ?, hero_desc_en = ?, hero_image = ?,
+      phone = ?, email = ?, address_ja = ?, address_en = ?
     WHERE id = 1
-  `).run(name_ja, name_en, corporate_number, license, ceo_name_ja, ceo_role_ja, ceo_message_ja, phone, email, address_ja);
+  `).run(
+    name_ja || '', name_en || '', corporate_number || '', license || '', 
+    ceo_name_ja || '', ceo_name_en || '', ceo_role_ja || '', ceo_role_en || '', ceo_image || '/images/ceo_portrait.jpg', ceo_message_ja || '', ceo_message_en || '', 
+    hero_title_ja || '', hero_title_accent_ja || '', hero_desc_ja || '', hero_title_en || '', hero_title_accent_en || '', hero_desc_en || '', hero_image || '/images/hero_banner.jpg',
+    phone || '', email || '', address_ja || '', address_en || ''
+  );
 
   res.redirect('/admin?tab=company');
 });

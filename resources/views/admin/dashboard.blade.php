@@ -208,30 +208,45 @@
                         </div>
 
                         <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
-                                    <span>代表者 顔写真 画像URL (CEO Photo URL)</span>
-                                    <span class="admin-preview-badge">📷 プレビュー表示中</span>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
+                                    📷 代表者（CEO）顔写真 (CEO Portrait Photo)
                                 </label>
-                                <input type="text" id="input_ceo_image" name="ceo_image" class="form-input" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" oninput="updateAdminImagePreview('input_ceo_image', 'preview_ceo_image', 'preview_ceo_status')">
-                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">利用可能画像例: <code>/images/ceo_portrait.jpg</code>, <code>/images/abc.jpeg</code> またはHTTPS画像URL</div>
+                                <div class="admin-image-upload-card" style="background: #F8FAFC; border: 2px dashed #CBD5E1; border-radius: 12px; padding: 20px;">
+                                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                        <img id="preview_ceo_image" src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="CEO Portrait Preview" style="width: 120px; height: 120px; border-radius: 12px; object-fit: cover; border: 2px solid #E2E8F0; background: #fff;" onerror="this.src='/images/ceo_portrait.jpg'">
+                                        <div style="flex: 1; min-width: 220px;">
+                                            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">顔写真をアップロード (Upload CEO Photo)</div>
+                                            <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP形式対応。ファイルを選択すると自動的にアップロードされ、即時プレビューされます。</div>
+                                            
+                                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                                <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
+                                                    📁 画像ファイルを選択
+                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status')">
+                                                </label>
+                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/ceo_portrait.jpg', 'preview_ceo_status')">
+                                                    🔄 デフォルト写真に戻す
+                                                </button>
+                                            </div>
 
-                                <!-- ACTUAL IMAGE PREVIEW CARD -->
-                                <div class="admin-image-preview-card">
-                                    <img id="preview_ceo_image" src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" alt="CEO Portrait Preview" class="admin-preview-thumbnail" onerror="handleImagePreviewError(this, 'preview_ceo_status')">
-                                    <div class="admin-preview-meta">
-                                        <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;" id="preview_ceo_status">
-                                            ✓ 代表者 顔写真 プレビュー
-                                        </div>
-                                        <div style="font-size: 12px; color: #64748B; line-height: 1.4;">
-                                            公開サイトの「代表メッセージ」セクションに表示される写真です。画像URLを変更すると即座にプレビューが更新されます。
+                                            <div id="preview_ceo_status" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #166534; display: inline-block;">
+                                                ✓ 写真が設定されています ({{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }})
+                                            </div>
                                         </div>
                                     </div>
+                                    <input type="hidden" id="input_ceo_image" name="ceo_image" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}">
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">代表者 統合表示名 (後方互換)</label>
-                                <input type="text" name="ceo_name" class="form-input" value="{{ $company->ceo_name ?? 'ギリ ラム クリシュナ (Giri Ram Krishna)' }}">
+                                <label class="form-label">代表社員 日本語氏名 (CEO Name - Japanese)</label>
+                                <input type="text" name="ceo_name_ja" class="form-input" value="{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">代表社員 英語氏名 (CEO Name - English)</label>
+                                <input type="text" name="ceo_name_en" class="form-input" value="{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}">
                             </div>
                         </div>
 
@@ -248,27 +263,34 @@
 
                         <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 24px 0 12px;">2. ヒーローバナー（トップ大画面）</h3>
                         <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
-                                    <span>トップバナー画像URL (Hero Banner URL)</span>
-                                    <span class="admin-preview-badge">🖼️ プレビュー表示中</span>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
+                                    🖼️ トップヒーローバナー画像 (Hero Banner Image)
                                 </label>
-                                <input type="text" id="input_hero_image" name="hero_image" class="form-input" value="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" oninput="updateAdminImagePreview('input_hero_image', 'preview_hero_image', 'preview_hero_status')">
-                                <div style="font-size: 12px; color: #64748B; margin-top: 4px;">デフォルト: <code>/images/hero_banner.jpg</code> またはHTTPS画像URL</div>
+                                <div class="admin-image-upload-card" style="background: #F8FAFC; border: 2px dashed #CBD5E1; border-radius: 12px; padding: 20px;">
+                                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                        <img id="preview_hero_image" src="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" alt="Hero Banner Preview" style="width: 100%; max-width: 380px; height: 150px; border-radius: 10px; object-fit: cover; border: 2px solid #E2E8F0; background: #0B1C38;" onerror="this.src='/images/hero_banner.jpg'">
+                                        <div style="flex: 1; min-width: 220px;">
+                                            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">バナー画像をアップロード (Upload Hero Banner)</div>
+                                            <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP形式対応（推奨サイズ: 1920×1080 または 16:9横長比率）。ファイルを選択すると自動的にアップロードされます。</div>
+                                            
+                                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                                <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
+                                                    📁 バナー画像を選択
+                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_image', 'preview_hero_status')">
+                                                </label>
+                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_image', '/images/hero_banner.jpg', 'preview_hero_status')">
+                                                    🔄 デフォルトバナーに戻す
+                                                </button>
+                                            </div>
 
-                                <!-- ACTUAL HERO BANNER PREVIEW CARD -->
-                                <div class="admin-image-preview-card" style="flex-direction: column; align-items: flex-start;">
-                                    <img id="preview_hero_image" src="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" alt="Hero Banner Preview" class="admin-preview-banner-thumbnail" onerror="handleImagePreviewError(this, 'preview_hero_status')">
-                                    <div class="admin-preview-meta" style="margin-top: 8px;">
-                                        <div style="font-size: 13px; font-weight: 700; color: #0F172A;" id="preview_hero_status">
-                                            ✓ トップバナー背景画像 プレビュー
+                                            <div id="preview_hero_status" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #166534; display: inline-block;">
+                                                ✓ バナー画像が設定されています ({{ $company->hero_image ?? '/images/hero_banner.jpg' }})
+                                            </div>
                                         </div>
                                     </div>
+                                    <input type="hidden" id="input_hero_image" name="hero_image" value="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">許認可番号バッジ表示</label>
-                                <input type="text" name="license" class="form-input" value="{{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }}">
                             </div>
                         </div>
 
@@ -1144,6 +1166,66 @@
             } finally {
                 btn.disabled = false;
                 btn.innerText = '⚡ API 接続テストを実行';
+            }
+        }
+
+        // --- IMAGE UPLOAD HELPER ---
+        async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId) {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById(statusBadgeId);
+            if (statusEl) {
+                statusEl.style.color = '#92400E';
+                statusEl.innerHTML = '⏳ アップロード中 / Uploading...';
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/api/admin/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.url) {
+                    const hiddenInput = document.getElementById(targetHiddenInputId);
+                    if (hiddenInput) hiddenInput.value = data.url;
+
+                    const previewImg = document.getElementById(previewImgId);
+                    if (previewImg) previewImg.src = data.url;
+
+                    if (statusEl) {
+                        statusEl.style.color = '#166534';
+                        statusEl.innerHTML = '✓ アップロード完了 / Uploaded: ' + (data.filename || 'OK');
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.style.color = '#DC2626';
+                        statusEl.innerHTML = '❌ エラー: ' + (data.error || 'Upload failed');
+                    }
+                }
+            } catch (err) {
+                console.error('Upload error:', err);
+                if (statusEl) {
+                    statusEl.style.color = '#DC2626';
+                    statusEl.innerHTML = '❌ 通信エラーが発生しました';
+                }
+            }
+        }
+
+        function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId) {
+            const hiddenInput = document.getElementById(targetHiddenInputId);
+            if (hiddenInput) hiddenInput.value = defaultUrl;
+
+            const previewImg = document.getElementById(previewImgId);
+            if (previewImg) previewImg.src = defaultUrl;
+
+            const statusEl = document.getElementById(statusBadgeId);
+            if (statusEl) {
+                statusEl.style.color = '#166534';
+                statusEl.innerHTML = '✓ デフォルト画像に設定しました';
             }
         }
 
