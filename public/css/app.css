@@ -187,22 +187,30 @@ header {
 }
 
 .navbar {
-    min-height: 72px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
 }
 
 .brand-wrapper {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.brand-text-block {
+    min-width: 0;
+    overflow: hidden;
 }
 
 .brand-icon {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: #FFFFFF;
     border-radius: var(--radius-sm);
@@ -210,29 +218,46 @@ header {
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 18px;
+    font-size: 17px;
     box-shadow: 0 4px 10px rgba(15, 44, 89, 0.2);
+    flex-shrink: 0;
+}
+
+.brand-logo-img {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(15, 44, 89, 0.15);
+    transition: transform 0.2s ease;
 }
 
 .brand-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--primary);
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .brand-subtitle {
     font-size: 11px;
     color: var(--text-light);
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-links {
     display: flex;
     align-items: center;
     list-style: none;
-    gap: 24px;
+    gap: 20px;
 }
 
 .nav-link {
@@ -241,6 +266,7 @@ header {
     color: var(--text-muted);
     padding: 6px 0;
     position: relative;
+    white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -265,22 +291,24 @@ header {
 .nav-right-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .lang-toggle-group {
     display: flex;
     align-items: center;
-    background: var(--surface-bg);
+    background: #F1F5F9;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-full);
-    padding: 3px;
+    padding: 2px;
+    flex-shrink: 0;
 }
 
 .lang-btn {
     border: none;
     background: transparent;
-    padding: 5px 12px;
+    padding: 4px 10px;
     font-size: 12px;
     font-weight: 700;
     color: var(--text-light);
@@ -301,12 +329,14 @@ header {
     color: #FFFFFF;
     font-size: 13px;
     font-weight: 700;
-    padding: 9px 18px;
+    padding: 8px 16px;
     border-radius: var(--radius-sm);
     display: inline-flex;
     align-items: center;
     gap: 6px;
     box-shadow: 0 2px 6px rgba(15, 44, 89, 0.15);
+    white-space: nowrap;
+    text-decoration: none;
 }
 
 .btn-header-cta:hover {
@@ -316,12 +346,24 @@ header {
 
 .mobile-menu-btn {
     display: none;
-    background: transparent;
+    background: #F8FAFC;
     border: 1px solid var(--border-color);
-    padding: 8px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
     border-radius: var(--radius-sm);
-    color: var(--text-main);
+    color: var(--primary);
     cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:active {
+    background: #E2E8F0;
+    border-color: var(--primary);
 }
 
 /* ===================================================
@@ -2586,4 +2628,54 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* Extra Small Smartphones (max-width: 380px) */
+@media (max-width: 380px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .navbar {
+        gap: 6px;
+    }
+
+    .brand-wrapper {
+        gap: 6px;
+    }
+
+    .brand-logo-img {
+        width: 28px;
+        height: 28px;
+    }
+
+    .brand-title {
+        font-size: 13px !important;
+    }
+
+    .lang-btn {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+
+    .mobile-menu-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .mobile-menu-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .hero-title {
+        font-size: 20px;
+    }
+
+    .btn-primary, .btn-secondary, .btn-outline-white {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+}
+
 

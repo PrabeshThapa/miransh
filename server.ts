@@ -140,14 +140,14 @@ function renderHeader(company: any, activePage: string = 'home'): string {
 
   return `
     <!-- HEADER & NAVIGATION -->
-    <header>
+    <header id="site-header">
         <div class="container navbar">
             <a href="/" class="brand-wrapper">
                 <img src="/images/logo-icon.svg" alt="MIRANSH LLC" class="brand-logo-img">
-                <div>
+                <div class="brand-text-block">
                     <div class="brand-title">
-                        <span class="lang-ja">${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</span>
-                        <span class="lang-en">${escapeHtml(company.name_en || 'MIRANSH LLC')}</span>
+                        <span class="lang-ja">MIRANSH合同会社</span>
+                        <span class="lang-en">MIRANSH LLC</span>
                     </div>
                     <div class="brand-subtitle">
                         <span class="lang-ja">ミランス合同会社 | 国際人材ソリューション</span>
@@ -172,13 +172,10 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                     <button type="button" class="lang-btn active" id="btn-lang-ja" onclick="setLanguage('ja')">日本語</button>
                     <button type="button" class="lang-btn" id="btn-lang-en" onclick="setLanguage('en')">EN</button>
                 </div>
-                <a href="${prefix}#contact" class="btn-header-cta" style="display: inline-flex;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <a href="${prefix}#contact" class="btn-header-cta">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     <span class="lang-ja">お問い合わせ</span>
                     <span class="lang-en">Contact</span>
-                </a>
-                <a href="/admin" class="admin-link-btn" title="Admin Control Panel" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #0f4c81; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none;">
-                    ⚙️ <span class="lang-ja">管理</span><span class="lang-en">Admin</span>
                 </a>
                 <button type="button" class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="ナビゲーションメニューを開く">
                     <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -192,10 +189,10 @@ function renderHeader(company: any, activePage: string = 'home'): string {
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
             <div class="mobile-nav-header">
                 <div class="brand-wrapper">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 30px; height: 30px;">
                     <div class="brand-title" style="font-size: 16px;">
-                        <span class="lang-ja">${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</span>
-                        <span class="lang-en">${escapeHtml(company.name_en || 'MIRANSH LLC')}</span>
+                        <span class="lang-ja">MIRANSH合同会社</span>
+                        <span class="lang-en">MIRANSH LLC</span>
                     </div>
                 </div>
                 <button type="button" class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="メニューを閉じる">✕</button>
@@ -242,11 +239,6 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                     <span class="lang-en">👤 CEO Message</span>
                     <span>→</span>
                 </a>
-                <a href="/admin" class="mobile-nav-link" style="color: #2563EB; font-weight: 700;">
-                    <span class="lang-ja">⚙️ 管理者ダッシュボード</span>
-                    <span class="lang-en">⚙️ Admin Dashboard</span>
-                    <span>→</span>
-                </a>
             </div>
 
             <div class="mobile-nav-footer">
@@ -276,8 +268,8 @@ function renderFooter(company: any): string {
                     <div class="footer-brand">
                         <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 28px; height: 28px; filter: brightness(0) invert(1);">
                         <div class="footer-brand-title">
-                            <span class="lang-ja">${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</span>
-                            <span class="lang-en">${escapeHtml(company.name_en || 'MIRANSH LLC')}</span>
+                            <span class="lang-ja">MIRANSH合同会社</span>
+                            <span class="lang-en">MIRANSH LLC</span>
                         </div>
                     </div>
                     <div class="footer-desc">
@@ -300,7 +292,7 @@ function renderFooter(company: any): string {
                         <li><a href="/#stories"><span class="lang-ja">採用事例</span><span class="lang-en">Stories</span></a></li>
                         <li><a href="/#faq"><span class="lang-ja">FAQ</span><span class="lang-en">FAQ</span></a></li>
                         <li><a href="/#company"><span class="lang-ja">会社概要</span><span class="lang-en">Company Profile</span></a></li>
-                        <li><a href="/admin"><span class="lang-ja">⚙️ 管理者ログイン</span><span class="lang-en">⚙️ Admin Login</span></a></li>
+                        <li><a href="/#vision"><span class="lang-ja">代表挨拶</span><span class="lang-en">CEO Message</span></a></li>
                     </ul>
                 </div>
 
@@ -320,7 +312,7 @@ function renderFooter(company: any): string {
                     <div class="footer-contact-item">
                         <span>📍</span>
                         <div style="font-size: 13px; line-height: 1.4;">
-                            <span class="lang-ja">${escapeHtml(company.address_ja || '東京都小金井市東町4丁目8番14号 アクトレジデンス新小金井201号室')}</span>
+                            <span class="lang-ja">${escapeHtml(company.address_ja || '〒184-0011 東京都小金井市東町4丁目8番14号 アクトレジデンス新小金井201号室')}</span>
                             <span class="lang-en">${escapeHtml(company.address_en || 'Room 201, Act Residence Shin-Koganei, 4-8-14 Higashicho, Koganei-shi, Tokyo 184-0011, Japan')}</span>
                         </div>
                     </div>
@@ -329,11 +321,11 @@ function renderFooter(company: any): string {
 
             <div class="footer-bottom">
                 <div>
-                    &copy; ${year} <span class="lang-ja">${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</span><span class="lang-en">${escapeHtml(company.name_en || 'MIRANSH LLC')}</span>. All Rights Reserved.
+                    &copy; ${year} <span class="lang-ja">MIRANSH合同会社</span><span class="lang-en">MIRANSH LLC</span>. All Rights Reserved.
                 </div>
                 <div>
-                    <span class="lang-ja">有料職業紹介事業許可番号：13-ユ-319558</span>
-                    <span class="lang-en">Recruitment Agency License: 13-ユ-319558</span>
+                    <span class="lang-ja">有料職業紹介事業許可番号：${escapeHtml(company.license || '13-ユ-319558')}</span>
+                    <span class="lang-en">Recruitment Agency License: ${escapeHtml(company.license || '13-ユ-319558')}</span>
                 </div>
             </div>
         </div>
