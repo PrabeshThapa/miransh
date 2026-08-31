@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login | MIRANSH LLC</title>
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         .admin-login-wrapper {
@@ -132,7 +132,7 @@
         <div class="login-card">
             <div class="login-header">
                 <div style="display: flex; justify-content: center; margin-bottom: 14px;">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 6px 16px rgba(15, 44, 89, 0.25);">
+                    <img src="/images/logo-icon.png" alt="MIRANSH LLC" style="width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 6px 16px rgba(15, 44, 89, 0.25);">
                 </div>
                 <div class="brand-badge">MIRANSH <span>LLC</span></div>
                 <h1>Admin Control Panel</h1>

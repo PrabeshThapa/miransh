@@ -220,7 +220,7 @@ function renderHeader(company: any, activePage: string = 'home'): string {
     <header id="site-header">
         <div class="container navbar">
             <a href="/" class="brand-wrapper">
-                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" class="brand-logo-img">
+                <img src="/images/logo-icon.png" alt="MIRANSH LLC" class="brand-logo-img">
                 <div class="brand-text-block">
                     <div class="brand-title">
                         <span class="lang-ja">MIRANSH合同会社</span>
@@ -266,7 +266,7 @@ function renderHeader(company: any, activePage: string = 'home'): string {
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
             <div class="mobile-nav-header">
                 <div class="brand-wrapper">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 30px; height: 30px;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH" class="brand-logo-img" style="width: 30px; height: 30px;">
                     <div class="brand-title" style="font-size: 16px;">
                         <span class="lang-ja">MIRANSH合同会社</span>
                         <span class="lang-en">MIRANSH LLC</span>
@@ -343,7 +343,7 @@ function renderFooter(company: any): string {
             <div class="footer-grid">
                 <div>
                     <div class="footer-brand">
-                        <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;">
+                        <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;">
                         <div class="footer-brand-title">
                             <span class="lang-ja">MIRANSH合同会社</span>
                             <span class="lang-en">MIRANSH LLC</span>
@@ -657,7 +657,7 @@ app.get('/', (req: Request, res: Response) => {
     <title>${escapeHtml(company.name_ja || 'MIRANSH合同会社')} | ${escapeHtml(company.tagline_ja || '日本企業と海外人材をつなぐ、信頼の架け橋')}</title>
     <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポートを提供します。">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
 <body class="ja">
 
@@ -1306,7 +1306,7 @@ app.get('/services/:id', (req: Request, res: Response) => {
     <title>${escapeHtml(service.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</title>
     <meta name="description" content="${escapeHtml(service.desc_ja)}">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
 <body class="ja">
     ${renderHeader(company, 'service-detail')}
@@ -1392,7 +1392,7 @@ app.get('/stories/:id', (req: Request, res: Response) => {
     <title>${escapeHtml(story.title_ja)} | ${escapeHtml(company.name_ja || 'MIRANSH合同会社')}</title>
     <meta name="description" content="${escapeHtml(story.summary_ja)}">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
 <body class="ja">
     ${renderHeader(company, 'story-detail')}
@@ -1641,7 +1641,7 @@ app.get('/admin/login', (req: Request, res: Response) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login | MIRANSH LLC</title>
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
     <link rel="stylesheet" href="/css/app.css">
     <style>
         .admin-login-wrapper {
@@ -1693,7 +1693,7 @@ app.get('/admin/login', (req: Request, res: Response) => {
     <div class="admin-login-wrapper">
         <div class="login-card">
             <div class="login-header">
-                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 48px; height: 48px; margin-bottom: 12px;">
+                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 48px; height: 48px; margin-bottom: 12px;">
                 <h1 style="font-size: 22px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Portal</h1>
                 <p style="font-size: 14px; color: #64748B; margin: 0;">Sign in to access admin settings</p>
             </div>
@@ -1805,7 +1805,7 @@ app.get('/admin', (req: Request, res: Response) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIRANSH LLC | 管理者ダッシュボード (Admin Portal)</title>
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
     <link rel="stylesheet" href="/css/app.css">
     <style>
         .admin-layout {
@@ -2152,7 +2152,7 @@ app.get('/admin', (req: Request, res: Response) => {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
+                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
                 <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
             </div>
         </div>
@@ -2181,7 +2181,7 @@ app.get('/admin', (req: Request, res: Response) => {
         <aside class="admin-sidebar">
             <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 36px; height: 36px; border-radius: 50%;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 36px; height: 36px; border-radius: 50%;">
                     <div>
                         <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
                         <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>

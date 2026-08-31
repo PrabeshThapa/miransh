@@ -6,7 +6,7 @@
     <title>{{ $company->name_ja ?? 'MIRANSH合同会社' }} | {{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋' }}</title>
     <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポートを提供します。">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
 <body class="ja">
 
@@ -14,7 +14,7 @@
     <header>
         <div class="container navbar">
             <a href="/" class="brand-wrapper">
-                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" class="brand-logo-img">
+                <img src="/images/logo-icon.png" alt="MIRANSH LLC" class="brand-logo-img">
                 <div>
                     <div class="brand-title">
                         <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
@@ -60,7 +60,7 @@
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
             <div class="mobile-nav-header">
                 <div class="brand-wrapper">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
                     <div class="brand-title" style="font-size: 16px;">
                         <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
                         <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
@@ -874,7 +874,7 @@
             <div class="footer-grid">
                 <div>
                     <div class="brand-wrapper" style="margin-bottom: 14px;">
-                        <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 38px; height: 38px;">
+                        <img src="/images/logo-icon.png" alt="MIRANSH" class="brand-logo-img" style="width: 38px; height: 38px;">
                         <div class="footer-brand-title">
                             <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
                             <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>

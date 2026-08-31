@@ -6,7 +6,7 @@
     <title>{{ $service->title_ja }} | {{ $company->name_ja ?? 'MIRANSH合同会社' }}</title>
     <meta name="description" content="{{ $service->desc_ja }}">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" type="image/svg+xml" href="/images/logo-icon.svg">
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
 <body class="ja">
 
@@ -14,7 +14,7 @@
     <header>
         <div class="container navbar">
             <a href="/" class="brand-wrapper">
-                <img src="/images/logo-icon.svg" alt="MIRANSH LLC" class="brand-logo-img">
+                <img src="/images/logo-icon.png" alt="MIRANSH LLC" class="brand-logo-img">
                 <div>
                     <div class="brand-title">
                         <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
@@ -57,7 +57,7 @@
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
             <div class="mobile-nav-header">
                 <div class="brand-wrapper">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH" class="brand-logo-img" style="width: 32px; height: 32px;">
                     <div class="brand-title" style="font-size: 16px;">
                         <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
                         <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
