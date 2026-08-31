@@ -272,7 +272,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 26px; height: 26px; filter: brightness(0) invert(1);">
+                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
                 <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
             </div>
         </div>
@@ -301,7 +301,7 @@
         <aside class="admin-sidebar">
             <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;">
                     <div>
                         <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
                         <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div>
@@ -404,9 +404,9 @@
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                                 <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
                                                     📁 画像ファイルを選択
-                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status')">
+                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status', 'ceo_image')">
                                                 </label>
-                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/ceo_portrait.jpg', 'preview_ceo_status')">
+                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/ceo_portrait.jpg', 'preview_ceo_status', 'ceo_image')">
                                                     🔄 デフォルト写真に戻す
                                                 </button>
                                             </div>
@@ -418,17 +418,6 @@
                                     </div>
                                     <input type="hidden" id="input_ceo_image" name="ceo_image" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}">
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">代表社員 日本語氏名 (CEO Name - Japanese)</label>
-                                <input type="text" name="ceo_name_ja" class="form-input" value="{{ $company->ceo_name_ja ?? 'ギリ ラム クリシュナ' }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">代表社員 英語氏名 (CEO Name - English)</label>
-                                <input type="text" name="ceo_name_en" class="form-input" value="{{ $company->ceo_name_en ?? 'Giri Ram Krishna' }}">
                             </div>
                         </div>
 
@@ -459,9 +448,9 @@
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                                 <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
                                                     📁 バナー画像を選択
-                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_image', 'preview_hero_status')">
+                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_image', 'preview_hero_status', 'hero_image')">
                                                 </label>
-                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_image', '/images/hero_banner.jpg', 'preview_hero_status')">
+                                                <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_image', '/images/hero_banner.jpg', 'preview_hero_status', 'hero_image')">
                                                     🔄 デフォルトバナーに戻す
                                                 </button>
                                             </div>
@@ -1352,18 +1341,21 @@
         }
 
         // --- IMAGE UPLOAD HELPER ---
-        async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId) {
+        async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId, targetField) {
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;
 
             const statusEl = document.getElementById(statusBadgeId);
             if (statusEl) {
                 statusEl.style.color = '#92400E';
-                statusEl.innerHTML = '⏳ アップロード中 / Uploading...';
+                statusEl.innerHTML = '⏳ アップロード中 / Uploading image (' + Math.round(file.size / 1024) + ' KB)...';
             }
 
             const formData = new FormData();
             formData.append('image', file);
+            if (targetField) {
+                formData.append('target_field', targetField);
+            }
 
             try {
                 const res = await fetch('/api/admin/upload-image', {
@@ -1376,11 +1368,13 @@
                     if (hiddenInput) hiddenInput.value = data.url;
 
                     const previewImg = document.getElementById(previewImgId);
-                    if (previewImg) previewImg.src = data.url;
+                    if (previewImg) {
+                        previewImg.src = data.url + '?t=' + Date.now();
+                    }
 
                     if (statusEl) {
                         statusEl.style.color = '#166534';
-                        statusEl.innerHTML = '✓ アップロード完了 / Uploaded: ' + (data.filename || 'OK');
+                        statusEl.innerHTML = '✓ 画像反映・保存完了 / Saved & Applied (' + (data.filename || 'Success') + ')';
                     }
                 } else {
                     if (statusEl) {
@@ -1392,12 +1386,12 @@
                 console.error('Upload error:', err);
                 if (statusEl) {
                     statusEl.style.color = '#DC2626';
-                    statusEl.innerHTML = '❌ 通信エラーが発生しました';
+                    statusEl.innerHTML = '❌ 通信エラーが発生しました (Connection Error)';
                 }
             }
         }
 
-        function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId) {
+        async function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId, targetField) {
             const hiddenInput = document.getElementById(targetHiddenInputId);
             if (hiddenInput) hiddenInput.value = defaultUrl;
 
@@ -1407,7 +1401,21 @@
             const statusEl = document.getElementById(statusBadgeId);
             if (statusEl) {
                 statusEl.style.color = '#166534';
-                statusEl.innerHTML = '✓ デフォルト画像に設定しました';
+                statusEl.innerHTML = '✓ デフォルト画像に設定しました (' + defaultUrl + ')';
+            }
+
+            if (targetField) {
+                try {
+                    const params = new URLSearchParams();
+                    params.append(targetField, defaultUrl);
+                    await fetch('/admin/company', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    });
+                } catch (e) {
+                    console.log('Reset default auto-saved on save button submit');
+                }
             }
         }
 

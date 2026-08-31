@@ -132,7 +132,7 @@
         <div class="login-card">
             <div class="login-header">
                 <div style="display: flex; justify-content: center; margin-bottom: 14px;">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 52px; height: 52px; border-radius: 12px; box-shadow: 0 4px 12px rgba(15, 44, 89, 0.2);">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH LLC" style="width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 6px 16px rgba(15, 44, 89, 0.25);">
                 </div>
                 <div class="brand-badge">MIRANSH <span>LLC</span></div>
                 <h1>Admin Control Panel</h1>

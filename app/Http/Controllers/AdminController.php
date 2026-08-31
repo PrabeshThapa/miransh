@@ -421,12 +421,27 @@ class AdminController extends Controller
         $file->move($destinationPath, $filename);
         $fullFilePath = $destinationPath . '/' . $filename;
         $size = file_exists($fullFilePath) ? filesize($fullFilePath) : 0;
+        $relativePath = '/uploads/' . $filename;
+
+        // Auto-save to company_info if target_field is specified
+        if ($request->filled('target_field')) {
+            $targetField = $request->input('target_field');
+            if (in_array($targetField, ['ceo_image', 'hero_image'])) {
+                $company = CompanyInfo::first();
+                if (!$company) {
+                    $company = new CompanyInfo();
+                }
+                $company->$targetField = $relativePath;
+                $company->save();
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'url' => '/uploads/' . $filename,
+            'url' => $relativePath,
             'filename' => $filename,
-            'size' => $size
+            'size' => $size,
+            'auto_saved' => $request->filled('target_field')
         ]);
     }
 }

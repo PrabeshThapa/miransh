@@ -327,7 +327,7 @@ function renderFooter(company: any): string {
             <div class="footer-grid">
                 <div>
                     <div class="footer-brand">
-                        <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 28px; height: 28px; filter: brightness(0) invert(1);">
+                        <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain;">
                         <div class="footer-brand-title">
                             <span class="lang-ja">MIRANSH合同会社</span>
                             <span class="lang-en">MIRANSH LLC</span>
@@ -2136,7 +2136,7 @@ app.get('/admin', (req: Request, res: Response) => {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 26px; height: 26px; filter: brightness(0) invert(1);">
+                <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
                 <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
             </div>
         </div>
@@ -2165,7 +2165,7 @@ app.get('/admin', (req: Request, res: Response) => {
         <aside class="admin-sidebar">
             <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 32px; height: 32px; filter: brightness(0) invert(1);">
+                    <img src="/images/logo-icon.svg" alt="MIRANSH" style="width: 36px; height: 36px; border-radius: 50%;">
                     <div>
                         <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
                         <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>
@@ -2229,9 +2229,9 @@ app.get('/admin', (req: Request, res: Response) => {
                                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                         <label class="file-upload-btn-label">
                                             📁 ファイルを選択してアップロード
-                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status')">
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status', 'ceo_image')">
                                         </label>
-                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/ceo_portrait.jpg', 'ceo_status')">
+                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/ceo_portrait.jpg', 'ceo_status', 'ceo_image')">
                                             🔄 デフォルト写真に戻す
                                         </button>
                                     </div>
@@ -2298,9 +2298,9 @@ app.get('/admin', (req: Request, res: Response) => {
                                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                         <label class="file-upload-btn-label">
                                             📁 バナー画像を選択してアップロード
-                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_img', 'hero_status')">
+                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_img', 'hero_status', 'hero_image')">
                                         </label>
-                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_img', '/images/hero_banner.jpg', 'hero_status')">
+                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_img', '/images/hero_banner.jpg', 'hero_status', 'hero_image')">
                                             🔄 デフォルトバナーに戻す
                                         </button>
                                     </div>
@@ -2535,7 +2535,7 @@ app.get('/admin', (req: Request, res: Response) => {
 
     <!-- Admin Image Upload JS -->
     <script>
-    async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId) {
+    async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId, targetField) {
         const file = fileInput.files && fileInput.files[0];
         if (!file) return;
 
@@ -2543,11 +2543,14 @@ app.get('/admin', (req: Request, res: Response) => {
         if (statusEl) {
             statusEl.style.display = 'inline-flex';
             statusEl.className = 'upload-status-tag uploading';
-            statusEl.innerHTML = '⏳ アップロード中 / Uploading...';
+            statusEl.innerHTML = '⏳ アップロード中 / Uploading (' + Math.round(file.size / 1024) + ' KB)...';
         }
 
         const formData = new FormData();
         formData.append('image', file);
+        if (targetField) {
+            formData.append('target_field', targetField);
+        }
 
         try {
             const res = await fetch('/api/admin/upload-image', {
@@ -2560,11 +2563,13 @@ app.get('/admin', (req: Request, res: Response) => {
                 if (hiddenInput) hiddenInput.value = data.url;
 
                 const previewImg = document.getElementById(previewImgId);
-                if (previewImg) previewImg.src = data.url;
+                if (previewImg) {
+                    previewImg.src = data.url + '?t=' + Date.now();
+                }
 
                 if (statusEl) {
                     statusEl.className = 'upload-status-tag success';
-                    statusEl.innerHTML = '✓ アップロード完了 / Uploaded: ' + (data.filename || 'OK');
+                    statusEl.innerHTML = '✓ 画像反映・保存完了 / Saved & Applied (' + (data.filename || 'Success') + ')';
                 }
             } else {
                 if (statusEl) {
@@ -2580,12 +2585,12 @@ app.get('/admin', (req: Request, res: Response) => {
                 statusEl.className = 'upload-status-tag uploading';
                 statusEl.style.background = '#FEE2E2';
                 statusEl.style.color = '#991B1B';
-                statusEl.innerHTML = '❌ 通信エラーが発生しました';
+                statusEl.innerHTML = '❌ 通信エラーが発生しました (Connection Error)';
             }
         }
     }
 
-    function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId) {
+    async function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId, targetField) {
         const hiddenInput = document.getElementById(targetHiddenInputId);
         if (hiddenInput) hiddenInput.value = defaultUrl;
 
@@ -2596,7 +2601,21 @@ app.get('/admin', (req: Request, res: Response) => {
         if (statusEl) {
             statusEl.style.display = 'inline-flex';
             statusEl.className = 'upload-status-tag success';
-            statusEl.innerHTML = '✓ デフォルト画像に設定しました';
+            statusEl.innerHTML = '✓ デフォルト画像に設定しました (' + defaultUrl + ')';
+        }
+
+        if (targetField) {
+            try {
+                const params = new URLSearchParams();
+                params.append(targetField, defaultUrl);
+                await fetch('/admin/company', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+            } catch (e) {
+                console.log('Reset default auto-saved');
+            }
         }
     }
 
@@ -2637,11 +2656,21 @@ app.post('/api/admin/upload-image', (req: Request, res: Response) => {
     }
 
     const relativePath = `/uploads/${req.file.filename}`;
+    const targetField = req.body.target_field || req.query.target_field;
+
+    // Immediately persist to database if target_field is specified
+    if (targetField === 'ceo_image') {
+      db.prepare('UPDATE company_info SET ceo_image = ? WHERE id = 1').run(relativePath);
+    } else if (targetField === 'hero_image') {
+      db.prepare('UPDATE company_info SET hero_image = ? WHERE id = 1').run(relativePath);
+    }
+
     return res.json({
       success: true,
       url: relativePath,
       filename: req.file.filename,
-      size: req.file.size
+      size: req.file.size,
+      auto_saved: Boolean(targetField)
     });
   });
 });
@@ -2656,6 +2685,10 @@ app.post('/admin/company', (req: Request, res: Response) => {
     phone, email, address_ja, address_en 
   } = req.body;
   
+  const current = getCompanyInfo();
+  const finalCeoImage = (ceo_image && ceo_image.trim()) ? ceo_image : (current.ceo_image || '/images/ceo_portrait.jpg');
+  const finalHeroImage = (hero_image && hero_image.trim()) ? hero_image : (current.hero_image || '/images/hero_banner.jpg');
+
   db.prepare(`
     UPDATE company_info SET 
       name_ja = ?, name_en = ?, corporate_number = ?, license = ?, 
@@ -2664,10 +2697,10 @@ app.post('/admin/company', (req: Request, res: Response) => {
       phone = ?, email = ?, address_ja = ?, address_en = ?
     WHERE id = 1
   `).run(
-    name_ja || '', name_en || '', corporate_number || '', license || '', 
-    ceo_name_ja || '', ceo_name_en || '', ceo_role_ja || '', ceo_role_en || '', ceo_image || '/images/ceo_portrait.jpg', ceo_message_ja || '', ceo_message_en || '', 
-    hero_title_ja || '', hero_title_accent_ja || '', hero_desc_ja || '', hero_title_en || '', hero_title_accent_en || '', hero_desc_en || '', hero_image || '/images/hero_banner.jpg',
-    phone || '', email || '', address_ja || '', address_en || ''
+    name_ja || current.name_ja || '', name_en || current.name_en || '', corporate_number || current.corporate_number || '', license || current.license || '', 
+    ceo_name_ja || current.ceo_name_ja || '', ceo_name_en || current.ceo_name_en || '', ceo_role_ja || current.ceo_role_ja || '', ceo_role_en || current.ceo_role_en || '', finalCeoImage, ceo_message_ja || current.ceo_message_ja || '', ceo_message_en || current.ceo_message_en || '', 
+    hero_title_ja || current.hero_title_ja || '', hero_title_accent_ja || current.hero_title_accent_ja || '', hero_desc_ja || current.hero_desc_ja || '', hero_title_en || current.hero_title_en || '', hero_title_accent_en || current.hero_title_accent_en || '', hero_desc_en || current.hero_desc_en || '', finalHeroImage,
+    phone || current.phone || '', email || current.email || '', address_ja || current.address_ja || '', address_en || current.address_en || ''
   );
 
   res.redirect('/admin?tab=company');
