@@ -4,7 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $company->name_ja ?? 'MIRANSH合同会社' }} | {{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋' }}</title>
-    <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポートを提供します。">
+    <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。有料職業紹介事業（許可番号：13-ユ-319558）として特定技能（介護・建設・清掃・外食など）外国人材の採用支援、在留資格申請手続き、生活・職場定着サポートをワンストップで提供します。">
+    <meta name="keywords" content="MIRANSH合同会社,ミランス合同会社,外国人材紹介,特定技能,介護人材,ネパール人材採用,在留資格申請,特定技能登録支援機関,有料職業紹介,Giri Ram Krishna">
+    <meta name="author" content="MIRANSH合同会社">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://miransh.co.jp/">
+
+    <!-- Open Graph Protocol (Facebook, LINE, LinkedIn, Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://miransh.co.jp/">
+    <meta property="og:title" content="{{ $company->name_ja ?? 'MIRANSH合同会社' }} | {{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋' }}">
+    <meta property="og:description" content="MIRANSH合同会社は日本企業とネパールを中心とする海外人材をつなぐ有料職業紹介事業者（13-ユ-319558）です。介護・建設などの特定技能人材の紹介から入国・生活定着まで伴走支援します。">
+    <meta property="og:image" content="https://miransh.co.jp/images/logo-icon.png">
+    <meta property="og:image:alt" content="MIRANSH合同会社 ロゴ">
+    <meta property="og:site_name" content="MIRANSH合同会社 (MIRANSH LLC)">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://miransh.co.jp/">
+    <meta name="twitter:title" content="{{ $company->name_ja ?? 'MIRANSH合同会社' }} | 日本企業と海外人材をつなぐ、信頼の架け橋">
+    <meta name="twitter:description" content="特定技能（介護・建設・清掃など）の外国人材採用支援・在留資格申請・生活定着サポート。厚生労働大臣許可：13-ユ-319558。">
+    <meta name="twitter:image" content="https://miransh.co.jp/images/logo-icon.png">
+
+    <!-- Schema.org JSON-LD Structured Data for Japanese Recruitment Agency -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmploymentAgency",
+      "name": "MIRANSH合同会社",
+      "alternateName": "MIRANSH LLC",
+      "url": "https://miransh.co.jp",
+      "logo": "https://miransh.co.jp/images/logo-icon.png",
+      "image": "https://miransh.co.jp/images/hero_banner.jpg",
+      "description": "日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポート。",
+      "telephone": "{{ $company->phone ?? '042-409-8256' }}",
+      "email": "{{ $company->email ?? 'info@miransh.jp' }}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "東町4丁目8番14号 アクトレジデンス新小金井201号室",
+        "addressLocality": "小金井市",
+        "addressRegion": "東京都",
+        "postalCode": "184-0011",
+        "addressCountry": "JP"
+      },
+      "founder": {
+        "@type": "Person",
+        "name": "Giri Ram Krishna",
+        "jobTitle": "代表社員 (CEO)"
+      }
+    }
+    </script>
+
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
@@ -854,10 +906,26 @@
                                     <span class="lang-ja">ご相談内容・メッセージ</span><span class="lang-en">Inquiry Details</span>
                                     <span class="req">*</span>
                                 </label>
-                                <textarea id="input-message" name="message" class="form-textarea" required placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
+                                <textarea id="input-message" name="message" class="form-textarea" required minlength="10" placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
                             </div>
 
-                            <button type="submit" class="btn-submit-contact">
+                            <!-- Bot Honeypot Field (Invisible to human users) -->
+                            <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+                                <label for="website_url">Do not fill this field if you are human</label>
+                                <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+                            </div>
+
+                            <!-- Anti-Spam Verification Challenge -->
+                            <div class="form-group" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px;">
+                                <label class="form-label" style="margin-bottom: 6px; font-size: 13px;">
+                                    <span class="lang-ja">🤖 スパム防止認証： <strong>5 + 3 = ?</strong> の答えを入力してください</span>
+                                    <span class="lang-en">🤖 Spam Protection: What is <strong>5 + 3 = ?</strong></span>
+                                    <span class="req">*</span>
+                                </label>
+                                <input type="number" id="input-captcha" name="captcha_ans" class="form-input" required style="width: 120px;" placeholder="8">
+                            </div>
+
+                            <button type="submit" id="btn-contact-submit" class="btn-submit-contact">
                                 <span class="lang-ja">送信する (Submit Inquiry)</span>
                                 <span class="lang-en">Submit Inquiry</span>
                             </button>

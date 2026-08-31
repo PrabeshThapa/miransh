@@ -52,6 +52,7 @@ const dbPath = path.join(__dirname, 'database', 'database.sqlite');
 const db = new Database(dbPath);
 
 // Middleware
+app.disable('x-powered-by'); // Hide web server identity header
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(cookieParser());
@@ -62,12 +63,32 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// Serve static assets from public folder
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(uploadsDir));
-app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
-app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
-app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+// Security Headers Middleware
+app.use((req: Request, res: Response, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Serve static assets with caching headers policy
+const staticOptions = {
+  maxAge: '7d',
+  setHeaders: (res: any, path: string) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+  }
+};
+
+app.use(express.static(path.join(__dirname, 'public'), staticOptions));
+app.use('/uploads', express.static(uploadsDir, staticOptions));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images'), staticOptions));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css'), staticOptions));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js'), staticOptions));
 
 // Explicit route handler for /uploads/:filename fallback
 app.get('/uploads/:filename', (req: Request, res: Response) => {
@@ -654,7 +675,51 @@ app.get('/', (req: Request, res: Response) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(company.name_ja || 'MIRANSH合同会社')} | ${escapeHtml(company.tagline_ja || '日本企業と海外人材をつなぐ、信頼の架け橋')}</title>
-    <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポートを提供します。">
+    <meta name="description" content="MIRANSH合同会社（ミランス）は、日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業です。有料職業紹介事業（許可番号：13-ユ-319558）として特定技能（介護・建設・清掃・外食など）外国人材の採用支援、在留資格申請手続き、生活・職場定着サポートをワンストップで提供します。">
+    <meta name="keywords" content="MIRANSH合同会社,ミランス合同会社,外国人材紹介,特定技能,介護人材,ネパール人材採用,在留資格申請,有料職業紹介,Giri Ram Krishna">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://miransh.co.jp/">
+
+    <!-- Open Graph Protocol -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://miransh.co.jp/">
+    <meta property="og:title" content="${escapeHtml(company.name_ja || 'MIRANSH合同会社')} | ${escapeHtml(company.tagline_ja || '日本企業と海外人材をつなぐ、信頼の架け橋')}">
+    <meta property="og:description" content="MIRANSH合同会社は日本企業とネパールを中心とする海外人材をつなぐ有料職業紹介事業者（13-ユ-319558）です。介護・建設などの特定技能人材の紹介から入国・生活定着まで伴走支援します。">
+    <meta property="og:image" content="https://miransh.co.jp/images/logo-icon.png">
+    <meta property="og:site_name" content="MIRANSH合同会社 (MIRANSH LLC)">
+    <meta property="og:locale" content="ja_JP">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://miransh.co.jp/">
+    <meta name="twitter:title" content="${escapeHtml(company.name_ja || 'MIRANSH合同会社')} | 日本企業と海外人材をつなぐ、信頼の架け橋">
+    <meta name="twitter:description" content="特定技能（介護・建設・清掃など）の外国人材採用支援・在留資格申請・生活定着サポート。厚生労働大臣許可：13-ユ-319558。">
+    <meta name="twitter:image" content="https://miransh.co.jp/images/logo-icon.png">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmploymentAgency",
+      "name": "MIRANSH合同会社",
+      "alternateName": "MIRANSH LLC",
+      "url": "https://miransh.co.jp",
+      "logo": "https://miransh.co.jp/images/logo-icon.png",
+      "image": "https://miransh.co.jp/images/hero_banner.jpg",
+      "description": "日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポート。",
+      "telephone": "${escapeHtml(company.phone || '042-409-8256')}",
+      "email": "${escapeHtml(company.email || 'info@miransh.jp')}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "東町4丁目8番14号 アクトレジデンス新小金井201号室",
+        "addressLocality": "小金井市",
+        "addressRegion": "東京都",
+        "postalCode": "184-0011",
+        "addressCountry": "JP"
+      }
+    }
+    </script>
+
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
@@ -1446,23 +1511,42 @@ app.get('/stories/:id', (req: Request, res: Response) => {
 // Public Contact Submission API & Form Handler
 // ----------------------------------------------------
 app.post('/contact', (req: Request, res: Response) => {
-  const { name, email, phone, inquiry_type, message } = req.body;
+  const { name, email, phone, service_interest, inquiry_type, message, website_url, captcha_ans } = req.body;
+
+  // Anti-Spam Check 1: Honeypot field must remain empty
+  if (website_url) {
+    console.warn('Spam submission detected and blocked (honeypot triggered)');
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ success: false, error: 'Spam validation failed' });
+    }
+    return res.redirect('/#contact');
+  }
+
+  // Anti-Spam Check 2: Simple verification challenge (5 + 3 = 8)
+  if (captcha_ans !== undefined && captcha_ans !== '' && parseInt(captcha_ans, 10) !== 8) {
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ success: false, error: 'Anti-spam answer is incorrect.' });
+    }
+    return res.redirect('/#contact?error=captcha');
+  }
+
   if (!name || !email || !message) {
     return res.status(400).json({ success: false, error: 'Name, email, and message are required' });
   }
 
   try {
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const chosenType = service_interest || inquiry_type || 'General';
     const stmt = db.prepare(`
       INSERT INTO inquiries (name, email, phone, inquiry_type, message, status, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, 'unread', ?, ?)
     `);
-    stmt.run(name, email, phone || '', inquiry_type || 'General', message, now, now);
+    stmt.run(name, email, phone || '', chosenType, message, now, now);
 
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
       return res.json({ success: true, message: 'Inquiry saved successfully' });
     }
-    return res.redirect('/#contact');
+    return res.redirect('/?submitted=true#contact');
   } catch (err: any) {
     console.error('Contact submit error:', err);
     return res.status(500).json({ success: false, error: err.message });

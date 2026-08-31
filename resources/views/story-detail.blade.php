@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $story->title_ja }} | {{ $company->name_ja ?? 'MIRANSH合同会社' }}</title>
     <meta name="description" content="{{ $story->summary_ja }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://miransh.co.jp/stories/{{ $story->id }}">
+
+    <!-- Open Graph Protocol -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://miransh.co.jp/stories/{{ $story->id }}">
+    <meta property="og:title" content="{{ $story->title_ja }} | {{ $company->name_ja ?? 'MIRANSH合同会社' }}">
+    <meta property="og:description" content="{{ $story->summary_ja }}">
+    <meta property="og:image" content="{{ $story->image_url ? (str_starts_with($story->image_url, 'http') ? $story->image_url : 'https://miransh.co.jp'.$story->image_url) : 'https://miransh.co.jp/images/logo-icon.png' }}">
+    <meta property="og:site_name" content="MIRANSH合同会社 (MIRANSH LLC)">
+    <meta property="og:locale" content="ja_JP">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $story->title_ja }} | MIRANSH合同会社">
+    <meta name="twitter:description" content="{{ $story->summary_ja }}">
+    <meta name="twitter:image" content="{{ $story->image_url ? (str_starts_with($story->image_url, 'http') ? $story->image_url : 'https://miransh.co.jp'.$story->image_url) : 'https://miransh.co.jp/images/logo-icon.png' }}">
+
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>

@@ -340,6 +340,92 @@ function closeImageZoom() {
     document.body.style.overflow = "";
 }
 
+// Client-side Contact Form Validation & Submission Enhancement
+function initContactFormEnhancements() {
+    const form = document.getElementById("contact-form");
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+        const nameInput = document.getElementById("input-name");
+        const emailInput = document.getElementById("input-email");
+        const msgInput = document.getElementById("input-message");
+        const captchaInput = document.getElementById("input-captcha");
+        const honeypot = document.getElementById("website_url");
+
+        // Honeypot check
+        if (honeypot && honeypot.value) {
+            e.preventDefault();
+            console.warn("Spam honeypot triggered");
+            return false;
+        }
+
+        // Field checks
+        if (!nameInput || !nameInput.value.trim()) {
+            e.preventDefault();
+            alert("お名前（ご担当者様名）をご入力ください。");
+            nameInput?.focus();
+            return false;
+        }
+
+        if (!emailInput || !emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
+            e.preventDefault();
+            alert("有効なメールアドレスをご入力ください。");
+            emailInput?.focus();
+            return false;
+        }
+
+        if (!msgInput || msgInput.value.trim().length < 10) {
+            e.preventDefault();
+            alert("お問い合わせ内容は10文字以上でご入力ください。");
+            msgInput?.focus();
+            return false;
+        }
+
+        if (captchaInput && parseInt(captchaInput.value.trim(), 10) !== 8) {
+            e.preventDefault();
+            alert("スパム防止認証の計算（5 + 3）の答えが正しくありません。8を入力してください。");
+            captchaInput.focus();
+            return false;
+        }
+
+        const submitBtn = document.getElementById("btn-contact-submit");
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.7";
+            submitBtn.textContent = "送信中 (Submitting)...";
+        }
+    });
+}
+
+// Smooth scrolling for in-page anchors with offset for sticky navbar
+function initSmoothScrollAnchors() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href');
+            if (!targetId || targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+                const navHeight = document.querySelector('header')?.offsetHeight || 70;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+
+                // Auto-close mobile drawer if open
+                const drawer = document.getElementById("mobile-nav-drawer");
+                if (drawer && drawer.classList.contains("open")) {
+                    toggleMobileNav();
+                }
+            }
+        });
+    });
+}
+
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", function () {
     let savedLanguage = "ja";
@@ -349,4 +435,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setLanguage(savedLanguage);
     initImageZoomLightbox();
+    initContactFormEnhancements();
+    initSmoothScrollAnchors();
 });
