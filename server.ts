@@ -1946,7 +1946,7 @@ app.get('/admin', (req: Request, res: Response) => {
   const stories = getStories();
   const faqs = getFaqs();
   const inquiries = getInquiries();
-  const activeTab = (req.query.tab as string) || 'company';
+  const activeTab = (req.query.tab as string) || 'dashboard';
   const user = (req.session as any).user;
 
   const html = renderAdminLTEDashboard({
@@ -2156,7 +2156,103 @@ app.post('/admin/inquiries/:id/status', (req: Request, res: Response) => {
   const id = parseInt(req.params.id, 10);
   const { status } = req.body;
   db.prepare('UPDATE inquiries SET status = ? WHERE id = ?').run(status, id);
+  if (req.headers['x-requested-with'] === 'XMLHttpRequest' || req.headers.accept?.includes('application/json')) {
+    return res.json({ success: true, id, status });
+  }
   res.redirect('/admin?tab=inquiries');
+});
+
+app.post('/admin/inquiries/:id/delete', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM inquiries WHERE id = ?').run(id);
+  res.redirect('/admin?tab=inquiries');
+});
+
+// Services CRUD
+app.post(['/admin/services', '/admin/services/create'], (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const { title_ja, title_en, desc_ja, desc_en, icon, sort_order } = req.body;
+  const sort = parseInt(sort_order, 10) || 0;
+  db.prepare(`
+    INSERT INTO services (title_ja, title_en, desc_ja, desc_en, icon, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(title_ja, title_en, desc_ja, desc_en, icon || 'briefcase', sort);
+  res.redirect('/admin?tab=services');
+});
+
+app.post('/admin/services/:id', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  const { title_ja, title_en, desc_ja, desc_en, icon, sort_order } = req.body;
+  const sort = parseInt(sort_order, 10) || 0;
+  db.prepare(`
+    UPDATE services SET
+      title_ja = ?, title_en = ?, desc_ja = ?, desc_en = ?, icon = ?, sort_order = ?
+    WHERE id = ?
+  `).run(title_ja, title_en, desc_ja, desc_en, icon || 'briefcase', sort, id);
+  res.redirect('/admin?tab=services');
+});
+
+app.post('/admin/services/:id/delete', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM services WHERE id = ?').run(id);
+  res.redirect('/admin?tab=services');
+});
+
+// FAQs CRUD
+app.post(['/admin/faqs', '/admin/faqs/create'], (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const { category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order } = req.body;
+  const sort = parseInt(sort_order, 10) || 0;
+  db.prepare(`
+    INSERT INTO faqs (category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(category_ja || '一般', category_en || 'General', question_ja, question_en || question_ja, answer_ja, answer_en || answer_ja, sort);
+  res.redirect('/admin?tab=faqs');
+});
+
+app.post('/admin/faqs/:id', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  const { category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order } = req.body;
+  const sort = parseInt(sort_order, 10) || 0;
+  db.prepare(`
+    UPDATE faqs SET
+      category_ja = ?, category_en = ?, question_ja = ?, question_en = ?, answer_ja = ?, answer_en = ?, sort_order = ?
+    WHERE id = ?
+  `).run(category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort, id);
+  res.redirect('/admin?tab=faqs');
+});
+
+app.post('/admin/faqs/:id/delete', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM faqs WHERE id = ?').run(id);
+  res.redirect('/admin?tab=faqs');
+});
+
+// Admin User Profile & Password
+app.post('/admin/profile', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const { name, email, new_password } = req.body;
+  const userId = (req.session as any).user.id || 1;
+
+  if (new_password && new_password.trim()) {
+    const hashed = bcrypt.hashSync(new_password.trim(), 10);
+    db.prepare('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?').run(name || 'admin', email || 'admin@miransh.jp', hashed, userId);
+  } else {
+    db.prepare('UPDATE users SET name = ?, email = ? WHERE id = ?').run(name || 'admin', email || 'admin@miransh.jp', userId);
+  }
+
+  (req.session as any).user = {
+    ...(req.session as any).user,
+    name: name || 'admin',
+    email: email || 'admin@miransh.jp'
+  };
+
+  res.redirect('/admin?tab=users&saved=1');
 });
 
 app.post('/admin/api/sakana/config', (req: Request, res: Response) => {

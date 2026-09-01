@@ -49,6 +49,10 @@ Route::prefix('admin')->group(function () {
 
     // Inquiries
     Route::post('/inquiries/{id}/status', [AdminController::class, 'updateInquiryStatus'])->name('admin.inquiries.status');
+    Route::post('/inquiries/{id}/delete', [AdminController::class, 'deleteInquiry'])->name('admin.inquiries.delete');
+
+    // Profile & Password
+    Route::post('/profile', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
 
     // Image Upload
     Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.uploadImage');
