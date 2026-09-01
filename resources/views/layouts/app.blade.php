@@ -1,4 +1,3 @@
-```blade
 <!DOCTYPE html>
 <html lang="@yield('lang', 'ja')">
 
@@ -229,4 +228,3 @@
 </body>
 
 </html>
-```

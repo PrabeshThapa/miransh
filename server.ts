@@ -1379,17 +1379,20 @@ app.get('/robots.txt', (req: Request, res: Response) => {
 // ----------------------------------------------------
 // Numeric URL Redirect Handler (Fixes /1, /2, /3, /4 index errors)
 // ----------------------------------------------------
-app.get('/:id(\\d+)', (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  const service = db.prepare('SELECT id FROM services WHERE id = ?').get(id);
-  if (service) {
-    return res.redirect(301, `/services/${id}`);
+app.get('/:id', (req: Request, res: Response, next: NextFunction) => {
+  if (/^\d+$/.test(req.params.id)) {
+    const id = parseInt(req.params.id, 10);
+    const service = db.prepare('SELECT id FROM services WHERE id = ?').get(id);
+    if (service) {
+      return res.redirect(301, `/services/${id}`);
+    }
+    const story = db.prepare('SELECT id FROM stories WHERE id = ?').get(id);
+    if (story) {
+      return res.redirect(301, `/stories/${id}`);
+    }
+    return res.redirect(301, '/#services');
   }
-  const story = db.prepare('SELECT id FROM stories WHERE id = ?').get(id);
-  if (story) {
-    return res.redirect(301, `/stories/${id}`);
-  }
-  return res.redirect(301, '/#services');
+  next();
 });
 
 // ----------------------------------------------------
@@ -1970,22 +1973,41 @@ app.get('/admin', (req: Request, res: Response) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRANSH LLC | 管理者ダッシュボード (Admin Portal)</title>
+    <title>MIRANSH Admin Panel | Filament v3</title>
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
     <link rel="stylesheet" href="/css/app.css">
     <style>
+        :root {
+            --fi-primary: #F59E0B;
+            --fi-primary-hover: #D97706;
+            --fi-primary-light: #FEF3C7;
+            --fi-primary-dark: #B45309;
+            --fi-sidebar-bg: #090D16;
+            --fi-sidebar-border: #1E293B;
+            --fi-surface: #FFFFFF;
+            --fi-bg: #F8FAFC;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--fi-bg);
+            color: #0F172A;
+            margin: 0;
+            padding: 0;
+        }
+
         .admin-layout {
             display: grid;
-            grid-template-columns: 260px 1fr;
+            grid-template-columns: 270px 1fr;
             min-height: 100vh;
-            background: #F1F5F9;
+            background: var(--fi-bg);
             position: relative;
         }
 
         /* Mobile Header */
         .admin-mobile-header {
             display: none;
-            background: #0B1C38;
+            background: var(--fi-sidebar-bg);
             color: #FFFFFF;
             padding: 12px 16px;
             align-items: center;
@@ -1993,11 +2015,12 @@ app.get('/admin', (req: Request, res: Response) => {
             position: sticky;
             top: 0;
             z-index: 990;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid var(--fi-sidebar-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         .admin-hamburger-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: #FFFFFF;
             border-radius: 8px;
             width: 38px;
@@ -2041,9 +2064,10 @@ app.get('/admin', (req: Request, res: Response) => {
             flex-shrink: 0;
         }
         .admin-mobile-tab-pill.active {
-            background: #2563EB;
-            color: #FFFFFF;
-            border-color: #2563EB;
+            background: #F59E0B;
+            color: #090D16;
+            font-weight: 800;
+            border-color: #F59E0B;
         }
 
         /* Backdrop Overlay */
@@ -2062,78 +2086,203 @@ app.get('/admin', (req: Request, res: Response) => {
             opacity: 1;
         }
 
+        /* Filament Sidebar */
         .admin-sidebar {
-            background: #0B1C38;
+            background: var(--fi-sidebar-bg);
             color: #FFFFFF;
-            padding: 24px 16px;
+            padding: 20px 14px;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid var(--fi-sidebar-border);
         }
         .sidebar-brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 24px;
+            padding: 8px 8px 20px;
+            border-bottom: 1px solid var(--fi-sidebar-border);
+            margin-bottom: 20px;
         }
         .sidebar-close-btn {
             display: none;
             background: transparent;
             border: none;
             color: #94A3B8;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             padding: 4px;
+        }
+        .sidebar-group-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748B;
+            padding: 12px 10px 6px;
+            margin: 0;
         }
         .sidebar-menu {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            flex-grow: 1;
+            gap: 3px;
             padding: 0;
-            margin: 0;
+            margin: 0 0 12px;
         }
         .sidebar-item-btn {
             width: 100%;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
+            justify-content: space-between;
+            padding: 9px 12px;
             border-radius: 8px;
-            color: #CBD5E1;
-            font-size: 14px;
+            color: #94A3B8;
+            font-size: 13px;
             font-weight: 600;
             background: transparent;
             border: none;
             cursor: pointer;
             text-align: left;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-decoration: none;
         }
-        .sidebar-item-btn:hover,
-        .sidebar-item-btn.active {
-            background: #2563EB;
+        .sidebar-item-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
             color: #FFFFFF;
         }
-        .admin-main {
-            padding: 32px 40px;
-            overflow-y: auto;
+        .sidebar-item-btn.active {
+            background: rgba(245, 158, 11, 0.14);
+            color: #F59E0B;
+            font-weight: 700;
+            border-left: 3px solid #F59E0B;
         }
+        .sidebar-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 12px;
+            background: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+        }
+        .sidebar-badge.green {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+        }
+
+        /* Filament Main Content */
+        .admin-main {
+            padding: 28px 36px 60px;
+            overflow-y: auto;
+            max-width: 1400px;
+        }
+
+        /* Filament Topbar */
+        .filament-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 18px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .filament-breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 600;
+        }
+        .filament-breadcrumbs span.active {
+            color: #0F172A;
+            font-weight: 800;
+        }
+
+        /* Filament Stats Widgets Grid */
+        .filament-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .filament-stat-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .filament-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+            border-color: #CBD5E1;
+        }
+        .filament-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #E2E8F0;
+        }
+        .filament-stat-card.primary::before { background: #F59E0B; }
+        .filament-stat-card.blue::before { background: #3B82F6; }
+        .filament-stat-card.green::before { background: #10B981; }
+        .filament-stat-card.purple::before { background: #8B5CF6; }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .stat-card-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748B;
+        }
+        .stat-card-number {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1.1;
+        }
+        .stat-card-footer {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Filament Cards & Form Elements */
         .admin-card {
             background: #FFFFFF;
             border: 1px solid #E2E8F0;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            padding: 24px 26px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             margin-bottom: 24px;
         }
         .admin-card-title {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 17px;
+            font-weight: 800;
             color: #0F172A;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -2141,7 +2290,7 @@ app.get('/admin', (req: Request, res: Response) => {
         .form-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 18px;
             margin-bottom: 16px;
         }
         .form-group {
@@ -2150,23 +2299,86 @@ app.get('/admin', (req: Request, res: Response) => {
         .form-label {
             display: block;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             color: #334155;
             margin-bottom: 6px;
         }
         .form-input, .form-textarea, .form-select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 9px 13px;
             border: 1px solid #CBD5E1;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13.5px;
             box-sizing: border-box;
             outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            background: #FFFFFF;
         }
         .form-input:focus, .form-textarea:focus, .form-select:focus {
-            border-color: #2563EB;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #F59E0B;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
         }
+
+        /* Filament Buttons */
+        .btn-filament-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #F59E0B;
+            color: #090D16;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: 1px solid #D97706;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+        .btn-filament-primary:hover {
+            background: #D97706;
+            color: #FFFFFF;
+        }
+        .btn-filament-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #FFFFFF;
+            color: #334155;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #CBD5E1;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+        .btn-filament-secondary:hover {
+            background: #F8FAFC;
+            color: #0F172A;
+            border-color: #94A3B8;
+        }
+        .btn-filament-chip {
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            color: #475569;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-filament-chip:hover {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+            color: #B45309;
+        }
+
         .admin-image-upload-card {
             background: #F8FAFC;
             border: 2px dashed #CBD5E1;
@@ -2176,8 +2388,8 @@ app.get('/admin', (req: Request, res: Response) => {
             position: relative;
         }
         .admin-image-upload-card:hover, .admin-image-upload-card.dragover {
-            border-color: #2563EB;
-            background: #EFF6FF;
+            border-color: #F59E0B;
+            background: #FFFBEB;
         }
         .upload-preview-container {
             display: flex;
@@ -2192,7 +2404,7 @@ app.get('/admin', (req: Request, res: Response) => {
             object-fit: cover;
             border: 2px solid #E2E8F0;
             background: #FFFFFF;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
         }
         .preview-banner-box {
             width: 100%;
@@ -2201,8 +2413,8 @@ app.get('/admin', (req: Request, res: Response) => {
             border-radius: 10px;
             object-fit: cover;
             border: 2px solid #E2E8F0;
-            background: #0B1C38;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            background: #090D16;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
         }
         .upload-controls {
             flex: 1;
@@ -2212,17 +2424,18 @@ app.get('/admin', (req: Request, res: Response) => {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 18px;
-            background: #2563EB;
-            color: #FFFFFF;
+            padding: 9px 16px;
+            background: #F59E0B;
+            color: #090D16;
             border-radius: 8px;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             transition: background 0.2s ease;
         }
         .file-upload-btn-label:hover {
-            background: #1D4ED8;
+            background: #D97706;
+            color: #FFFFFF;
         }
         .upload-status-tag {
             display: inline-flex;
@@ -2242,7 +2455,7 @@ app.get('/admin', (req: Request, res: Response) => {
             background: #FEF3C7;
             color: #92400E;
         }
-        .admin-table-responsive {
+        .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             width: 100%;
@@ -2288,8 +2501,9 @@ app.get('/admin', (req: Request, res: Response) => {
                 width: 100%;
                 box-sizing: border-box;
             }
-            .admin-desktop-title-bar {
-                display: none;
+            .filament-stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
             }
             .form-grid-2 {
                 grid-template-columns: 1fr;
@@ -2308,6 +2522,11 @@ app.get('/admin', (req: Request, res: Response) => {
                 height: 120px;
             }
         }
+        @media (max-width: 640px) {
+            .filament-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2318,19 +2537,19 @@ app.get('/admin', (req: Request, res: Response) => {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
-                <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
+                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 28px; height: 28px; border-radius: 50%;">
+                <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH <span style="color: #F59E0B;">Filament</span></span>
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="/" target="_blank" style="font-size: 12px; color: #93C5FD; text-decoration: none; font-weight: 700;">サイト表示 ↗</a>
-            <a href="/admin/logout" style="font-size: 12px; color: #FCA5A5; text-decoration: none; font-weight: 700;">退出</a>
+            <a href="/" target="_blank" style="font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 700;">サイト ↗</a>
+            <a href="/admin/logout" style="font-size: 12px; color: #FCA5A5; text-decoration: none; font-weight: 700;">ログアウト</a>
         </div>
     </header>
 
     <!-- Mobile Horizontal Quick Tab Bar -->
     <nav class="admin-mobile-tab-bar">
-        <a href="/admin?tab=company" class="admin-mobile-tab-pill ${activeTab === 'company' ? 'active' : ''}">🏢 会社・画像</a>
+        <a href="/admin?tab=company" class="admin-mobile-tab-pill ${activeTab === 'company' ? 'active' : ''}">🏢 会社情報</a>
         <a href="/admin?tab=about" class="admin-mobile-tab-pill ${activeTab === 'about' ? 'active' : ''}">📖 会社紹介</a>
         <a href="/admin?tab=services" class="admin-mobile-tab-pill ${activeTab === 'services' ? 'active' : ''}">💼 事業内容</a>
         <a href="/admin?tab=stories" class="admin-mobile-tab-pill ${activeTab === 'stories' ? 'active' : ''}">📰 採用事例</a>
@@ -2343,46 +2562,132 @@ app.get('/admin', (req: Request, res: Response) => {
     <div id="adminBackdrop" class="admin-backdrop" onclick="closeAdminSidebar()"></div>
 
     <div class="admin-layout">
-        <!-- Sidebar Navigation (Responsive Drawer on Mobile) -->
+        <!-- Sidebar Navigation (Filament v3 Design) -->
         <aside class="admin-sidebar">
             <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 36px; height: 36px; border-radius: 50%;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 34px; height: 34px; border-radius: 50%;">
                     <div>
-                        <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
-                        <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>
+                        <div style="font-weight: 800; font-size: 15px; color: #FFFFFF; line-height: 1.2;">MIRANSH <span style="color: #F59E0B;">Filament</span></div>
+                        <div style="font-size: 10.5px; color: #64748B;">Admin Panel v3.2 (SQLite)</div>
                     </div>
                 </div>
                 <button type="button" class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="メニューを閉じる">✕</button>
             </div>
 
+            <!-- FILAMENT NAVIGATION GROUPS -->
+            <p class="sidebar-group-label">RESOURCES</p>
             <ul class="sidebar-menu">
-                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}" onclick="closeAdminSidebar()">🏢 会社情報・画像 (Company)</a></li>
-                <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}" onclick="closeAdminSidebar()">📖 会社紹介・約束 (About)</a></li>
-                <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}" onclick="closeAdminSidebar()">💼 事業内容 (Services)</a></li>
-                <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}" onclick="closeAdminSidebar()">📰 採用事例 (Stories)</a></li>
-                <li><a href="/admin?tab=faqs" class="sidebar-item-btn ${activeTab === 'faqs' ? 'active' : ''}" onclick="closeAdminSidebar()">❓ よくある質問 (FAQs)</a></li>
-                <li><a href="/admin?tab=inquiries" class="sidebar-item-btn ${activeTab === 'inquiries' ? 'active' : ''}" onclick="closeAdminSidebar()">📬 お問い合わせ (${inquiries.length})</a></li>
-                <li><a href="/admin?tab=ai" class="sidebar-item-btn ${activeTab === 'ai' ? 'active' : ''}" onclick="closeAdminSidebar()">🐟 Sakana AI 設定</a></li>
+                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>🏢 会社概要・代表者 (Company)</span></a></li>
+                <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>📖 会社紹介・強み (About)</span></a></li>
+                <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>💼 事業内容 (Services)</span> <span class="sidebar-badge">${services.length}</span></a></li>
+                <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>📰 採用事例・事例 (Stories)</span> <span class="sidebar-badge">${stories.length}</span></a></li>
+                <li><a href="/admin?tab=faqs" class="sidebar-item-btn ${activeTab === 'faqs' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>❓ よくある質問 (FAQs)</span> <span class="sidebar-badge">${faqs.length}</span></a></li>
             </ul>
 
-            <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-                <a href="/" target="_blank" style="display: block; color: #94A3B8; font-size: 13px; text-decoration: none; margin-bottom: 12px;">🌐 公開サイトを表示 →</a>
-                <a href="/admin/logout" style="display: block; color: #F87171; font-size: 13px; text-decoration: none; font-weight: 600;">🚪 ログアウト (Sign Out)</a>
+            <p class="sidebar-group-label">COMMUNICATION</p>
+            <ul class="sidebar-menu">
+                <li><a href="/admin?tab=inquiries" class="sidebar-item-btn ${activeTab === 'inquiries' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>📬 お問い合わせ (Inquiries)</span> <span class="sidebar-badge ${inquiries.some(i => i.status !== 'resolved') ? '' : 'green'}">${inquiries.length}</span></a></li>
+            </ul>
+
+            <p class="sidebar-group-label">AI & SYSTEM</p>
+            <ul class="sidebar-menu">
+                <li><a href="/admin?tab=ai" class="sidebar-item-btn ${activeTab === 'ai' ? 'active' : ''}" onclick="closeAdminSidebar()"><span>🐟 Sakana AI 相談設定</span> <span class="sidebar-badge green">● Active</span></a></li>
+            </ul>
+
+            <div style="padding-top: 18px; border-top: 1px solid var(--fi-sidebar-border); margin-top: auto;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 28px; height: 28px; border-radius: 50%; background: #1E293B; display: flex; align-items: center; justify-content: center; color: #F59E0B; font-weight: 800; font-size: 12px;">M</div>
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; color: #E2E8F0;">Admin User</div>
+                            <div style="font-size: 10.5px; color: #64748B;">info@miransh.co.jp</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="/" target="_blank" class="btn-filament-secondary" style="flex: 1; font-size: 11px; padding: 6px 8px; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #CBD5E1;">公開サイト ↗</a>
+                    <a href="/admin/logout" class="btn-filament-secondary" style="flex: 1; font-size: 11px; padding: 6px 8px; background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.25); color: #F87171;">ログアウト</a>
+                </div>
             </div>
         </aside>
 
         <!-- Main Content Panel -->
         <main class="admin-main">
-            <!-- Top bar for desktop -->
-            <div class="admin-desktop-title-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <div>
-                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Management Portal</h1>
-                    <p style="font-size: 14px; color: #64748B; margin: 0;">Update company profile, CEO portrait, Hero banner, services, and Sakana AI parameters</p>
+            <!-- Filament Topbar with Breadcrumbs & Quick Link -->
+            <div class="filament-topbar">
+                <div class="filament-breadcrumbs">
+                    <span>MIRANSH</span>
+                    <span>/</span>
+                    <span>Admin</span>
+                    <span>/</span>
+                    <span class="active">
+                        ${activeTab === 'company' ? '🏢 Company Profile' :
+                          activeTab === 'about' ? '📖 About Us' :
+                          activeTab === 'services' ? '💼 Services' :
+                          activeTab === 'stories' ? '📰 Stories & Date Management' :
+                          activeTab === 'faqs' ? '❓ FAQs' :
+                          activeTab === 'inquiries' ? '📬 Inquiries' : '🐟 Sakana AI'}
+                    </span>
                 </div>
-                <div>
-                    <a href="/" target="_blank" class="btn-secondary" style="display: inline-flex; font-size: 13px;">View Live Site ↗</a>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 12px; font-weight: 700; color: #059669; background: #D1FAE5; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                        Filament v3 Ready
+                    </span>
+                    <a href="/" target="_blank" class="btn-filament-secondary" style="font-size: 12px; padding: 6px 12px;">
+                        Live Site ↗
+                    </a>
                 </div>
+            </div>
+
+            <!-- Filament Stats Overview Widgets Grid -->
+            <div class="filament-stats-grid">
+                <a href="/admin?tab=inquiries" class="filament-stat-card primary">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Inquiries & Leads</span>
+                        <span style="font-size: 18px;">📬</span>
+                    </div>
+                    <div class="stat-card-number">${inquiries.length}</div>
+                    <div class="stat-card-footer">
+                        <span style="color: ${inquiries.some(i => i.status !== 'resolved') ? '#D97706' : '#059669'}; font-weight: 700;">
+                            ${inquiries.filter(i => i.status !== 'resolved').length} 件 未対応
+                        </span>
+                    </div>
+                </a>
+
+                <a href="/admin?tab=stories" class="filament-stat-card blue">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Stories & Case Studies</span>
+                        <span style="font-size: 18px;">📰</span>
+                    </div>
+                    <div class="stat-card-number">${stories.length}</div>
+                    <div class="stat-card-footer">
+                        <span>📅 日付ピッカー対応</span>
+                    </div>
+                </a>
+
+                <a href="/admin?tab=services" class="filament-stat-card green">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Active Services</span>
+                        <span style="font-size: 18px;">💼</span>
+                    </div>
+                    <div class="stat-card-number">${services.length}</div>
+                    <div class="stat-card-footer">
+                        <span>特定技能 & 登録支援機関</span>
+                    </div>
+                </a>
+
+                <a href="/admin?tab=ai" class="filament-stat-card purple">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Sakana AI Engine</span>
+                        <span style="font-size: 18px;">🤖</span>
+                    </div>
+                    <div class="stat-card-number" style="font-size: 20px; font-family: monospace;">Namazu</div>
+                    <div class="stat-card-footer">
+                        <span style="color: #059669; font-weight: 700;">● Operational</span>
+                    </div>
+                </a>
             </div>
 
             <!-- TAB 1: Company Profile & Images -->
@@ -2630,48 +2935,63 @@ app.get('/admin', (req: Request, res: Response) => {
             <!-- TAB 4: Stories (採用事例・ニュース) -->
             ${activeTab === 'stories' ? `
             <div class="admin-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
                     <div>
                         <div class="admin-card-title" style="margin-bottom: 4px;">📰 採用事例・お知らせ 管理 (${stories.length}件)</div>
-                        <p style="font-size: 13px; color: #64748B; margin: 0;">トップページの「採用事例」セクションにリアルタイムに反映されます。新規追加、編集、写真変更が可能です。</p>
+                        <p style="font-size: 13px; color: #64748B; margin: 0;">Filament Stories Resource: 日付ピッカー付きで公開日を柔軟に編集・即時反映できます。</p>
                     </div>
-                    <button type="button" class="btn-primary" onclick="openStoryCreateModal()" style="font-size: 13px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
-                        ＋ 新規事例を追加
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="btn-filament-primary" onclick="openStoryCreateModal()">
+                            <span>＋ 新規事例を追加</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filament Table Filter Bar -->
+                <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;">
+                    <div style="position: relative; flex: 1; min-width: 200px;">
+                        <input type="text" id="stories_table_search" class="form-input" placeholder="🔍 事例タイトル・カテゴリで検索..." oninput="filterStoriesTable(this.value)" style="padding-left: 32px; font-size: 13px;">
+                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; opacity: 0.6;">🔎</span>
+                    </div>
+                    <span style="font-size: 12px; color: #64748B; font-weight: 600;">全 ${stories.length} 件</span>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="profile-table" style="width: 100%;">
+                    <table class="profile-table" id="stories_admin_table" style="width: 100%;">
                         <thead>
                             <tr style="background: #F8FAFC;">
                                 <th style="width: 70px;">写真</th>
                                 <th>タイトル (日本語 / 英語)</th>
                                 <th>カテゴリ</th>
-                                <th>公開日</th>
-                                <th style="width: 160px; text-align: right;">操作</th>
+                                <th style="width: 140px;">📅 公開日 (Date)</th>
+                                <th style="width: 160px; text-align: right;">アクション</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${stories.map(st => `
-                            <tr>
+                            <tr class="story-row-item" data-search="${escapeHtml(st.title_ja + ' ' + (st.title_en||'') + ' ' + st.category_ja).toLowerCase()}">
                                 <td style="text-align: center;">
                                     <img src="${escapeHtml(st.image || '/images/story1.jpg')}" alt="Story" style="width: 58px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1;">
                                 </td>
                                 <td>
                                     <strong style="color: #0F172A; font-size: 14px;">${escapeHtml(st.title_ja)}</strong>
-                                    ${st.featured ? '<span style="font-size: 10px; background: #FEF3C7; color: #92400E; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">★ おすすめ</span>' : ''}
+                                    ${st.featured ? '<span style="font-size: 10px; background: #FEF3C7; color: #B45309; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; border: 1px solid #FDE68A;">★ おすすめ</span>' : ''}
                                     <br>
                                     <span style="font-size: 12px; color: #64748B;">${escapeHtml(st.title_en)}</span>
                                 </td>
-                                <td><span style="font-size: 11px; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${escapeHtml(st.category_ja)}</span></td>
-                                <td style="font-size: 12px; color: #64748B; white-space: nowrap;">${escapeHtml(st.published_date)}</td>
+                                <td><span style="font-size: 11px; background: #FEF3C7; color: #B45309; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #FDE68A;">${escapeHtml(st.category_ja)}</span></td>
+                                <td style="font-size: 13px; font-weight: 700; color: #0F172A; white-space: nowrap;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; background: #F1F5F9; padding: 3px 8px; border-radius: 6px; border: 1px solid #E2E8F0;">
+                                        📅 ${escapeHtml(st.published_date)}
+                                    </span>
+                                </td>
                                 <td style="text-align: right; white-space: nowrap;">
-                                    <button type="button" class="btn-secondary" style="font-size: 12px; padding: 4px 10px; margin-right: 4px;" onclick='openStoryEditModal(${JSON.stringify(st).replace(/'/g, "&#39;")})'>
+                                    <button type="button" class="btn-filament-secondary" style="font-size: 12px; padding: 4px 10px; margin-right: 4px;" onclick='openStoryEditModal(${JSON.stringify(st).replace(/'/g, "&#39;")})'>
                                         ✏️ 編集
                                     </button>
-                                    <a href="/stories/${st.id}" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 4px 8px; margin-right: 4px;">↗</a>
+                                    <a href="/stories/${st.id}" target="_blank" class="btn-filament-secondary" style="font-size: 12px; padding: 4px 8px; margin-right: 4px;" title="プレビュー">↗</a>
                                     <form action="/admin/stories/${st.id}/delete" method="POST" style="display: inline;" onsubmit="return confirm('本当に事例「${escapeHtml(st.title_ja)}」を削除しますか？');">
-                                        <button type="submit" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">🗑️</button>
+                                        <button type="submit" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px;" title="削除">🗑️</button>
                                     </form>
                                 </td>
                             </tr>
@@ -2681,34 +3001,65 @@ app.get('/admin', (req: Request, res: Response) => {
                 </div>
             </div>
 
-            <!-- STORY CREATE MODAL -->
-            <div id="storyCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-                <div class="admin-card" style="width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">📰 新規 採用事例の追加 (Add New Story)</h3>
+            <!-- STORY CREATE MODAL (WITH FILAMENT DATE PICKER) -->
+            <div id="storyCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div class="admin-card" style="width: 100%; max-width: 780px; max-height: 92vh; overflow-y: auto; margin: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); border: 1px solid #CBD5E1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">📰 新規 採用事例の追加 (Add New Story)</h3>
+                            <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Filament Form: 日付ピッカー・写真アップローダー完備</div>
+                        </div>
                         <button type="button" onclick="closeStoryCreateModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
                     </div>
 
                     <form action="/admin/stories/create" method="POST">
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">タイトル (日本語) *</label>
+                                <label class="form-label">タイトル (日本語) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" name="title_ja" class="form-input" placeholder="例: 神奈川県・介護老人保健施設での特定技能マッチング" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Title (English) *</label>
+                                <label class="form-label">Title (English) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" name="title_en" class="form-input" placeholder="e.g. Caregiving Placement in Kanagawa" required>
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">カテゴリ (日本語) *</label>
+                                <label class="form-label">カテゴリ (日本語) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" name="category_ja" class="form-input" value="特定技能 / 介護分野" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Category (English) *</label>
+                                <label class="form-label">Category (English) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" name="category_en" class="form-input" value="Nursing Care / SSW" required>
+                            </div>
+                        </div>
+
+                        <!-- FILAMENT DATE PICKER SECTION (CREATE) -->
+                        <div class="form-group" style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 14px 16px;">
+                            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="color: #92400E; font-weight: 800; font-size: 13.5px;">📅 公開日 (Published Date) & 日付ピッカー</span>
+                                <span style="font-size: 11px; color: #B45309;">カレンダー選択またはクイック設定</span>
+                            </label>
+                            
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <div style="position: relative; flex: 1; min-width: 180px;">
+                                    <input type="date" id="create_story_datepicker" class="form-input" style="padding-left: 36px; font-weight: 700; background: #FFFFFF;" onchange="syncDateToTextInput('create_story_datepicker', 'create_story_datetext')">
+                                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none;">📅</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 12px; color: #64748B; font-weight: 700;">保存形式:</span>
+                                    <input type="text" id="create_story_datetext" name="published_date" class="form-input" style="width: 130px; font-weight: 800; color: #0F172A; text-align: center; background: #FFFFFF;" value="${new Date().toISOString().slice(0, 10).replace(/-/g, '.')}">
+                                </div>
+                            </div>
+
+                            <!-- Preset Chips -->
+                            <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                                <span style="font-size: 11px; color: #78350F; font-weight: 700;">クイック設定:</span>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('create_story_datepicker', 'create_story_datetext', 0)">今日 (Today)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('create_story_datepicker', 'create_story_datetext', -1)">昨日 (Yesterday)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('create_story_datepicker', 'create_story_datetext', -7)">1週間前 (1 Week ago)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('create_story_datepicker', 'create_story_datetext', -30)">1か月前 (1 Month ago)</button>
                             </div>
                         </div>
 
@@ -2728,11 +3079,11 @@ app.get('/admin', (req: Request, res: Response) => {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">概要文 (日本語) *</label>
+                            <label class="form-label">概要文 (日本語) <span style="color: #F59E0B;">*</span></label>
                             <textarea name="summary_ja" class="form-textarea" rows="3" placeholder="事例の要約..." required></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Summary (English) *</label>
+                            <label class="form-label">Summary (English) <span style="color: #F59E0B;">*</span></label>
                             <textarea name="summary_en" class="form-textarea" rows="3" placeholder="Summary in English..." required></textarea>
                         </div>
 
@@ -2747,51 +3098,85 @@ app.get('/admin', (req: Request, res: Response) => {
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" name="published_date" class="form-input" value="${new Date().toISOString().slice(0, 10).replace(/-/g, '.')}">
+                                <label class="form-label">執筆者 (Author)</label>
+                                <input type="text" name="author" class="form-input" value="MIRANSH 編集部">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">執筆者</label>
-                                <input type="text" name="author" class="form-input" value="MIRANSH 編集部">
+                                <label class="form-label">トップ掲載 (Featured / おすすめ)</label>
+                                <select name="featured" class="form-select">
+                                    <option value="1">★ おすすめとして表示 (Featured)</option>
+                                    <option value="0">通常表示 (Standard)</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
-                            <button type="button" onclick="closeStoryCreateModal()" class="btn-secondary" style="padding: 8px 18px;">キャンセル</button>
-                            <button type="submit" class="btn-primary" style="padding: 8px 22px;">✓ 事例を登録する</button>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
+                            <button type="button" onclick="closeStoryCreateModal()" class="btn-filament-secondary" style="padding: 8px 18px;">キャンセル</button>
+                            <button type="submit" class="btn-filament-primary" style="padding: 8px 22px;">✓ 事例を登録する</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- STORY EDIT MODAL -->
-            <div id="storyEditModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-                <div class="admin-card" style="width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">✏️ 採用事例の編集 (Edit Story <span id="edit-story-id-label"></span>)</h3>
+            <!-- STORY EDIT MODAL (WITH FILAMENT DATE PICKER) -->
+            <div id="storyEditModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div class="admin-card" style="width: 100%; max-width: 780px; max-height: 92vh; overflow-y: auto; margin: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); border: 1px solid #CBD5E1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">✏️ 採用事例の編集 (Edit Story <span id="edit-story-id-label" style="color: #F59E0B;"></span>)</h3>
+                            <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Filament Resource Editor</div>
+                        </div>
                         <button type="button" onclick="closeStoryEditModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
                     </div>
 
                     <form id="form-edit-story" action="" method="POST">
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">タイトル (日本語) *</label>
+                                <label class="form-label">タイトル (日本語) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" id="edit-st-title-ja" name="title_ja" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Title (English) *</label>
+                                <label class="form-label">Title (English) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" id="edit-st-title-en" name="title_en" class="form-input" required>
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">カテゴリ (日本語) *</label>
+                                <label class="form-label">カテゴリ (日本語) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" id="edit-st-cat-ja" name="category_ja" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Category (English) *</label>
+                                <label class="form-label">Category (English) <span style="color: #F59E0B;">*</span></label>
                                 <input type="text" id="edit-st-cat-en" name="category_en" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <!-- FILAMENT DATE PICKER SECTION (EDIT) -->
+                        <div class="form-group" style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 14px 16px;">
+                            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="color: #92400E; font-weight: 800; font-size: 13.5px;">📅 公開日 (Published Date) & 日付ピッカー</span>
+                                <span style="font-size: 11px; color: #B45309;">カレンダー選択またはクイック設定</span>
+                            </label>
+                            
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <div style="position: relative; flex: 1; min-width: 180px;">
+                                    <input type="date" id="edit_story_datepicker" class="form-input" style="padding-left: 36px; font-weight: 700; background: #FFFFFF;" onchange="syncDateToTextInput('edit_story_datepicker', 'edit-st-date')">
+                                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none;">📅</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 12px; color: #64748B; font-weight: 700;">保存形式:</span>
+                                    <input type="text" id="edit-st-date" name="published_date" class="form-input" style="width: 130px; font-weight: 800; color: #0F172A; text-align: center; background: #FFFFFF;">
+                                </div>
+                            </div>
+
+                            <!-- Preset Chips -->
+                            <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                                <span style="font-size: 11px; color: #78350F; font-weight: 700;">クイック設定:</span>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('edit_story_datepicker', 'edit-st-date', 0)">今日 (Today)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('edit_story_datepicker', 'edit-st-date', -1)">昨日 (Yesterday)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('edit_story_datepicker', 'edit-st-date', -7)">1週間前 (1 Week ago)</button>
+                                <button type="button" class="btn-filament-chip" onclick="setPresetDateForForm('edit_story_datepicker', 'edit-st-date', -30)">1か月前 (1 Month ago)</button>
                             </div>
                         </div>
 
@@ -2811,11 +3196,11 @@ app.get('/admin', (req: Request, res: Response) => {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">概要文 (日本語) *</label>
+                            <label class="form-label">概要文 (日本語) <span style="color: #F59E0B;">*</span></label>
                             <textarea id="edit-st-summary-ja" name="summary_ja" class="form-textarea" rows="3" required></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Summary (English) *</label>
+                            <label class="form-label">Summary (English) <span style="color: #F59E0B;">*</span></label>
                             <textarea id="edit-st-summary-en" name="summary_en" class="form-textarea" rows="3" required></textarea>
                         </div>
 
@@ -2830,18 +3215,21 @@ app.get('/admin', (req: Request, res: Response) => {
 
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" id="edit-st-date" name="published_date" class="form-input">
+                                <label class="form-label">執筆者 (Author)</label>
+                                <input type="text" id="edit-st-author" name="author" class="form-input">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">執筆者</label>
-                                <input type="text" id="edit-st-author" name="author" class="form-input">
+                                <label class="form-label">トップ掲載 (Featured / おすすめ)</label>
+                                <select id="edit-st-featured" name="featured" class="form-select">
+                                    <option value="1">★ おすすめとして表示 (Featured)</option>
+                                    <option value="0">通常表示 (Standard)</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
-                            <button type="button" onclick="closeStoryEditModal()" class="btn-secondary" style="padding: 8px 18px;">キャンセル</button>
-                            <button type="submit" class="btn-primary" style="padding: 8px 22px;">✓ 変更を保存する</button>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
+                            <button type="button" onclick="closeStoryEditModal()" class="btn-filament-secondary" style="padding: 8px 18px;">キャンセル</button>
+                            <button type="submit" class="btn-filament-primary" style="padding: 8px 22px;">✓ 変更を保存する</button>
                         </div>
                     </form>
                 </div>
@@ -3067,15 +3455,31 @@ app.get('/admin', (req: Request, res: Response) => {
         if (backdrop) backdrop.classList.remove('active');
     }
 
-    // Story Management Modals
+    // Story Management Modals & Filament Date Picker Handlers
     function openStoryCreateModal() {
         const modal = document.getElementById('storyCreateModal');
-        if (modal) modal.style.display = 'flex';
+        if (modal) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const isoDate = yyyy + '-' + mm + '-' + dd;
+            const dotDate = yyyy + '.' + mm + '.' + dd;
+            
+            const picker = document.getElementById('create_story_datepicker');
+            const datetext = document.getElementById('create_story_datetext');
+            if (picker) picker.value = isoDate;
+            if (datetext) datetext.value = dotDate;
+
+            modal.style.display = 'flex';
+        }
     }
+
     function closeStoryCreateModal() {
         const modal = document.getElementById('storyCreateModal');
         if (modal) modal.style.display = 'none';
     }
+
     function openStoryEditModal(st) {
         if (!st) return;
         const modal = document.getElementById('storyEditModal');
@@ -3092,8 +3496,29 @@ app.get('/admin', (req: Request, res: Response) => {
         document.getElementById('edit-st-summary-en').value = st.summary_en || '';
         document.getElementById('edit-st-content-ja').value = st.content_ja || '';
         document.getElementById('edit-st-content-en').value = st.content_en || '';
-        document.getElementById('edit-st-date').value = st.published_date || '';
         document.getElementById('edit-st-author').value = st.author || 'MIRANSH 編集部';
+        
+        // Populate featured
+        const featSelect = document.getElementById('edit-st-featured');
+        if (featSelect) featSelect.value = st.featured ? '1' : '0';
+
+        // Format and set date picker
+        const rawDate = (st.published_date || '').trim();
+        const dateInput = document.getElementById('edit-st-date');
+        const datePicker = document.getElementById('edit_story_datepicker');
+        if (dateInput) dateInput.value = rawDate;
+
+        if (datePicker && rawDate) {
+            // Convert "2026.04.15" or "2026/04/15" to "2026-04-15"
+            const normalized = rawDate.replace(/\./g, '-').replace(/\//g, '-');
+            const match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (match) {
+                const yyyy = match[1];
+                const mm = match[2].padStart(2, '0');
+                const dd = match[3].padStart(2, '0');
+                datePicker.value = yyyy + '-' + mm + '-' + dd;
+            }
+        }
         
         const imgInput = document.getElementById('input_edit_story_img');
         const previewImg = document.getElementById('preview_edit_story');
@@ -3102,10 +3527,51 @@ app.get('/admin', (req: Request, res: Response) => {
 
         modal.style.display = 'flex';
     }
+
     function closeStoryEditModal() {
         const modal = document.getElementById('storyEditModal');
         if (modal) modal.style.display = 'none';
     }
+
+    function syncDateToTextInput(pickerId, textId) {
+        const picker = document.getElementById(pickerId);
+        const text = document.getElementById(textId);
+        if (picker && text && picker.value) {
+            // Converts "2026-05-18" to "2026.05.18"
+            text.value = picker.value.replace(/-/g, '.');
+        }
+    }
+
+    function setPresetDateForForm(pickerId, textId, offsetDays) {
+        const target = new Date();
+        if (offsetDays !== 0) {
+            target.setDate(target.getDate() + offsetDays);
+        }
+        const yyyy = target.getFullYear();
+        const mm = String(target.getMonth() + 1).padStart(2, '0');
+        const dd = String(target.getDate()).padStart(2, '0');
+        const iso = yyyy + '-' + mm + '-' + dd;
+        const dot = yyyy + '.' + mm + '.' + dd;
+
+        const picker = document.getElementById(pickerId);
+        const text = document.getElementById(textId);
+        if (picker) picker.value = iso;
+        if (text) text.value = dot;
+    }
+
+    function filterStoriesTable(query) {
+        const q = (query || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.story-row-item');
+        rows.forEach(row => {
+            const data = row.getAttribute('data-search') || '';
+            if (!q || data.includes(q)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
     function updateStoryPreview(inputId, previewImgId) {
         const input = document.getElementById(inputId);
         const img = document.getElementById(previewImgId);
