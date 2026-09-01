@@ -81,8 +81,12 @@ class AdminController extends Controller
         $faqs = Faq::orderBy('sort_order', 'asc')->get();
         $inquiries = Inquiry::orderBy('created_at', 'desc')->get();
         $activeTab = $request->query('tab', 'company');
+        $currentLang = $request->query('lang', session('admin_lang', 'ja'));
+        if ($request->has('lang')) {
+            session(['admin_lang' => $request->query('lang')]);
+        }
 
-        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab'));
+        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab', 'currentLang'));
     }
 
     /**

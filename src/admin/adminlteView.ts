@@ -63,16 +63,56 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        /* Bilingual Display Engine */
-        html[data-admin-lang="ja"] .admin-lang-en { display: none !important; }
-        html[data-admin-lang="ja"] .admin-lang-ja { display: inline !important; }
-        html[data-admin-lang="ja"] span.admin-lang-ja { display: inline !important; }
-        html[data-admin-lang="ja"] div.admin-lang-ja, html[data-admin-lang="ja"] p.admin-lang-ja { display: block !important; }
+        /* Bilingual Display Engine (Supports both .admin-lang-* and .lang-*) */
+        html[data-admin-lang="ja"] .admin-lang-en,
+        html[data-admin-lang="ja"] .lang-en,
+        html[data-lang="ja"] .admin-lang-en,
+        html[data-lang="ja"] .lang-en,
+        body.ja .admin-lang-en,
+        body.ja .lang-en,
+        body.admin-ja .admin-lang-en,
+        body.admin-ja .lang-en {
+            display: none !important;
+        }
 
-        html[data-admin-lang="en"] .admin-lang-ja { display: none !important; }
-        html[data-admin-lang="en"] .admin-lang-en { display: inline !important; }
-        html[data-admin-lang="en"] span.admin-lang-en { display: inline !important; }
-        html[data-admin-lang="en"] div.admin-lang-en, html[data-admin-lang="en"] p.admin-lang-en { display: block !important; }
+        html[data-admin-lang="en"] .admin-lang-ja,
+        html[data-admin-lang="en"] .lang-ja,
+        html[data-lang="en"] .admin-lang-ja,
+        html[data-lang="en"] .lang-ja,
+        body.en .admin-lang-ja,
+        body.en .lang-ja,
+        body.admin-en .admin-lang-ja,
+        body.admin-en .lang-ja {
+            display: none !important;
+        }
+
+        html[data-admin-lang="ja"] span.admin-lang-ja,
+        html[data-admin-lang="ja"] span.lang-ja,
+        body.ja span.admin-lang-ja,
+        body.ja span.lang-ja {
+            display: inline !important;
+        }
+
+        html[data-admin-lang="ja"] div.admin-lang-ja,
+        html[data-admin-lang="ja"] p.admin-lang-ja,
+        body.ja div.admin-lang-ja,
+        body.ja p.admin-lang-ja {
+            display: block !important;
+        }
+
+        html[data-admin-lang="en"] span.admin-lang-en,
+        html[data-admin-lang="en"] span.lang-en,
+        body.en span.admin-lang-en,
+        body.en span.lang-en {
+            display: inline !important;
+        }
+
+        html[data-admin-lang="en"] div.admin-lang-en,
+        html[data-admin-lang="en"] p.admin-lang-en,
+        body.en div.admin-lang-en,
+        body.en p.admin-lang-en {
+            display: block !important;
+        }
 
         .brand-link .brand-image {
             float: left;
@@ -1819,8 +1859,8 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     <span class="admin-lang-en">Language Switcher</span>
                 </label>
                 <div class="btn-group btn-group-sm w-100">
-                    <button type="button" class="btn btn-primary" onclick="setAdminLanguage('ja')">🇯🇵 日本語</button>
-                    <button type="button" class="btn btn-secondary" onclick="setAdminLanguage('en')">🇺🇸 English</button>
+                    <button type="button" class="btn btn-primary" id="sidebar-btn-ja" onclick="setAdminLanguage('ja')">🇯🇵 日本語</button>
+                    <button type="button" class="btn btn-secondary" id="sidebar-btn-en" onclick="setAdminLanguage('en')">🇺🇸 English</button>
                 </div>
             </div>
         </div>
@@ -1839,10 +1879,19 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
 <script>
     // Bilingual Admin UI Switcher
     function setAdminLanguage(lang) {
+        if (!lang) lang = 'ja';
         localStorage.setItem('miransh_admin_lang', lang);
+        localStorage.setItem('miransh_lang', lang);
         document.documentElement.setAttribute('data-admin-lang', lang);
+        document.documentElement.setAttribute('data-lang', lang);
         document.documentElement.setAttribute('lang', lang);
 
+        if (document.body) {
+            document.body.classList.remove('ja', 'en', 'admin-ja', 'admin-en');
+            document.body.classList.add(lang, 'admin-' + lang);
+        }
+
+        // Update Top Navbar Switcher Buttons
         const btnJa = document.getElementById('admin-btn-ja');
         const btnEn = document.getElementById('admin-btn-en');
         if (btnJa && btnEn) {
@@ -1854,11 +1903,27 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 btnJa.className = 'btn btn-xs lang-switch-btn btn-light text-dark font-weight-bold';
             }
         }
+
+        // Update Sidebar/Drawer Buttons if present
+        const sideBtnJa = document.getElementById('sidebar-btn-ja');
+        const sideBtnEn = document.getElementById('sidebar-btn-en');
+        if (sideBtnJa && sideBtnEn) {
+            if (lang === 'ja') {
+                sideBtnJa.className = 'btn btn-sm btn-primary font-weight-bold';
+                sideBtnEn.className = 'btn btn-sm btn-secondary';
+            } else {
+                sideBtnEn.className = 'btn btn-sm btn-primary font-weight-bold';
+                sideBtnJa.className = 'btn btn-sm btn-secondary';
+            }
+        }
     }
+    window.setAdminLanguage = setAdminLanguage;
 
     // Initialize Language & Theme on Load
     (function() {
-        const savedLang = localStorage.getItem('miransh_admin_lang') || 'ja';
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryLang = urlParams.get('lang');
+        const savedLang = queryLang || localStorage.getItem('miransh_admin_lang') || localStorage.getItem('miransh_lang') || 'ja';
         setAdminLanguage(savedLang);
 
         if (localStorage.getItem('miransh_admin_dark') === 'true') {
