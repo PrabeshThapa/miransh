@@ -11,6 +11,8 @@ export interface AdminLTEViewData {
   user: any;
   currentSakanaModel: string;
   currentSakanaKey: string;
+  currentSakanaPrompt?: string;
+  currentSakanaTemperature?: number;
   escapeHtml: (str: any) => string;
 }
 
@@ -26,6 +28,8 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
     user,
     currentSakanaModel,
     currentSakanaKey,
+    currentSakanaPrompt = 'You are the official Sakana AI consultant for MIRANSH LLC.',
+    currentSakanaTemperature = 0.7,
     escapeHtml,
   } = data;
 
@@ -1155,93 +1159,170 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 <!-- ================= TAB 2: About & Philosophy ================= -->
                 ${activeTab === 'about' ? `
                 <div class="card card-primary card-outline shadow-sm">
-                    <div class="card-header bg-white">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-award text-primary mr-1"></i>
-                            <span class="admin-lang-ja">企業理念・About Us コンテンツ設定</span>
-                            <span class="admin-lang-en">About Us & Corporate Philosophy Management</span>
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-award text-primary mr-2"></i>
+                            <span class="admin-lang-ja">企業理念・About Us コンテンツ設定 (完全日英両対応)</span>
+                            <span class="admin-lang-en">About Us & Corporate Philosophy Management (Full Bilingual)</span>
                         </h3>
+                        <span class="badge badge-primary px-3 py-2 text-sm">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span class="admin-lang-ja">本番データ同期中</span>
+                            <span class="admin-lang-en">Live Sync</span>
+                        </span>
                     </div>
                     <form action="/admin/about" method="POST">
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-primary mr-1">JA</span>
-                                        <span class="admin-lang-ja">セクション見出し (日本語)</span>
-                                        <span class="admin-lang-en">Section Heading (Japanese)</span>
-                                    </label>
-                                    <input type="text" name="heading_ja" class="form-control" value="${escapeHtml(about.heading_ja || '')}">
+                            <!-- Section Badges & Headings -->
+                            <div class="card card-outline card-secondary mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-tag mr-1 text-secondary"></i>
+                                        <span class="admin-lang-ja">1. バッジ & メインヘッダー設定</span>
+                                        <span class="admin-lang-en">1. Badge & Main Heading Settings</span>
+                                    </h6>
                                 </div>
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-secondary mr-1">EN</span>
-                                        <span class="admin-lang-ja">Section Heading (English)</span>
-                                        <span class="admin-lang-en">Section Heading (English)</span>
-                                    </label>
-                                    <input type="text" name="heading_en" class="form-control" value="${escapeHtml(about.heading_en || '')}">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">セクションバッジ (日本語)</span>
+                                                <span class="admin-lang-en">Section Badge (Japanese)</span>
+                                            </label>
+                                            <input type="text" name="badge_ja" class="form-control" value="${escapeHtml(about.badge_ja || '企業理念・会社概要')}">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">Section Badge (English)</span>
+                                                <span class="admin-lang-en">Section Badge (English)</span>
+                                            </label>
+                                            <input type="text" name="badge_en" class="form-control" value="${escapeHtml(about.badge_en || 'Corporate Philosophy & Profile')}">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">メイン大見出し (日本語)</span>
+                                                <span class="admin-lang-en">Main Big Heading (Japanese)</span>
+                                            </label>
+                                            <input type="text" name="heading_ja" class="form-control" value="${escapeHtml(about.heading_ja || '')}">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">Main Big Heading (English)</span>
+                                                <span class="admin-lang-en">Main Big Heading (English)</span>
+                                            </label>
+                                            <input type="text" name="heading_en" class="form-control" value="${escapeHtml(about.heading_en || '')}">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">サブ見出し・キャッチコピー (日本語)</span>
+                                                <span class="admin-lang-en">Subheading / Catchphrase (Japanese)</span>
+                                            </label>
+                                            <input type="text" name="subheading_ja" class="form-control" value="${escapeHtml(about.subheading_ja || '')}">
+                                        </div>
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">Subheading / Catchphrase (English)</span>
+                                                <span class="admin-lang-en">Subheading / Catchphrase (English)</span>
+                                            </label>
+                                            <input type="text" name="subheading_en" class="form-control" value="${escapeHtml(about.subheading_en || '')}">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-primary mr-1">JA</span>
-                                        <span class="admin-lang-ja">本文第1段落 (日本語)</span>
-                                        <span class="admin-lang-en">Paragraph 1 (Japanese)</span>
-                                    </label>
-                                    <textarea name="desc1_ja" class="form-control" rows="5">${escapeHtml(about.desc1_ja || '')}</textarea>
+                            <!-- Body Text & Philosophy Details -->
+                            <div class="card card-outline card-primary mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-align-left mr-1 text-primary"></i>
+                                        <span class="admin-lang-ja">2. 会社概要・本文段落テキスト</span>
+                                        <span class="admin-lang-en">2. Corporate Narrative & Paragraph Text</span>
+                                    </h6>
                                 </div>
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-secondary mr-1">EN</span>
-                                        <span class="admin-lang-ja">本文第1段落 (英語)</span>
-                                        <span class="admin-lang-en">Paragraph 1 (English)</span>
-                                    </label>
-                                    <textarea name="desc1_en" class="form-control" rows="5">${escapeHtml(about.desc1_en || '')}</textarea>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">本文第1段落・使命と背景 (日本語)</span>
+                                                <span class="admin-lang-en">Paragraph 1 - Mission (Japanese)</span>
+                                            </label>
+                                            <textarea name="desc1_ja" class="form-control" rows="5">${escapeHtml(about.desc1_ja || '')}</textarea>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">本文第1段落・使命と背景 (英語)</span>
+                                                <span class="admin-lang-en">Paragraph 1 - Mission (English)</span>
+                                            </label>
+                                            <textarea name="desc1_en" class="form-control" rows="5">${escapeHtml(about.desc1_en || '')}</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">本文第2段落・伴走支援体制 (日本語)</span>
+                                                <span class="admin-lang-en">Paragraph 2 - Support System (Japanese)</span>
+                                            </label>
+                                            <textarea name="desc2_ja" class="form-control" rows="4">${escapeHtml(about.desc2_ja || '')}</textarea>
+                                        </div>
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">本文第2段落・伴走支援体制 (英語)</span>
+                                                <span class="admin-lang-en">Paragraph 2 - Support System (English)</span>
+                                            </label>
+                                            <textarea name="desc2_en" class="form-control" rows="4">${escapeHtml(about.desc2_en || '')}</textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-primary mr-1">JA</span>
-                                        <span class="admin-lang-ja">本文第2段落・伴走支援 (日本語)</span>
-                                        <span class="admin-lang-en">Paragraph 2 (Japanese)</span>
-                                    </label>
-                                    <textarea name="desc2_ja" class="form-control" rows="4">${escapeHtml(about.desc2_ja || '')}</textarea>
+                            <!-- Philosophy Quote Card -->
+                            <div class="card card-outline card-info mb-0">
+                                <div class="card-header bg-light">
+                                    <h6 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-quote-left mr-1 text-info"></i>
+                                        <span class="admin-lang-ja">3. 理念メッセージ・引用文</span>
+                                        <span class="admin-lang-en">3. Philosophy Message & Quote Highlight</span>
+                                    </h6>
                                 </div>
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-secondary mr-1">EN</span>
-                                        <span class="admin-lang-ja">本文第2段落・伴走支援 (英語)</span>
-                                        <span class="admin-lang-en">Paragraph 2 (English)</span>
-                                    </label>
-                                    <textarea name="desc2_en" class="form-control" rows="4">${escapeHtml(about.desc2_en || '')}</textarea>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-primary mr-1">JA</span>
-                                        <span class="admin-lang-ja">理念メッセージ (日本語)</span>
-                                        <span class="admin-lang-en">Philosophy Quote (Japanese)</span>
-                                    </label>
-                                    <textarea name="quote_ja" class="form-control" rows="3">${escapeHtml(about.quote_ja || '')}</textarea>
-                                </div>
-                                <div class="col-md-6 form-group">
-                                    <label class="font-weight-bold">
-                                        <span class="badge badge-secondary mr-1">EN</span>
-                                        <span class="admin-lang-ja">理念メッセージ (英語)</span>
-                                        <span class="admin-lang-en">Philosophy Quote (English)</span>
-                                    </label>
-                                    <textarea name="quote_en" class="form-control" rows="3">${escapeHtml(about.quote_en || '')}</textarea>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-primary mr-1">JA</span>
+                                                <span class="admin-lang-ja">理念メッセージハイライト (日本語)</span>
+                                                <span class="admin-lang-en">Philosophy Quote (Japanese)</span>
+                                            </label>
+                                            <textarea name="quote_ja" class="form-control" rows="3">${escapeHtml(about.quote_ja || '')}</textarea>
+                                        </div>
+                                        <div class="col-md-6 form-group mb-0">
+                                            <label class="font-weight-bold">
+                                                <span class="badge badge-secondary mr-1">EN</span>
+                                                <span class="admin-lang-ja">Philosophy Quote (English)</span>
+                                                <span class="admin-lang-en">Philosophy Quote (English)</span>
+                                            </label>
+                                            <textarea name="quote_en" class="form-control" rows="3">${escapeHtml(about.quote_en || '')}</textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer bg-light text-right">
-                            <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <div class="card-footer bg-light text-right py-3">
+                            <button type="submit" class="btn btn-primary font-weight-bold px-4 shadow-sm">
                                 <i class="fas fa-save mr-1"></i>
                                 <span class="admin-lang-ja">理念・About設定を保存</span>
                                 <span class="admin-lang-en">Save About & Philosophy</span>
@@ -1255,8 +1336,8 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 ${activeTab === 'services' ? `
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-briefcase text-primary mr-1"></i>
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-briefcase text-primary mr-2"></i>
                             <span class="admin-lang-ja">特定技能分野・事業内容 一覧管理 (${services.length} 件)</span>
                             <span class="admin-lang-en">SSW & Business Services List (${services.length})</span>
                         </h3>
@@ -1317,8 +1398,8 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 ${activeTab === 'stories' ? `
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-newspaper text-primary mr-1"></i>
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-newspaper text-primary mr-2"></i>
                             <span class="admin-lang-ja">採用事例・お知らせ 記事管理 (${stories.length} 件)</span>
                             <span class="admin-lang-en">Stories & News Article Management (${stories.length})</span>
                         </h3>
@@ -1394,11 +1475,16 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 ${activeTab === 'faqs' ? `
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-question-circle text-primary mr-1"></i>
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-question-circle text-primary mr-2"></i>
                             <span class="admin-lang-ja">FAQ よくある質問 管理 (${faqs.length} 件)</span>
                             <span class="admin-lang-en">FAQ Management (${faqs.length})</span>
                         </h3>
+                        <button type="button" class="btn btn-success btn-sm font-weight-bold shadow-sm" onclick="openFaqCreateModal()">
+                            <i class="fas fa-plus mr-1"></i>
+                            <span class="admin-lang-ja">新規FAQ追加</span>
+                            <span class="admin-lang-en">New FAQ</span>
+                        </button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -1406,42 +1492,57 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                                 <thead class="thead-light">
                                     <tr>
                                         <th style="width: 50px;">#</th>
+                                        <th style="width: 140px;">
+                                            <span class="admin-lang-ja">カテゴリ</span>
+                                            <span class="admin-lang-en">Category</span>
+                                        </th>
                                         <th>
                                             <span class="admin-lang-ja">質問内容 (日本語 / 英語)</span>
                                             <span class="admin-lang-en">Question (JA / EN)</span>
                                         </th>
                                         <th>
-                                            <span class="admin-lang-ja">回答概要</span>
+                                            <span class="admin-lang-ja">回答内容</span>
                                             <span class="admin-lang-en">Answer</span>
                                         </th>
-                                        <th style="width: 100px;">
-                                            <span class="admin-lang-ja">カテゴリ</span>
-                                            <span class="admin-lang-en">Category</span>
-                                        </th>
-                                        <th class="text-right" style="width: 100px;">
+                                        <th class="text-right" style="width: 150px;">
                                             <span class="admin-lang-ja">操作</span>
                                             <span class="admin-lang-en">Actions</span>
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${faqs.map((f, idx) => `
+                                    ${faqs.length === 0 ? `
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> FAQデータが登録されていません。「新規FAQ追加」ボタンから登録してください。
+                                        </td>
+                                    </tr>
+                                    ` : faqs.map((f, idx) => `
                                     <tr>
                                         <td>${idx + 1}</td>
                                         <td>
-                                            <div class="font-weight-bold text-dark">Q. ${escapeHtml(f.question_ja)}</div>
-                                            <div class="text-muted text-xs">Q. ${escapeHtml(f.question_en)}</div>
+                                            <span class="badge badge-primary px-2 py-1">${escapeHtml(f.category_ja || '一般')}</span>
+                                            <div class="text-xs text-muted mt-1">${escapeHtml(f.category_en || 'General')}</div>
                                         </td>
                                         <td>
-                                            <div class="text-truncate" style="max-width: 300px;">${escapeHtml(f.answer_ja)}</div>
+                                            <div class="font-weight-bold text-dark">Q. ${escapeHtml(f.question_ja)}</div>
+                                            <div class="text-muted text-xs mt-1">Q. ${escapeHtml(f.question_en || f.question_ja)}</div>
                                         </td>
-                                        <td><span class="badge badge-secondary">${escapeHtml(f.category_ja || '一般')}</span></td>
+                                        <td>
+                                            <div class="text-dark" style="max-height: 80px; overflow-y: auto; white-space: pre-line;">${escapeHtml(f.answer_ja)}</div>
+                                            <div class="text-muted text-xs mt-1 border-top pt-1" style="white-space: pre-line;">${escapeHtml(f.answer_en || '')}</div>
+                                        </td>
                                         <td class="text-right">
-                                            <button type="button" class="btn btn-info btn-xs" onclick='openFaqEditModal(${JSON.stringify(f)})'>
+                                            <button type="button" class="btn btn-info btn-xs mr-1 font-weight-bold" onclick='openFaqEditModal(${JSON.stringify(f)})'>
                                                 <i class="fas fa-edit mr-1"></i>
                                                 <span class="admin-lang-ja">編集</span>
                                                 <span class="admin-lang-en">Edit</span>
                                             </button>
+                                            <form action="/admin/faqs/${f.id}/delete" method="POST" class="d-inline" onsubmit="return confirm('このFAQを削除してもよろしいですか？ / Are you sure you want to delete this FAQ?');">
+                                                <button type="submit" class="btn btn-danger btn-xs">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     `).join('')}
@@ -1456,8 +1557,8 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 ${activeTab === 'inquiries' ? `
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-envelope text-primary mr-1"></i>
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-envelope text-primary mr-2"></i>
                             <span class="admin-lang-ja">お問い合わせ・リード一覧 (${inquiries.length} 件)</span>
                             <span class="admin-lang-en">Inquiries & Leads Table (${inquiries.length})</span>
                         </h3>
@@ -1535,51 +1636,162 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
 
                 <!-- ================= TAB 7: Sakana AI Engine ================= -->
                 ${activeTab === 'ai' ? `
-                <div class="card card-success card-outline shadow-sm">
-                    <div class="card-header bg-white">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-microchip text-success mr-1"></i>
-                            <span class="admin-lang-ja">Sakana AI 相談エンジン設定・診断 (EvoLLM-JP-v1-7B)</span>
-                            <span class="admin-lang-en">Sakana AI Intelligence Engine Setup & Diagnostics</span>
-                        </h3>
+                <div class="row">
+                    <!-- Column 1: Configuration Card -->
+                    <div class="col-lg-6">
+                        <div class="card card-success card-outline shadow-sm">
+                            <div class="card-header bg-white">
+                                <h3 class="card-title font-weight-bold mb-0">
+                                    <i class="fas fa-sliders-h text-success mr-2"></i>
+                                    <span class="admin-lang-ja">Sakana AI パラメータ設定 & APIキー管理</span>
+                                    <span class="admin-lang-en">Sakana AI Engine Setup & API Key</span>
+                                </h3>
+                            </div>
+                            <form id="sakanaConfigForm" action="/admin/sakana/config" method="POST">
+                                <div class="card-body">
+                                    <div class="callout callout-success mb-3">
+                                        <h6 class="font-weight-bold text-success mb-1">
+                                            <i class="fas fa-microchip mr-1"></i>
+                                            <span class="admin-lang-ja">日本特化型 EvoLLM / Namazu AI 相談コア連携</span>
+                                            <span class="admin-lang-en">Japan-Specialized Reasoning Core Active</span>
+                                        </h6>
+                                        <p class="text-xs text-muted mb-0">
+                                            <span class="admin-lang-ja">MIRANSHの特定技能人材紹介、在留資格申請、企業様向け要件に関するリアルタイムAI自動応答システムです。</span>
+                                            <span class="admin-lang-en">Real-time intelligent reasoning engine for Specified Skilled Workers and visa requirements.</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Model Selector -->
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <span class="admin-lang-ja">稼働 AI モデル (Model Selection)</span>
+                                            <span class="admin-lang-en">Active AI Model</span>
+                                        </label>
+                                        <select name="model" id="sakana_model" class="form-control font-weight-bold">
+                                            <option value="sakana-namazu" ${currentSakanaModel === 'sakana-namazu' ? 'selected' : ''}>sakana-namazu (Sakana Namazu - 推薦 / 日本語特化 推論強化)</option>
+                                            <option value="EvoLLM-JP-v1-7B" ${currentSakanaModel === 'EvoLLM-JP-v1-7B' ? 'selected' : ''}>EvoLLM-JP-v1-7B (Sakana EvoLLM 7B - 高速応答 / Fast)</option>
+                                            <option value="fugu" ${currentSakanaModel === 'fugu' ? 'selected' : ''}>fugu (Fugu Japanese LLM)</option>
+                                            <option value="fugu-ultra" ${currentSakanaModel === 'fugu-ultra' ? 'selected' : ''}>fugu-ultra (Fugu Ultra High Accuracy)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- API Key -->
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <span class="admin-lang-ja">Sakana AI API キー (Bearer Token)</span>
+                                            <span class="admin-lang-en">Sakana AI API Key</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" name="apiKey" id="sakana_key_input" class="form-control font-mono" value="${escapeHtml(currentSakanaKey)}" placeholder="sk-sakana-...">
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="toggleSakanaKeyVisibility()">
+                                                    <i class="fas fa-eye" id="sakana_key_icon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            <span class="admin-lang-ja">※ システム内蔵キーが稼働しているため、空欄のままでも自動フォールバックが機能します。</span>
+                                            <span class="admin-lang-en">Internal secure key is active. Fallback engine is continuously operational.</span>
+                                        </small>
+                                    </div>
+
+                                    <!-- Temperature -->
+                                    <div class="form-group">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="font-weight-bold mb-0">
+                                                <span class="admin-lang-ja">Temperature (創造性・確実性の調整)</span>
+                                                <span class="admin-lang-en">Temperature</span>
+                                            </label>
+                                            <span class="badge badge-info font-weight-bold" id="temp_val_display">${currentSakanaTemperature}</span>
+                                        </div>
+                                        <input type="range" name="temperature" id="sakana_temp_range" class="custom-range" min="0.0" max="1.0" step="0.05" value="${currentSakanaTemperature}" oninput="document.getElementById('temp_val_display').innerText = this.value">
+                                        <div class="d-flex justify-content-between text-xs text-muted">
+                                            <span>0.0 (確実・論理的 / Precise)</span>
+                                            <span>1.0 (創造的 / Creative)</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- System Persona / Prompt -->
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">
+                                            <span class="admin-lang-ja">AI システムプロンプト・ペルソナ (System Prompt)</span>
+                                            <span class="admin-lang-en">AI System Persona & Prompt</span>
+                                        </label>
+                                        <textarea name="prompt" id="sakana_prompt_input" class="form-control text-sm" rows="4">${escapeHtml(currentSakanaPrompt)}</textarea>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light text-right">
+                                    <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                                        <i class="fas fa-save mr-1"></i>
+                                        <span class="admin-lang-ja">Sakana AI 設定を保存</span>
+                                        <span class="admin-lang-en">Save Sakana AI Config</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="callout callout-success">
-                            <h5 class="font-weight-bold text-success">
-                                <i class="fas fa-robot mr-1"></i>
-                                <span class="admin-lang-ja">日本特化型 AI 相談アシスタント連携中</span>
-                                <span class="admin-lang-en">Japan-Specialized AI Engine Connected</span>
-                            </h5>
-                            <p class="text-sm text-muted mb-0">
-                                <span class="admin-lang-ja">MIRANSHの特定技能人材紹介、在留資格申請、ネパール人材採用に関するリアルタイムAI自動応答システムです。</span>
-                                <span class="admin-lang-en">Real-time intelligent assistant for Specified Skilled Workers, visas, and recruitment from Nepal.</span>
-                            </p>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label class="font-weight-bold">
-                                    <span class="admin-lang-ja">稼働中モデル (Active Model)</span>
-                                    <span class="admin-lang-en">Active Model</span>
-                                </label>
-                                <input type="text" class="form-control font-weight-bold text-primary" value="${escapeHtml(currentSakanaModel)}" readonly>
+                    <!-- Column 2: Interactive Testing & Diagnostics -->
+                    <div class="col-lg-6">
+                        <div class="card card-outline card-info shadow-sm">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <h3 class="card-title font-weight-bold mb-0">
+                                    <i class="fas fa-comments text-info mr-2"></i>
+                                    <span class="admin-lang-ja">インタラクティブ AI 相談テスト & 診断</span>
+                                    <span class="admin-lang-en">Interactive AI Test & Diagnostics</span>
+                                </h3>
+                                <button type="button" class="btn btn-outline-info btn-xs font-weight-bold" onclick="runSakanaTest()">
+                                    <i class="fas fa-satellite-dish mr-1"></i> Ping
+                                </button>
                             </div>
-                            <div class="col-md-6 form-group">
-                                <label class="font-weight-bold">
-                                    <span class="admin-lang-ja">API キー (API Key Status)</span>
-                                    <span class="admin-lang-en">API Key Status</span>
-                                </label>
-                                <input type="text" class="form-control" value="${escapeHtml(currentSakanaKey || 'システム内部キー稼働中 (Active)')}" readonly>
-                            </div>
-                        </div>
+                            <div class="card-body">
+                                <p class="text-xs text-muted mb-3">
+                                    <span class="admin-lang-ja">管理画面から直接 Sakana AI に質問を送り、応答速度・推論内容・バイリンガル精度を検証できます。</span>
+                                    <span class="admin-lang-en">Send interactive test queries directly to test latency, bilingual reasoning, and accuracy.</span>
+                                </p>
 
-                        <div class="mt-3">
-                            <button type="button" class="btn btn-success font-weight-bold px-3" onclick="runSakanaTest()">
-                                <i class="fas fa-play mr-1"></i>
-                                <span class="admin-lang-ja">接続診断テストを実行 (Run Ping Diagnostics)</span>
-                                <span class="admin-lang-en">Run Connectivity Diagnostics</span>
-                            </button>
-                            <div id="aiTestResult" class="mt-3 p-3 bg-light rounded border" style="display: none;"></div>
+                                <!-- Sample Prompt Chips -->
+                                <div class="mb-3">
+                                    <label class="text-xs font-weight-bold text-muted d-block mb-1">
+                                        <span class="admin-lang-ja">クイック質問サンプル:</span>
+                                        <span class="admin-lang-en">Quick Samples:</span>
+                                    </label>
+                                    <button type="button" class="btn btn-xs btn-outline-primary mr-1 mb-1" onclick="setQuickAiPrompt('介護分野の特定技能人材の採用要件と強みを教えてください。')">
+                                        介護分野の要件と強み
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-primary mr-1 mb-1" onclick="setQuickAiPrompt('ネパール人材を採用するメリットと日本語能力について教えてください。')">
+                                        ネパール人材のメリット
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-primary mr-1 mb-1" onclick="setQuickAiPrompt('MIRANSH合同会社への相談の流れとサポート体制はどうなっていますか？')">
+                                        MIRANSHのサポート体制
+                                    </button>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-sm">
+                                        <span class="admin-lang-ja">テスト質問内容 (Test Question)</span>
+                                        <span class="admin-lang-en">Test Question</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" id="sakana_test_query" class="form-control" placeholder="質問を入力してください..." value="介護分野の特定技能人材の採用要件と強みを教えてください。">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-info font-weight-bold px-3" onclick="sendSakanaInteractiveQuery()">
+                                                <i class="fas fa-paper-plane mr-1"></i>
+                                                <span class="admin-lang-ja">送信</span>
+                                                <span class="admin-lang-en">Send</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Response Box -->
+                                <div id="aiInteractiveResult" class="p-3 bg-light rounded border" style="min-height: 180px;">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-robot fa-2x mb-2 text-secondary"></i>
+                                        <p class="text-sm mb-0">「送信」ボタンをクリックして Sakana AI の応答をテストしてください。</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1801,6 +2013,75 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         <button type="submit" class="btn btn-success font-weight-bold">
                             <span class="admin-lang-ja">投稿・保存</span>
                             <span class="admin-lang-en">Publish Article</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Create/Edit Modal -->
+    <div class="modal fade" id="modal-faq-form" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="faqForm" action="/admin/faqs" method="POST">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title font-weight-bold" id="faqModalTitle">
+                            <i class="fas fa-question-circle mr-1"></i>
+                            <span class="admin-lang-ja">FAQ（よくある質問）の追加・編集</span>
+                            <span class="admin-lang-en">Create / Edit FAQ Item</span>
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-primary mr-1">JA</span> カテゴリ (日本語)</label>
+                                <input type="text" name="category_ja" id="faq_category_ja" class="form-control" value="特定技能制度について" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-secondary mr-1">EN</span> Category (English)</label>
+                                <input type="text" name="category_en" id="faq_category_en" class="form-control" value="About Specified Skilled Worker" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-primary mr-1">JA</span> 質問内容 (日本語) <span class="text-danger">*</span></label>
+                                <input type="text" name="question_ja" id="faq_question_ja" class="form-control" placeholder="例: 介護分野の特定技能人材を採用する手順は？" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-secondary mr-1">EN</span> Question (English)</label>
+                                <input type="text" name="question_en" id="faq_question_en" class="form-control" placeholder="e.g. What is the process for hiring SSW nursing care talent?">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-primary mr-1">JA</span> 回答本文 (日本語) <span class="text-danger">*</span></label>
+                                <textarea name="answer_ja" id="faq_answer_ja" class="form-control" rows="4" placeholder="詳細な回答を入力してください..." required></textarea>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="font-weight-bold"><span class="badge badge-secondary mr-1">EN</span> Answer (English)</label>
+                                <textarea name="answer_en" id="faq_answer_en" class="form-control" rows="4" placeholder="Enter answer details in English..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">
+                                <span class="admin-lang-ja">表示順 (Sort Order)</span>
+                                <span class="admin-lang-en">Sort Order</span>
+                            </label>
+                            <input type="number" name="sort_order" id="faq_sort_order" class="form-control" value="0" style="max-width: 140px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            <span class="admin-lang-ja">キャンセル</span>
+                            <span class="admin-lang-en">Cancel</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary font-weight-bold">
+                            <span class="admin-lang-ja">FAQを保存</span>
+                            <span class="admin-lang-en">Save FAQ</span>
                         </button>
                     </div>
                 </form>
@@ -2050,6 +2331,95 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             '</div>';
         document.getElementById('inquiryDetailBody').innerHTML = html;
         $('#modal-inquiry-detail').modal('show');
+    }
+
+    // FAQ Modals
+    function openFaqCreateModal() {
+        const form = document.getElementById('faqForm');
+        form.action = '/admin/faqs';
+        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-plus-circle mr-1"></i> 新規FAQ（よくある質問）の登録';
+        document.getElementById('faq_category_ja').value = '特定技能制度について';
+        document.getElementById('faq_category_en').value = 'About Specified Skilled Worker';
+        document.getElementById('faq_question_ja').value = '';
+        document.getElementById('faq_question_en').value = '';
+        document.getElementById('faq_answer_ja').value = '';
+        document.getElementById('faq_answer_en').value = '';
+        document.getElementById('faq_sort_order').value = '0';
+        $('#modal-faq-form').modal('show');
+    }
+
+    function openFaqEditModal(f) {
+        const form = document.getElementById('faqForm');
+        form.action = '/admin/faqs/' + f.id;
+        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-edit mr-1"></i> FAQ（よくある質問）の編集 #' + f.id;
+        document.getElementById('faq_category_ja').value = f.category_ja || '';
+        document.getElementById('faq_category_en').value = f.category_en || '';
+        document.getElementById('faq_question_ja').value = f.question_ja || '';
+        document.getElementById('faq_question_en').value = f.question_en || '';
+        document.getElementById('faq_answer_ja').value = f.answer_ja || '';
+        document.getElementById('faq_answer_en').value = f.answer_en || '';
+        document.getElementById('faq_sort_order').value = f.sort_order || 0;
+        $('#modal-faq-form').modal('show');
+    }
+
+    // Sakana AI UI Helpers
+    function toggleSakanaKeyVisibility() {
+        const input = document.getElementById('sakana_key_input');
+        const icon = document.getElementById('sakana_key_icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    function setQuickAiPrompt(text) {
+        document.getElementById('sakana_test_query').value = text;
+    }
+
+    function sendSakanaInteractiveQuery() {
+        const queryInput = document.getElementById('sakana_test_query');
+        const query = queryInput.value.trim();
+        if (!query) {
+            toastr.warning('質問内容を入力してください');
+            return;
+        }
+
+        const modelSelect = document.getElementById('sakana_model');
+        const model = modelSelect ? modelSelect.value : 'sakana-namazu';
+        const resultBox = document.getElementById('aiInteractiveResult');
+        const startTime = Date.now();
+
+        resultBox.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-info mb-2"></i><p class="text-sm font-weight-bold text-dark mb-0">Sakana AI (' + model + ') が推論・回答生成中...</p><small class="text-muted">Analyzing request & formatting response...</small></div>';
+
+        fetch('/api/sakana/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: query,
+                language: localStorage.getItem('miransh_admin_lang') || 'ja'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const latency = Date.now() - startTime;
+            if (data.reply) {
+                resultBox.innerHTML = 
+                    '<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">' +
+                        '<div><span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> 回答生成完了</span> <span class="badge badge-info ml-1">' + (data.model || model) + '</span></div>' +
+                        '<small class="text-muted"><i class="far fa-clock mr-1"></i> ' + latency + 'ms</small>' +
+                    '</div>' +
+                    '<div class="text-dark font-weight-normal text-sm" style="white-space: pre-line; line-height: 1.7;">' + data.reply + '</div>' +
+                    (data.source ? '<div class="mt-2 pt-2 border-top text-xs text-muted"><i class="fas fa-info-circle mr-1"></i> Engine: ' + data.source + '</div>' : '');
+            } else {
+                throw new Error(data.error || 'No reply received');
+            }
+        })
+        .catch(err => {
+            resultBox.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle mr-1"></i> <b>AI 応答エラー:</b> ' + err.message + '</div>';
+        });
     }
 
     function toggleInquiryStatus(id, newStatus) {
