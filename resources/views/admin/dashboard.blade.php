@@ -757,37 +757,117 @@
                                 </div>
 
                                 <div class="row mt-3">
+                                    <!-- CEO Portrait Upload & Preview -->
                                     <div class="col-md-6">
-                                        <div class="card card-info card-outline">
-                                            <div class="card-header py-2 bg-light">
-                                                <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-image mr-1"></i> CEO 顔写真 / Executive Portrait</h6>
+                                        <div class="card card-primary card-outline h-100 shadow-sm">
+                                            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                                                <h6 class="m-0 font-weight-bold text-dark">
+                                                    <i class="fas fa-user-tie mr-1 text-primary"></i>
+                                                    <span class="admin-lang-ja">代表者（CEO）顔写真設定</span>
+                                                    <span class="admin-lang-en">CEO Portrait Photo</span>
+                                                </h6>
+                                                <span class="badge badge-info">Preview & Upload</span>
                                             </div>
-                                            <div class="card-body text-center">
-                                                <img src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" id="ceoPreviewImg" class="preview-img-box mb-3" style="width: 140px; height: 140px; border-radius: 50%;" alt="CEO Preview" onerror="this.src='/images/logo-icon.png'">
-                                                <div class="form-group text-left">
-                                                    <label class="text-xs">画像URL / Image Path</label>
-                                                    <input type="text" name="ceo_image" id="ceo_image_url" class="form-control form-control-sm" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}">
+                                            <div class="card-body">
+                                                <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                                                    <div class="text-center mb-3 mb-sm-0 mr-sm-3">
+                                                        <img src="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}" id="preview_ceo_img" class="preview-img-box img-thumbnail shadow-sm" style="width: 130px; height: 130px; object-fit: cover; border-radius: 8px;" alt="CEO Portrait" onerror="this.src='/images/ceo_portrait.jpg'">
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="font-weight-bold text-dark mb-1">
+                                                            <span class="admin-lang-ja">顔写真の変更</span>
+                                                            <span class="admin-lang-en">Change Portrait</span>
+                                                        </h6>
+                                                        <p class="text-xs text-muted mb-2">
+                                                            <span class="admin-lang-ja">正方形比率推奨。ファイル選択で即時プレビュー・自動アップロードされます。</span>
+                                                            <span class="admin-lang-en">Square ratio recommended. Instant upload & preview on select.</span>
+                                                        </p>
+                                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                                            <label class="btn btn-primary btn-sm mb-0 mr-2 cursor-pointer font-weight-bold">
+                                                                <i class="fas fa-upload mr-1"></i>
+                                                                <span class="admin-lang-ja">写真を選択</span>
+                                                                <span class="admin-lang-en">Choose Photo</span>
+                                                                <input type="file" accept="image/*" class="d-none" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status', 'ceo_image')">
+                                                            </label>
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/ceo_portrait.jpg', 'ceo_status', 'ceo_image')">
+                                                                <i class="fas fa-undo mr-1"></i>
+                                                                <span class="admin-lang-ja">デフォルトに戻す</span>
+                                                                <span class="admin-lang-en">Reset</span>
+                                                            </button>
+                                                        </div>
+                                                        <div id="ceo_status" class="badge badge-success text-xs mt-2 py-1 px-2" style="display: {{ !empty($company->ceo_image) ? 'inline-block' : 'none' }};">
+                                                            ✓ <span class="admin-lang-ja">現在の写真が設定されています</span><span class="admin-lang-en">Active portrait set</span>
+                                                        </div>
+                                                        <input type="hidden" id="input_ceo_image" name="ceo_image" value="{{ $company->ceo_image ?? '/images/ceo_portrait.jpg' }}">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Hero Banner Upload & Preview -->
                                     <div class="col-md-6">
-                                        <div class="card card-info card-outline">
-                                            <div class="card-header py-2 bg-light">
-                                                <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-phone-alt mr-1"></i> 連絡先 & 許可番号 / Contacts & License</h6>
+                                        <div class="card card-primary card-outline h-100 shadow-sm">
+                                            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                                                <h6 class="m-0 font-weight-bold text-dark">
+                                                    <i class="fas fa-image mr-1 text-primary"></i>
+                                                    <span class="admin-lang-ja">トップ ヒーローバナー画像設定</span>
+                                                    <span class="admin-lang-en">Homepage Hero Banner</span>
+                                                </h6>
+                                                <span class="badge badge-info">16:9 Landscape</span>
                                             </div>
                                             <div class="card-body">
-                                                <div class="form-group">
-                                                    <label>電話番号 / Phone Number</label>
-                                                    <input type="text" name="phone" class="form-control" value="{{ $company->phone ?? '042-203-5163' }}">
+                                                <div class="text-center mb-2">
+                                                    <img src="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}" id="preview_hero_img" class="preview-img-box img-fluid shadow-sm rounded border" style="max-height: 120px; width: 100%; object-fit: cover;" alt="Hero Banner" onerror="this.src='/images/hero_banner.jpg'">
                                                 </div>
-                                                <div class="form-group">
-                                                    <label>代表メール / Official Email</label>
-                                                    <input type="email" name="email" class="form-control" value="{{ $company->email ?? 'info@miransh.co.jp' }}">
+                                                <div class="d-flex flex-wrap justify-content-between align-items-center mt-2">
+                                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                                        <label class="btn btn-primary btn-sm mb-0 mr-2 cursor-pointer font-weight-bold">
+                                                            <i class="fas fa-upload mr-1"></i>
+                                                            <span class="admin-lang-ja">バナーを選択</span>
+                                                            <span class="admin-lang-en">Choose Banner</span>
+                                                            <input type="file" accept="image/*" class="d-none" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_img', 'hero_status', 'hero_image')">
+                                                        </label>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetImageDefault('input_hero_image', 'preview_hero_img', '/images/hero_banner.jpg', 'hero_status', 'hero_image')">
+                                                            <i class="fas fa-undo mr-1"></i>
+                                                            <span class="admin-lang-ja">デフォルトに戻す</span>
+                                                            <span class="admin-lang-en">Reset</span>
+                                                        </button>
+                                                    </div>
+                                                    <div id="hero_status" class="badge badge-success text-xs py-1 px-2" style="display: {{ !empty($company->hero_image) ? 'inline-block' : 'none' }};">
+                                                        ✓ <span class="admin-lang-ja">設定済み</span><span class="admin-lang-en">Configured</span>
+                                                    </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label>有料職業紹介 許可番号 / License Number</label>
-                                                    <input type="text" name="license_number" class="form-control" value="{{ $company->license_number ?? '13-ユ-319558' }}">
+                                                <input type="hidden" id="input_hero_image" name="hero_image" value="{{ $company->hero_image ?? '/images/hero_banner.jpg' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="card card-secondary card-outline">
+                                            <div class="card-header py-2 bg-light">
+                                                <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-phone-alt mr-1 text-primary"></i> 連絡先・法人番号・許認可情報 / Corporate Registry & Contacts</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-3 form-group">
+                                                        <label class="font-weight-bold">電話番号 / Phone</label>
+                                                        <input type="text" name="phone" class="form-control" value="{{ $company->phone ?? '042-203-5163' }}">
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label class="font-weight-bold">代表メール / Official Email</label>
+                                                        <input type="email" name="email" class="form-control" value="{{ $company->email ?? 'info@miransh.co.jp' }}">
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label class="font-weight-bold">有料職業紹介 許可番号</label>
+                                                        <input type="text" name="license_number" class="form-control" value="{{ $company->license_number ?? '13-ユ-319558' }}">
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label class="font-weight-bold">法人番号 / Corporate No.</label>
+                                                        <input type="text" name="corporate_number" class="form-control" value="{{ $company->corporate_number ?? '' }}">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -930,6 +1010,9 @@
                                             <td><span class="badge badge-info">{{ $st->category_ja }}</span></td>
                                             <td><small class="text-muted">{{ $st->published_date }}</small></td>
                                             <td class="text-right">
+                                                <button type="button" class="btn btn-xs btn-info font-weight-bold mr-1" onclick="openStoryEditModal({{ json_encode($st) }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
                                                 <form action="{{ route('admin.stories.delete', $st->id, false) }}" method="POST" class="d-inline" onsubmit="return confirm('この記事を削除しますか？ / Delete this story?');">
                                                     @csrf
                                                     <button type="submit" class="btn btn-xs btn-danger font-weight-bold">
@@ -1573,6 +1656,39 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Story Image Preview & Upload Section -->
+                    <div class="card card-outline card-secondary mt-2 mb-0">
+                        <div class="card-header py-2 bg-light">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-image mr-1 text-primary"></i> 記事アイキャッチ画像設定 / Story Cover Image</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                                <div class="text-center mb-3 mb-sm-0 mr-sm-3">
+                                    <img src="/images/hero_banner.jpg" id="preview_story_create_img" class="preview-img-box img-thumbnail shadow-sm" style="width: 140px; height: 90px; object-fit: cover;" alt="Story Image" onerror="this.src='/images/hero_banner.jpg'">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                        <label class="btn btn-primary btn-sm mb-0 mr-2 cursor-pointer font-weight-bold">
+                                            <i class="fas fa-upload mr-1"></i>
+                                            <span class="admin-lang-ja">画像を選択</span>
+                                            <span class="admin-lang-en">Upload Image</span>
+                                            <input type="file" accept="image/*" class="d-none" onchange="handleAdminUpload(this, 'input_story_create_image', 'preview_story_create_img', 'story_create_status')">
+                                        </label>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetImageDefault('input_story_create_image', 'preview_story_create_img', '/images/hero_banner.jpg', 'story_create_status')">
+                                            <i class="fas fa-undo mr-1"></i>
+                                            <span class="admin-lang-ja">リセット</span>
+                                            <span class="admin-lang-en">Reset</span>
+                                        </button>
+                                    </div>
+                                    <div id="story_create_status" class="badge badge-success text-xs py-1 px-2" style="display: none;">
+                                        ✓ <span class="admin-lang-ja">画像設定完了</span><span class="admin-lang-en">Image configured</span>
+                                    </div>
+                                    <input type="hidden" id="input_story_create_image" name="image" value="/images/hero_banner.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル / Cancel</button>
@@ -1580,6 +1696,100 @@
                         <i class="fas fa-paper-plane mr-1"></i>
                         <span class="admin-lang-ja">記事を公開</span>
                         <span class="admin-lang-en">Publish Story</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Story Edit Modal -->
+<div class="modal fade" id="modal-story-edit" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form id="storyEditForm" action="" method="POST">
+                @csrf
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title font-weight-bold">
+                        <i class="fas fa-edit mr-1"></i>
+                        <span class="admin-lang-ja">記事・お知らせの編集</span>
+                        <span class="admin-lang-en">Edit Story</span>
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">タイトル (日本語) *</label>
+                                <input type="text" name="title_ja" id="edit_story_title_ja" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">カテゴリ (日本語)</label>
+                                <input type="text" name="category_ja" id="edit_story_category_ja" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">本文・概要 (日本語) *</label>
+                                <textarea name="content_ja" id="edit_story_content_ja" class="form-control" rows="4" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Title (English) *</label>
+                                <input type="text" name="title_en" id="edit_story_title_en" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Category (English)</label>
+                                <input type="text" name="category_en" id="edit_story_category_en" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Content (English) *</label>
+                                <textarea name="content_en" id="edit_story_content_en" class="form-control" rows="4" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Story Image Preview & Upload Section -->
+                    <div class="card card-outline card-secondary mt-2 mb-0">
+                        <div class="card-header py-2 bg-light">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-image mr-1 text-primary"></i> 記事アイキャッチ画像設定 / Story Cover Image</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                                <div class="text-center mb-3 mb-sm-0 mr-sm-3">
+                                    <img src="/images/hero_banner.jpg" id="preview_story_edit_img" class="preview-img-box img-thumbnail shadow-sm" style="width: 140px; height: 90px; object-fit: cover;" alt="Story Image" onerror="this.src='/images/hero_banner.jpg'">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                        <label class="btn btn-primary btn-sm mb-0 mr-2 cursor-pointer font-weight-bold">
+                                            <i class="fas fa-upload mr-1"></i>
+                                            <span class="admin-lang-ja">画像を変更</span>
+                                            <span class="admin-lang-en">Change Image</span>
+                                            <input type="file" accept="image/*" class="d-none" onchange="handleAdminUpload(this, 'input_story_edit_image', 'preview_story_edit_img', 'story_edit_status')">
+                                        </label>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetImageDefault('input_story_edit_image', 'preview_story_edit_img', '/images/hero_banner.jpg', 'story_edit_status')">
+                                            <i class="fas fa-undo mr-1"></i>
+                                            <span class="admin-lang-ja">リセット</span>
+                                            <span class="admin-lang-en">Reset</span>
+                                        </button>
+                                    </div>
+                                    <div id="story_edit_status" class="badge badge-success text-xs py-1 px-2" style="display: none;">
+                                        ✓ <span class="admin-lang-ja">画像設定完了</span><span class="admin-lang-en">Image configured</span>
+                                    </div>
+                                    <input type="hidden" id="input_story_edit_image" name="image" value="/images/hero_banner.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル / Cancel</button>
+                    <button type="submit" class="btn btn-info font-weight-bold">
+                        <i class="fas fa-save mr-1"></i>
+                        <span class="admin-lang-ja">変更を保存</span>
+                        <span class="admin-lang-en">Save Changes</span>
                     </button>
                 </div>
             </form>
@@ -1818,6 +2028,115 @@
         $('#edit_faq_answer_en').val(faq.answer_en || '');
         $('#modal-faq-edit').modal('show');
     }
+
+    function openStoryEditModal(story) {
+        if (!story) return;
+        $('#storyEditForm').attr('action', '/admin/stories/' + story.id);
+        $('#edit_story_title_ja').val(story.title_ja || '');
+        $('#edit_story_title_en').val(story.title_en || '');
+        $('#edit_story_category_ja').val(story.category_ja || '');
+        $('#edit_story_category_en').val(story.category_en || '');
+        $('#edit_story_content_ja').val(story.content_ja || '');
+        $('#edit_story_content_en').val(story.content_en || '');
+        
+        const storyImg = story.image || '/images/hero_banner.jpg';
+        $('#input_story_edit_image').val(storyImg);
+        const imgElem = document.getElementById('preview_story_edit_img');
+        if (imgElem) imgElem.src = storyImg;
+        const statusElem = document.getElementById('story_edit_status');
+        if (statusElem) statusElem.style.display = 'none';
+
+        $('#modal-story-edit').modal('show');
+    }
+
+    /**
+     * Handles instant image upload & preview for AdminLTE components
+     */
+    async function handleAdminUpload(input, inputTargetId, previewImgId, statusId, targetField) {
+        if (!input || !input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        
+        // Immediate local preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewEl = document.getElementById(previewImgId);
+            if (previewEl) {
+                previewEl.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+
+        // Show uploading indicator
+        const statusEl = statusId ? document.getElementById(statusId) : null;
+        if (statusEl) {
+            statusEl.style.display = 'inline-block';
+            statusEl.className = 'badge badge-warning text-xs mt-2 py-1 px-2';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> アップロード中 / Uploading...';
+        }
+
+        // Upload to server API
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            if (targetField) {
+                formData.append('target_field', targetField);
+            }
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const res = await fetch('/api/admin/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data && data.success && data.url) {
+                const targetInput = document.getElementById(inputTargetId);
+                if (targetInput) {
+                    targetInput.value = data.url;
+                }
+                const previewEl = document.getElementById(previewImgId);
+                if (previewEl) {
+                    previewEl.src = data.url;
+                }
+                if (statusEl) {
+                    statusEl.className = 'badge badge-success text-xs mt-2 py-1 px-2';
+                    statusEl.innerHTML = '✓ アップロード完了 / Uploaded';
+                }
+            } else {
+                throw new Error(data.message || 'Upload failed');
+            }
+        } catch (err) {
+            console.error('Image upload error:', err);
+            if (statusEl) {
+                statusEl.className = 'badge badge-danger text-xs mt-2 py-1 px-2';
+                statusEl.innerHTML = '⚠ アップロード失敗: ' + (err.message || 'Error');
+            }
+        }
+    }
+
+    /**
+     * Resets image preview and hidden input to default asset
+     */
+    function resetImageDefault(inputTargetId, previewImgId, defaultUrl, statusId, targetField) {
+        const targetInput = document.getElementById(inputTargetId);
+        if (targetInput) {
+            targetInput.value = defaultUrl;
+        }
+        const previewEl = document.getElementById(previewImgId);
+        if (previewEl) {
+            previewEl.src = defaultUrl;
+        }
+        const statusEl = statusId ? document.getElementById(statusId) : null;
+        if (statusEl) {
+            statusEl.style.display = 'inline-block';
+            statusEl.className = 'badge badge-secondary text-xs mt-2 py-1 px-2';
+            statusEl.innerHTML = '↺ デフォルトに設定 / Reset to Default';
+        }
+    }
+
+    window.handleAdminUpload = handleAdminUpload;
+    window.resetImageDefault = resetImageDefault;
+    window.openStoryEditModal = openStoryEditModal;
 
     async function sendSakanaInteractiveQuery() {
         const queryInput = document.getElementById('sakana_test_query');
