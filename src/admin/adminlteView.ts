@@ -61,10 +61,237 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
 
     <style>
         :root {
-            --primary-brand: #007bff;
+            --brand-navy-dark: #0A1E3F;
+            --brand-navy: #0F2C59;
+            --brand-navy-light: #1E3E7B;
+            --brand-blue: #2563EB;
+            --brand-blue-hover: #1D4ED8;
+            --brand-blue-light: #DBEAFE;
+            --brand-blue-subtle: #EFF6FF;
+            --brand-gold: #D97706;
+            --brand-emerald: #059669;
+            --brand-slate-bg: #F8FAFC;
+            --brand-border: #E2E8F0;
         }
         body {
             font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--brand-slate-bg);
+            color: #1E293B;
+        }
+
+        /* Top Navbar */
+        .main-header.navbar {
+            background-color: #FFFFFF !important;
+            border-bottom: 1px solid var(--brand-border) !important;
+            box-shadow: 0 1px 3px rgba(15, 44, 89, 0.05) !important;
+        }
+        .main-header.navbar .nav-link {
+            color: #475569 !important;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .main-header.navbar .nav-link:hover {
+            color: var(--brand-blue) !important;
+        }
+        .main-header.navbar .nav-link.active,
+        .main-header.navbar .nav-link.text-primary {
+            color: var(--brand-blue) !important;
+            font-weight: 700;
+        }
+
+        /* Sidebar Styling - Deep Navy & Royal Blue Accents */
+        .main-sidebar {
+            background: linear-gradient(180deg, #0A1E3F 0%, #0F2C59 100%) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 2px 0 16px rgba(10, 30, 63, 0.15);
+        }
+        .brand-link {
+            background: linear-gradient(135deg, #0A1E3F 0%, #1E3E7B 100%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            padding: 0.9rem 1rem !important;
+            display: flex;
+            align-items: center;
+        }
+        .brand-link .brand-text {
+            color: #FFFFFF !important;
+            letter-spacing: 0.05em;
+            font-size: 1.15rem;
+        }
+        .brand-badge-pill {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            letter-spacing: 0.05em;
+            margin-left: 6px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+        }
+
+        .sidebar .user-panel {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 12px 10px 16px 10px !important;
+        }
+        .sidebar .user-panel .info a {
+            color: #FFFFFF !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Sidebar Navigation Items */
+        .sidebar .nav-header {
+            color: #94A3B8 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.06em;
+            padding: 12px 16px 4px 16px !important;
+        }
+        .sidebar .nav-link {
+            color: #CBD5E1 !important;
+            border-radius: 8px !important;
+            margin: 2px 10px !important;
+            padding: 9px 14px !important;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #FFFFFF !important;
+            transform: translateX(2px);
+        }
+        .sidebar .nav-link.active,
+        .sidebar .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+            transform: translateX(3px);
+        }
+        .sidebar .nav-link .nav-icon {
+            font-size: 1rem;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: #94A3B8;
+        }
+        .sidebar .nav-link.active .nav-icon {
+            color: #FFFFFF !important;
+        }
+
+        /* Primary Cards & Overrides */
+        .card-primary.card-outline {
+            border-top: 3px solid var(--brand-blue) !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card-info.card-outline {
+            border-top: 3px solid #0EA5E9 !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card-success.card-outline {
+            border-top: 3px solid var(--brand-emerald) !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card {
+            border-radius: 12px;
+            border: 1px solid var(--brand-border);
+            box-shadow: 0 2px 8px rgba(15, 44, 89, 0.04);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--brand-border);
+            padding: 1rem 1.25rem;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+        .card-title {
+            color: var(--brand-navy) !important;
+            font-size: 1.05rem;
+            font-weight: 700 !important;
+        }
+
+        /* Primary Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+            border-color: #1D4ED8 !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+            border-color: #1E40AF !important;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4) !important;
+        }
+        .btn-outline-primary {
+            color: var(--brand-blue) !important;
+            border-color: var(--brand-blue) !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--brand-blue) !important;
+            color: #FFFFFF !important;
+        }
+
+        /* KPI Small Boxes in Blue Gradient Theme */
+        .small-box {
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.08) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .small-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(15, 44, 89, 0.14) !important;
+        }
+        .small-box.bg-info {
+            background: linear-gradient(135deg, #0F2C59 0%, #1E3E7B 100%) !important;
+        }
+        .small-box.bg-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%) !important;
+        }
+        .small-box.bg-warning {
+            background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
+        }
+        .small-box.bg-success {
+            background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+        }
+        .small-box.bg-danger {
+            background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%) !important;
+        }
+        .small-box .inner h3 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            color: #FFFFFF;
+        }
+        .small-box .inner p {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92);
+        }
+        .small-box-footer {
+            background: rgba(0, 0, 0, 0.15) !important;
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600;
+            padding: 6px 0;
         }
 
         /* Bilingual Display Engine (Supports both .admin-lang-* and .lang-*) */
@@ -167,13 +394,63 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             border-radius: 20px;
             transition: all 0.2s ease;
         }
+
+        /* Modal Headers with Blue Navy Gradient */
+        .modal-header {
+            background: linear-gradient(135deg, #0F2C59 0%, #1E3E7B 100%) !important;
+            color: #FFFFFF !important;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .modal-header .modal-title,
+        .modal-header h4,
+        .modal-header h5 {
+            color: #FFFFFF !important;
+            font-weight: 700;
+        }
+        .modal-header .close {
+            color: #FFFFFF !important;
+            text-shadow: none;
+            opacity: 0.85;
+        }
+        .modal-header .close:hover {
+            opacity: 1;
+        }
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(15, 44, 89, 0.2), 0 10px 10px -5px rgba(15, 44, 89, 0.1);
+        }
+
         /* Custom dark mode tweaks */
-        body.dark-mode .card:not(.card-outline) {
-            background-color: #343a40;
+        body.dark-mode {
+            background-color: #0B132B !important;
+            color: #E2E8F0 !important;
+        }
+        body.dark-mode .content-wrapper {
+            background-color: #0B132B !important;
+        }
+        body.dark-mode .card {
+            background-color: #1C2541 !important;
+            border-color: #3A506B !important;
+        }
+        body.dark-mode .card-header {
+            background-color: #1C2541 !important;
+            border-color: #3A506B !important;
+        }
+        body.dark-mode .card-title {
+            color: #FFFFFF !important;
+        }
+        body.dark-mode .main-header.navbar {
+            background-color: #1C2541 !important;
+            border-color: #3A506B !important;
+        }
+        body.dark-mode .main-header.navbar .nav-link {
+            color: #CBD5E1 !important;
         }
         body.dark-mode .preview-img-box {
             border-color: #4b545c;
-            background: #343a40;
+            background: #1C2541;
         }
     </style>
 </head>
@@ -2111,312 +2388,17 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
 
 </div>
 
-<!-- Admin Scripts: jQuery, Bootstrap 4, AdminLTE, Chart.js, SweetAlert2, Toastr -->
+<!-- Admin Scripts: jQuery, Bootstrap 4, DataTables, AdminLTE, Chart.js, SweetAlert2, Toastr -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-    // Bilingual Admin UI Switcher
-    function setAdminLanguage(lang) {
-        if (!lang) lang = 'ja';
-        localStorage.setItem('miransh_admin_lang', lang);
-        localStorage.setItem('miransh_lang', lang);
-        document.documentElement.setAttribute('data-admin-lang', lang);
-        document.documentElement.setAttribute('data-lang', lang);
-        document.documentElement.setAttribute('lang', lang);
-
-        if (document.body) {
-            document.body.classList.remove('ja', 'en', 'admin-ja', 'admin-en');
-            document.body.classList.add(lang, 'admin-' + lang);
-        }
-
-        // Update Top Navbar Switcher Buttons
-        const btnJa = document.getElementById('admin-btn-ja');
-        const btnEn = document.getElementById('admin-btn-en');
-        if (btnJa && btnEn) {
-            if (lang === 'ja') {
-                btnJa.className = 'btn btn-xs lang-switch-btn btn-primary text-white font-weight-bold';
-                btnEn.className = 'btn btn-xs lang-switch-btn btn-light text-dark font-weight-bold';
-            } else {
-                btnEn.className = 'btn btn-xs lang-switch-btn btn-primary text-white font-weight-bold';
-                btnJa.className = 'btn btn-xs lang-switch-btn btn-light text-dark font-weight-bold';
-            }
-        }
-
-        // Update Sidebar/Drawer Buttons if present
-        const sideBtnJa = document.getElementById('sidebar-btn-ja');
-        const sideBtnEn = document.getElementById('sidebar-btn-en');
-        if (sideBtnJa && sideBtnEn) {
-            if (lang === 'ja') {
-                sideBtnJa.className = 'btn btn-sm btn-primary font-weight-bold';
-                sideBtnEn.className = 'btn btn-sm btn-secondary';
-            } else {
-                sideBtnEn.className = 'btn btn-sm btn-primary font-weight-bold';
-                sideBtnJa.className = 'btn btn-sm btn-secondary';
-            }
-        }
-    }
-    window.setAdminLanguage = setAdminLanguage;
-
-    // Initialize Language & Theme on Load
-    (function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const queryLang = urlParams.get('lang');
-        const savedLang = queryLang || localStorage.getItem('miransh_admin_lang') || localStorage.getItem('miransh_lang') || 'ja';
-        setAdminLanguage(savedLang);
-
-        if (localStorage.getItem('miransh_admin_dark') === 'true') {
-            document.body.classList.add('dark-mode');
-            const icon = document.getElementById('theme-toggle-icon');
-            if (icon) icon.className = 'fas fa-sun';
-        }
-    })();
-
-    function toggleAdminDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('miransh_admin_dark', isDark);
-        const icon = document.getElementById('theme-toggle-icon');
-        if (icon) {
-            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        }
-    }
-
-    // Image Upload Helper
-    function handleAdminUpload(input, inputTargetId, previewImgId, statusId, targetField) {
-        if (!input.files || !input.files[0]) return;
-        const file = input.files[0];
-        
-        const formData = new FormData();
-        formData.append('image', file);
-        if (targetField) formData.append('target_field', targetField);
-
-        const statusEl = document.getElementById(statusId);
-        if (statusEl) {
-            statusEl.style.display = 'inline-block';
-            statusEl.className = 'badge badge-warning text-xs mt-2 py-1 px-2';
-            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> アップロード中... / Uploading...';
-        }
-
-        fetch('/api/admin/upload-image', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.url) {
-                const targetInput = document.getElementById(inputTargetId);
-                if (targetInput) targetInput.value = data.url;
-                const previewImg = document.getElementById(previewImgId);
-                if (previewImg) previewImg.src = data.url;
-
-                if (statusEl) {
-                    statusEl.className = 'badge badge-success text-xs mt-2 py-1 px-2';
-                    statusEl.innerHTML = '✓ 反映完了 / Uploaded & Saved';
-                }
-                toastr.success('画像をアップロードして保存しました / Image uploaded successfully!');
-            } else {
-                throw new Error(data.error || 'Upload error');
-            }
-        })
-        .catch(err => {
-            if (statusEl) {
-                statusEl.className = 'badge badge-danger text-xs mt-2 py-1 px-2';
-                statusEl.innerHTML = '✕ 失敗: ' + err.message;
-            }
-            toastr.error('アップロードに失敗しました: ' + err.message);
-        });
-    }
-
-    function resetImageDefault(inputTargetId, previewImgId, defaultUrl, statusId, targetField) {
-        const targetInput = document.getElementById(inputTargetId);
-        if (targetInput) targetInput.value = defaultUrl;
-        const previewImg = document.getElementById(previewImgId);
-        if (previewImg) previewImg.src = defaultUrl;
-        
-        const statusEl = document.getElementById(statusId);
-        if (statusEl) {
-            statusEl.className = 'badge badge-info text-xs mt-2 py-1 px-2';
-            statusEl.innerHTML = '✓ デフォルト設定に戻しました / Reset to default';
-        }
-    }
-
-    // Modal Opening Handlers
-    function openStoryCreateModal() {
-        const form = document.getElementById('storyForm');
-        form.action = '/admin/stories';
-        document.getElementById('story_title_ja').value = '';
-        document.getElementById('story_title_en').value = '';
-        document.getElementById('story_summary_ja').value = '';
-        document.getElementById('story_summary_en').value = '';
-        $('#modal-story-form').modal('show');
-    }
-
-    function openStoryEditModal(st) {
-        const form = document.getElementById('storyForm');
-        form.action = '/admin/stories/' + st.id;
-        document.getElementById('story_title_ja').value = st.title_ja || '';
-        document.getElementById('story_title_en').value = st.title_en || '';
-        document.getElementById('story_category_ja').value = st.category_ja || '';
-        document.getElementById('story_category_en').value = st.category_en || '';
-        document.getElementById('story_summary_ja').value = st.summary_ja || '';
-        document.getElementById('story_summary_en').value = st.summary_en || '';
-        document.getElementById('story_image').value = st.image || '/images/hero_banner.jpg';
-        $('#modal-story-form').modal('show');
-    }
-
-    function openServiceEditModal(s) {
-        const form = document.getElementById('serviceEditForm');
-        form.action = '/admin/services/' + s.id;
-        document.getElementById('service_title_ja').value = s.title_ja || '';
-        document.getElementById('service_title_en').value = s.title_en || '';
-        document.getElementById('service_desc_ja').value = s.desc_ja || '';
-        document.getElementById('service_desc_en').value = s.desc_en || '';
-        $('#modal-service-edit').modal('show');
-    }
-
-    function openInquiryDetailModal(inq) {
-        const html = '<div class="p-2">' +
-            '<h5 class="font-weight-bold text-primary mb-2">' + inq.name + ' 様</h5>' +
-            '<table class="table table-bordered text-sm">' +
-            '<tr><th class="bg-light" style="width:140px;">企業名 / Company</th><td>' + (inq.company_name || '個人 / Individual') + '</td></tr>' +
-            '<tr><th class="bg-light">メール / Email</th><td><a href="mailto:' + inq.email + '">' + inq.email + '</a></td></tr>' +
-            '<tr><th class="bg-light">電話番号 / Phone</th><td>' + (inq.phone || '-') + '</td></tr>' +
-            '<tr><th class="bg-light">相談分野 / Sector</th><td>' + (inq.service_interest || '全般') + '</td></tr>' +
-            '<tr><th class="bg-light">状況 / Status</th><td><span class="badge badge-info">' + (inq.status || 'new') + '</span></td></tr>' +
-            '<tr><th class="bg-light">メッセージ本文</th><td style="white-space: pre-line;">' + (inq.message || '-') + '</td></tr>' +
-            '</table>' +
-            '</div>';
-        document.getElementById('inquiryDetailBody').innerHTML = html;
-        $('#modal-inquiry-detail').modal('show');
-    }
-
-    // FAQ Modals
-    function openFaqCreateModal() {
-        const form = document.getElementById('faqForm');
-        form.action = '/admin/faqs';
-        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-plus-circle mr-1"></i> 新規FAQ（よくある質問）の登録';
-        document.getElementById('faq_category_ja').value = '特定技能制度について';
-        document.getElementById('faq_category_en').value = 'About Specified Skilled Worker';
-        document.getElementById('faq_question_ja').value = '';
-        document.getElementById('faq_question_en').value = '';
-        document.getElementById('faq_answer_ja').value = '';
-        document.getElementById('faq_answer_en').value = '';
-        document.getElementById('faq_sort_order').value = '0';
-        $('#modal-faq-form').modal('show');
-    }
-
-    function openFaqEditModal(f) {
-        const form = document.getElementById('faqForm');
-        form.action = '/admin/faqs/' + f.id;
-        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-edit mr-1"></i> FAQ（よくある質問）の編集 #' + f.id;
-        document.getElementById('faq_category_ja').value = f.category_ja || '';
-        document.getElementById('faq_category_en').value = f.category_en || '';
-        document.getElementById('faq_question_ja').value = f.question_ja || '';
-        document.getElementById('faq_question_en').value = f.question_en || '';
-        document.getElementById('faq_answer_ja').value = f.answer_ja || '';
-        document.getElementById('faq_answer_en').value = f.answer_en || '';
-        document.getElementById('faq_sort_order').value = f.sort_order || 0;
-        $('#modal-faq-form').modal('show');
-    }
-
-    // Sakana AI UI Helpers
-    function toggleSakanaKeyVisibility() {
-        const input = document.getElementById('sakana_key_input');
-        const icon = document.getElementById('sakana_key_icon');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.className = 'fas fa-eye-slash';
-        } else {
-            input.type = 'password';
-            icon.className = 'fas fa-eye';
-        }
-    }
-
-    function setQuickAiPrompt(text) {
-        document.getElementById('sakana_test_query').value = text;
-    }
-
-    function sendSakanaInteractiveQuery() {
-        const queryInput = document.getElementById('sakana_test_query');
-        const query = queryInput.value.trim();
-        if (!query) {
-            toastr.warning('質問内容を入力してください');
-            return;
-        }
-
-        const modelSelect = document.getElementById('sakana_model');
-        const model = modelSelect ? modelSelect.value : 'sakana-namazu';
-        const resultBox = document.getElementById('aiInteractiveResult');
-        const startTime = Date.now();
-
-        resultBox.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-info mb-2"></i><p class="text-sm font-weight-bold text-dark mb-0">Sakana AI (' + model + ') が推論・回答生成中...</p><small class="text-muted">Analyzing request & formatting response...</small></div>';
-
-        fetch('/api/sakana/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: query,
-                language: localStorage.getItem('miransh_admin_lang') || 'ja'
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const latency = Date.now() - startTime;
-            if (data.reply) {
-                resultBox.innerHTML = 
-                    '<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">' +
-                        '<div><span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> 回答生成完了</span> <span class="badge badge-info ml-1">' + (data.model || model) + '</span></div>' +
-                        '<small class="text-muted"><i class="far fa-clock mr-1"></i> ' + latency + 'ms</small>' +
-                    '</div>' +
-                    '<div class="text-dark font-weight-normal text-sm" style="white-space: pre-line; line-height: 1.7;">' + data.reply + '</div>' +
-                    (data.source ? '<div class="mt-2 pt-2 border-top text-xs text-muted"><i class="fas fa-info-circle mr-1"></i> Engine: ' + data.source + '</div>' : '');
-            } else {
-                throw new Error(data.error || 'No reply received');
-            }
-        })
-        .catch(err => {
-            resultBox.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle mr-1"></i> <b>AI 応答エラー:</b> ' + err.message + '</div>';
-        });
-    }
-
-    function toggleInquiryStatus(id, newStatus) {
-        fetch('/admin/inquiries/' + id + '/status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-        })
-        .then(() => {
-            toastr.success('ステータスを更新しました / Status updated');
-            setTimeout(() => window.location.reload(), 600);
-        });
-    }
-
-    function runSakanaTest() {
-        const el = document.getElementById('aiTestResult');
-        el.style.display = 'block';
-        el.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sakana AI 相談エンジンに ping テスト中... / Testing ping...';
-        
-        fetch('/api/sakana/test', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'EvoLLM-JP-v1-7B' })
-        })
-        .then(res => res.json())
-        .then(data => {
-            el.className = 'mt-3 p-3 bg-light rounded border border-success';
-            el.innerHTML = '<span class="text-success font-weight-bold">✓ Sakana AI 接続成功 (Status: Online)</span><br><small class="text-muted">Response Latency: ' + (data.latencyMs || 42) + 'ms | Model: ' + (data.model || 'EvoLLM-JP-v1-7B') + '</small>';
-        })
-        .catch(() => {
-            el.className = 'mt-3 p-3 bg-light rounded border border-success';
-            el.innerHTML = '<span class="text-success font-weight-bold">✓ Sakana AI 相談エンジン準備完了 (Ready)</span>';
-        });
-    }
-
     // Tab Navigation Configuration and Switcher
     const adminTabsMeta = {
         'dashboard': {
@@ -2491,6 +2473,9 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
         }
     };
 
+    let inquiriesTrendChartInstance = null;
+    let sectorsDonutChartInstance = null;
+
     function switchAdminTab(tabKey, event) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
@@ -2516,8 +2501,14 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
         navLinks.forEach(link => {
             if (link.getAttribute('data-tab') === tabKey) {
                 link.classList.add('active');
+                if (link.classList.contains('nav-link') && !link.closest('.sidebar')) {
+                    link.classList.add('text-primary');
+                }
             } else {
                 link.classList.remove('active');
+                if (link.classList.contains('nav-link') && !link.closest('.sidebar')) {
+                    link.classList.remove('text-primary');
+                }
             }
         });
 
@@ -2539,14 +2530,11 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             const descEn = document.getElementById('admin-page-desc-en');
             if (descEn) descEn.innerText = meta.descEn;
 
-            const breadcrumbJa = document.getElementById('admin-breadcrumb-ja');
-            if (breadcrumbJa) breadcrumbJa.innerText = meta.ja;
-
-            const breadcrumbEn = document.getElementById('admin-breadcrumb-en');
-            if (breadcrumbEn) breadcrumbEn.innerText = meta.en;
+            const breadcrumbActive = document.getElementById('admin-breadcrumb-active');
+            if (breadcrumbActive) breadcrumbActive.innerText = tabKey.toUpperCase();
         }
 
-        // 4. Update KPI boxes visibility or emphasis
+        // 4. Update KPI boxes visibility
         const kpiRow = document.getElementById('admin-kpi-summary-row');
         if (kpiRow) {
             if (tabKey === 'dashboard' || tabKey === 'inquiries' || tabKey === 'company') {
@@ -2562,10 +2550,407 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             window.history.pushState({ tab: tabKey }, '', newUrl);
         } catch (e) {}
 
-        // 6. Scroll to top of content
+        // 6. Handle Charts resize if dashboard is opened
+        if (tabKey === 'dashboard') {
+            setTimeout(initOrResizeCharts, 50);
+        }
+
+        // 7. Auto close mobile sidebar if open
+        if (window.innerWidth < 992 && document.body.classList.contains('sidebar-open')) {
+            document.body.classList.remove('sidebar-open');
+            document.body.classList.add('sidebar-closed');
+        }
+
+        // 8. Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     window.switchAdminTab = switchAdminTab;
+
+    // Filter sidebar menu items live
+    function filterAdminSidebar(query) {
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('#adminSidebarMenu .nav-item');
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    window.filterAdminSidebar = filterAdminSidebar;
+
+    // Chart Initializer
+    function initOrResizeCharts() {
+        const trendCanvas = document.getElementById('inquiriesTrendChart');
+        if (trendCanvas && !inquiriesTrendChartInstance) {
+            try {
+                inquiriesTrendChartInstance = new Chart(trendCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: ['4月 (Apr)', '5月 (May)', '6月 (Jun)', '7月 (Jul)', '8月 (Aug)', '9月 (Sep)'],
+                        datasets: [
+                            {
+                                label: 'お問い合わせ (Inquiries)',
+                                data: [12, 19, 15, 26, 34, 48],
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 3
+                            },
+                            {
+                                label: '特定技能相談 (SSW)',
+                                data: [8, 14, 11, 20, 28, 41],
+                                borderColor: '#059669',
+                                backgroundColor: 'transparent',
+                                borderDash: [5, 5],
+                                tension: 0.35,
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Error initializing trend chart:', err);
+            }
+        } else if (inquiriesTrendChartInstance) {
+            inquiriesTrendChartInstance.resize();
+        }
+
+        const donutCanvas = document.getElementById('sectorsDonutChart');
+        if (donutCanvas && !sectorsDonutChartInstance) {
+            try {
+                sectorsDonutChartInstance = new Chart(donutCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['介護分野 (Nursing)', '外食・飲食 (Dining)', '製造・加工 (Manufacturing)', '建設・その他 (Construction)'],
+                        datasets: [{
+                            data: [45, 25, 18, 12],
+                            backgroundColor: ['#2563EB', '#059669', '#F59E0B', '#0EA5E9'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Error initializing donut chart:', err);
+            }
+        } else if (sectorsDonutChartInstance) {
+            sectorsDonutChartInstance.resize();
+        }
+    }
+
+    // Bilingual Admin UI Switcher
+    function setAdminLanguage(lang) {
+        if (!lang) lang = 'ja';
+        localStorage.setItem('miransh_admin_lang', lang);
+        localStorage.setItem('miransh_lang', lang);
+        document.documentElement.setAttribute('data-admin-lang', lang);
+        document.documentElement.setAttribute('data-lang', lang);
+        document.documentElement.setAttribute('lang', lang);
+
+        if (document.body) {
+            document.body.classList.remove('ja', 'en', 'admin-ja', 'admin-en');
+            document.body.classList.add(lang, 'admin-' + lang);
+        }
+
+        // Update Top Navbar Switcher Buttons
+        const btnJa = document.getElementById('admin-btn-ja');
+        const btnEn = document.getElementById('admin-btn-en');
+        if (btnJa && btnEn) {
+            if (lang === 'ja') {
+                btnJa.className = 'btn btn-xs lang-switch-btn btn-primary text-white font-weight-bold';
+                btnEn.className = 'btn btn-xs lang-switch-btn btn-light text-dark font-weight-bold';
+            } else {
+                btnEn.className = 'btn btn-xs lang-switch-btn btn-primary text-white font-weight-bold';
+                btnJa.className = 'btn btn-xs lang-switch-btn btn-light text-dark font-weight-bold';
+            }
+        }
+
+        // Update Sidebar/Drawer Buttons if present
+        const sideBtnJa = document.getElementById('sidebar-btn-ja');
+        const sideBtnEn = document.getElementById('sidebar-btn-en');
+        if (sideBtnJa && sideBtnEn) {
+            if (lang === 'ja') {
+                sideBtnJa.className = 'btn btn-sm btn-primary font-weight-bold';
+                sideBtnEn.className = 'btn btn-sm btn-secondary';
+            } else {
+                sideBtnEn.className = 'btn btn-sm btn-primary font-weight-bold';
+                sideBtnJa.className = 'btn btn-sm btn-secondary';
+            }
+        }
+    }
+    window.setAdminLanguage = setAdminLanguage;
+
+    function toggleAdminDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('miransh_admin_dark', isDark);
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    }
+    window.toggleAdminDarkMode = toggleAdminDarkMode;
+
+    // Image Upload Helper
+    function handleAdminUpload(input, inputTargetId, previewImgId, statusId, targetField) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        if (targetField) formData.append('target_field', targetField);
+
+        const statusEl = document.getElementById(statusId);
+        if (statusEl) {
+            statusEl.style.display = 'inline-block';
+            statusEl.className = 'badge badge-warning text-xs mt-2 py-1 px-2';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> アップロード中... / Uploading...';
+        }
+
+        fetch('/api/admin/upload-image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.url) {
+                const targetInput = document.getElementById(inputTargetId);
+                if (targetInput) targetInput.value = data.url;
+                const previewImg = document.getElementById(previewImgId);
+                if (previewImg) previewImg.src = data.url;
+
+                if (statusEl) {
+                    statusEl.className = 'badge badge-success text-xs mt-2 py-1 px-2';
+                    statusEl.innerHTML = '✓ 反映完了 / Uploaded & Saved';
+                }
+                toastr.success('画像をアップロードして保存しました / Image uploaded successfully!');
+            } else {
+                throw new Error(data.error || 'Upload error');
+            }
+        })
+        .catch(err => {
+            if (statusEl) {
+                statusEl.className = 'badge badge-danger text-xs mt-2 py-1 px-2';
+                statusEl.innerHTML = '✕ 失敗: ' + err.message;
+            }
+            toastr.error('アップロードに失敗しました: ' + err.message);
+        });
+    }
+    window.handleAdminUpload = handleAdminUpload;
+
+    function resetImageDefault(inputTargetId, previewImgId, defaultUrl, statusId, targetField) {
+        const targetInput = document.getElementById(inputTargetId);
+        if (targetInput) targetInput.value = defaultUrl;
+        const previewImg = document.getElementById(previewImgId);
+        if (previewImg) previewImg.src = defaultUrl;
+        
+        const statusEl = document.getElementById(statusId);
+        if (statusEl) {
+            statusEl.className = 'badge badge-info text-xs mt-2 py-1 px-2';
+            statusEl.innerHTML = '✓ デフォルト設定に戻しました / Reset to default';
+        }
+    }
+    window.resetImageDefault = resetImageDefault;
+
+    // Modal Opening Handlers
+    function openStoryCreateModal() {
+        const form = document.getElementById('storyForm');
+        form.action = '/admin/stories';
+        document.getElementById('story_title_ja').value = '';
+        document.getElementById('story_title_en').value = '';
+        document.getElementById('story_summary_ja').value = '';
+        document.getElementById('story_summary_en').value = '';
+        $('#modal-story-form').modal('show');
+    }
+    window.openStoryCreateModal = openStoryCreateModal;
+
+    function openStoryEditModal(st) {
+        const form = document.getElementById('storyForm');
+        form.action = '/admin/stories/' + st.id;
+        document.getElementById('story_title_ja').value = st.title_ja || '';
+        document.getElementById('story_title_en').value = st.title_en || '';
+        document.getElementById('story_category_ja').value = st.category_ja || '';
+        document.getElementById('story_category_en').value = st.category_en || '';
+        document.getElementById('story_summary_ja').value = st.summary_ja || '';
+        document.getElementById('story_summary_en').value = st.summary_en || '';
+        document.getElementById('story_image').value = st.image || '/images/hero_banner.jpg';
+        $('#modal-story-form').modal('show');
+    }
+    window.openStoryEditModal = openStoryEditModal;
+
+    function openServiceEditModal(s) {
+        const form = document.getElementById('serviceEditForm');
+        form.action = '/admin/services/' + s.id;
+        document.getElementById('service_title_ja').value = s.title_ja || '';
+        document.getElementById('service_title_en').value = s.title_en || '';
+        document.getElementById('service_desc_ja').value = s.desc_ja || '';
+        document.getElementById('service_desc_en').value = s.desc_en || '';
+        $('#modal-service-edit').modal('show');
+    }
+    window.openServiceEditModal = openServiceEditModal;
+
+    function openInquiryDetailModal(inq) {
+        const html = '<div class="p-2">' +
+            '<h5 class="font-weight-bold text-primary mb-2">' + inq.name + ' 様</h5>' +
+            '<table class="table table-bordered text-sm">' +
+            '<tr><th class="bg-light" style="width:140px;">企業名 / Company</th><td>' + (inq.company_name || '個人 / Individual') + '</td></tr>' +
+            '<tr><th class="bg-light">メール / Email</th><td><a href="mailto:' + inq.email + '">' + inq.email + '</a></td></tr>' +
+            '<tr><th class="bg-light">電話番号 / Phone</th><td>' + (inq.phone || '-') + '</td></tr>' +
+            '<tr><th class="bg-light">相談分野 / Sector</th><td>' + (inq.service_interest || '全般') + '</td></tr>' +
+            '<tr><th class="bg-light">状況 / Status</th><td><span class="badge badge-info">' + (inq.status || 'new') + '</span></td></tr>' +
+            '<tr><th class="bg-light">メッセージ本文</th><td style="white-space: pre-line;">' + (inq.message || '-') + '</td></tr>' +
+            '</table>' +
+            '</div>';
+        document.getElementById('inquiryDetailBody').innerHTML = html;
+        $('#modal-inquiry-detail').modal('show');
+    }
+    window.openInquiryDetailModal = openInquiryDetailModal;
+
+    // FAQ Modals
+    function openFaqCreateModal() {
+        const form = document.getElementById('faqForm');
+        form.action = '/admin/faqs';
+        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-plus-circle mr-1"></i> 新規FAQ（よくある質問）の登録';
+        document.getElementById('faq_category_ja').value = '特定技能制度について';
+        document.getElementById('faq_category_en').value = 'About Specified Skilled Worker';
+        document.getElementById('faq_question_ja').value = '';
+        document.getElementById('faq_question_en').value = '';
+        document.getElementById('faq_answer_ja').value = '';
+        document.getElementById('faq_answer_en').value = '';
+        document.getElementById('faq_sort_order').value = '0';
+        $('#modal-faq-form').modal('show');
+    }
+    window.openFaqCreateModal = openFaqCreateModal;
+
+    function openFaqEditModal(f) {
+        const form = document.getElementById('faqForm');
+        form.action = '/admin/faqs/' + f.id;
+        document.getElementById('faqModalTitle').innerHTML = '<i class="fas fa-edit mr-1"></i> FAQ（よくある質問）の編集 #' + f.id;
+        document.getElementById('faq_category_ja').value = f.category_ja || '';
+        document.getElementById('faq_category_en').value = f.category_en || '';
+        document.getElementById('faq_question_ja').value = f.question_ja || '';
+        document.getElementById('faq_question_en').value = f.question_en || '';
+        document.getElementById('faq_answer_ja').value = f.answer_ja || '';
+        document.getElementById('faq_answer_en').value = f.answer_en || '';
+        document.getElementById('faq_sort_order').value = f.sort_order || 0;
+        $('#modal-faq-form').modal('show');
+    }
+    window.openFaqEditModal = openFaqEditModal;
+
+    // Sakana AI UI Helpers
+    function toggleSakanaKeyVisibility() {
+        const input = document.getElementById('sakana_key_input');
+        const icon = document.getElementById('sakana_key_icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+    window.toggleSakanaKeyVisibility = toggleSakanaKeyVisibility;
+
+    function setQuickAiPrompt(text) {
+        document.getElementById('sakana_test_query').value = text;
+    }
+    window.setQuickAiPrompt = setQuickAiPrompt;
+
+    function sendSakanaInteractiveQuery() {
+        const queryInput = document.getElementById('sakana_test_query');
+        const query = queryInput.value.trim();
+        if (!query) {
+            toastr.warning('質問内容を入力してください');
+            return;
+        }
+
+        const modelSelect = document.getElementById('sakana_model');
+        const model = modelSelect ? modelSelect.value : 'sakana-namazu';
+        const resultBox = document.getElementById('aiInteractiveResult');
+        const startTime = Date.now();
+
+        resultBox.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-info mb-2"></i><p class="text-sm font-weight-bold text-dark mb-0">Sakana AI (' + model + ') が推論・回答生成中...</p><small class="text-muted">Analyzing request & formatting response...</small></div>';
+
+        fetch('/api/sakana/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: query,
+                language: localStorage.getItem('miransh_admin_lang') || 'ja'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const latency = Date.now() - startTime;
+            if (data.reply) {
+                resultBox.innerHTML = 
+                    '<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">' +
+                        '<div><span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> 回答生成完了</span> <span class="badge badge-info ml-1">' + (data.model || model) + '</span></div>' +
+                        '<small class="text-muted"><i class="far fa-clock mr-1"></i> ' + latency + 'ms</small>' +
+                    '</div>' +
+                    '<div class="text-dark font-weight-normal text-sm" style="white-space: pre-line; line-height: 1.7;">' + data.reply + '</div>' +
+                    (data.source ? '<div class="mt-2 pt-2 border-top text-xs text-muted"><i class="fas fa-info-circle mr-1"></i> Engine: ' + data.source + '</div>' : '');
+            } else {
+                throw new Error(data.error || 'No reply received');
+            }
+        })
+        .catch(err => {
+            resultBox.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle mr-1"></i> <b>AI 応答エラー:</b> ' + err.message + '</div>';
+        });
+    }
+    window.sendSakanaInteractiveQuery = sendSakanaInteractiveQuery;
+
+    function toggleInquiryStatus(id, newStatus) {
+        fetch('/admin/inquiries/' + id + '/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(() => {
+            toastr.success('ステータスを更新しました / Status updated');
+            setTimeout(() => window.location.reload(), 600);
+        });
+    }
+    window.toggleInquiryStatus = toggleInquiryStatus;
+
+    function runSakanaTest() {
+        const el = document.getElementById('aiTestResult');
+        el.style.display = 'block';
+        el.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sakana AI 相談エンジンに ping テスト中... / Testing ping...';
+        
+        fetch('/api/sakana/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'EvoLLM-JP-v1-7B' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            el.className = 'mt-3 p-3 bg-light rounded border border-success';
+            el.innerHTML = '<span class="text-success font-weight-bold">✓ Sakana AI 接続成功 (Status: Online)</span><br><small class="text-muted">Response Latency: ' + (data.latencyMs || 42) + 'ms | Model: ' + (data.model || 'EvoLLM-JP-v1-7B') + '</small>';
+        })
+        .catch(() => {
+            el.className = 'mt-3 p-3 bg-light rounded border border-success';
+            el.innerHTML = '<span class="text-success font-weight-bold">✓ Sakana AI 相談エンジン準備完了 (Ready)</span>';
+        });
+    }
+    window.runSakanaTest = runSakanaTest;
 
     // Handle browser back/forward buttons
     window.addEventListener('popstate', function(e) {
@@ -2574,60 +2959,50 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
         switchAdminTab(tab);
     });
 
-    // Charts Initialization (Dashboard Tab)
-    document.addEventListener('DOMContentLoaded', function() {
+    // jQuery Ready - Event Delegations and Initializations
+    $(document).ready(function() {
+        // Universal tab click delegation (solves all AdminLTE treeview & bubble conflicts)
+        $(document).on('click', '[data-tab]', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const tabKey = $(this).attr('data-tab');
+            switchAdminTab(tabKey, e);
+        });
+
+        // Language & Dark mode initialization
         const urlParams = new URLSearchParams(window.location.search);
-        const initialTab = urlParams.get('tab') || '${activeTab}';
-        if (initialTab && initialTab !== 'dashboard') {
-            switchAdminTab(initialTab);
+        const queryLang = urlParams.get('lang');
+        const savedLang = queryLang || localStorage.getItem('miransh_admin_lang') || localStorage.getItem('miransh_lang') || 'ja';
+        setAdminLanguage(savedLang);
+
+        if (localStorage.getItem('miransh_admin_dark') === 'true') {
+            document.body.classList.add('dark-mode');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.className = 'fas fa-sun';
         }
 
-        const trendCanvas = document.getElementById('inquiriesTrendChart');
-        if (trendCanvas) {
-            new Chart(trendCanvas, {
-                type: 'line',
-                data: {
-                    labels: ['4月 (Apr)', '5月 (May)', '6月 (Jun)', '7月 (Jul)', '8月 (Aug)', '9月 (Sep)'],
-                    datasets: [
-                        {
-                            label: 'お問い合わせ (Inquiries)',
-                            data: [12, 19, 15, 26, 34, 48],
-                            borderColor: '#007bff',
-                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                            fill: true,
-                            tension: 0.35
-                        },
-                        {
-                            label: '特定技能相談 (SSW)',
-                            data: [8, 14, 11, 20, 28, 41],
-                            borderColor: '#28a745',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.35
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
+        // Initial Tab Selection
+        const initialTab = urlParams.get('tab') || '${activeTab}' || 'dashboard';
+        switchAdminTab(initialTab);
 
-        const donutCanvas = document.getElementById('sectorsDonutChart');
-        if (donutCanvas) {
-            new Chart(donutCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['介護分野 (Nursing)', '外食・飲食 (Dining)', '製造・加工 (Manufacturing)', '建設・その他 (Construction)'],
-                    datasets: [{
-                        data: [45, 25, 18, 12],
-                        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
+        // DataTables init
+        if ($.fn.DataTable && $('#inquiriesTable').length) {
+            $('#inquiriesTable').DataTable({
+                responsive: true,
+                autoWidth: false,
+                order: [[0, 'desc']],
+                pageLength: 10,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "検索 / Search...",
+                    lengthMenu: "表示 _MENU_ 件",
+                    info: "_TOTAL_ 件中 _START_ 〜 _END_ 件を表示",
+                    paginate: {
+                        first: "先頭",
+                        last: "末尾",
+                        next: "次へ",
+                        previous: "前へ"
+                    }
                 }
             });
         }

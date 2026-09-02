@@ -21,10 +21,226 @@
 
     <style>
         :root {
-            --primary-brand: #007bff;
+            --brand-navy-dark: #0A1E3F;
+            --brand-navy: #0F2C59;
+            --brand-navy-light: #1E3E7B;
+            --brand-blue: #2563EB;
+            --brand-blue-hover: #1D4ED8;
+            --brand-blue-light: #DBEAFE;
+            --brand-blue-subtle: #EFF6FF;
+            --brand-gold: #D97706;
+            --brand-emerald: #059669;
+            --brand-slate-bg: #F8FAFC;
+            --brand-border: #E2E8F0;
         }
         body {
             font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--brand-slate-bg);
+            color: #1E293B;
+        }
+
+        /* Top Navbar */
+        .main-header.navbar {
+            background-color: #FFFFFF !important;
+            border-bottom: 1px solid var(--brand-border) !important;
+            box-shadow: 0 1px 3px rgba(15, 44, 89, 0.05) !important;
+        }
+        .main-header.navbar .nav-link {
+            color: #475569 !important;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .main-header.navbar .nav-link:hover {
+            color: var(--brand-blue) !important;
+        }
+        .main-header.navbar .nav-link.active,
+        .main-header.navbar .nav-link.text-primary {
+            color: var(--brand-blue) !important;
+            font-weight: 700;
+        }
+
+        /* Sidebar Styling - Deep Navy & Royal Blue Accents */
+        .main-sidebar {
+            background: linear-gradient(180deg, #0A1E3F 0%, #0F2C59 100%) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 2px 0 16px rgba(10, 30, 63, 0.15);
+        }
+        .brand-link {
+            background: linear-gradient(135deg, #0A1E3F 0%, #1E3E7B 100%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            padding: 0.9rem 1rem !important;
+            display: flex;
+            align-items: center;
+        }
+        .brand-link .brand-text {
+            color: #FFFFFF !important;
+            letter-spacing: 0.05em;
+            font-size: 1.15rem;
+        }
+
+        .sidebar .user-panel {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 12px 10px 16px 10px !important;
+        }
+        .sidebar .user-panel .info a {
+            color: #FFFFFF !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Sidebar Navigation Items */
+        .sidebar .nav-header {
+            color: #94A3B8 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.06em;
+            padding: 12px 16px 4px 16px !important;
+        }
+        .sidebar .nav-link {
+            color: #CBD5E1 !important;
+            border-radius: 8px !important;
+            margin: 2px 10px !important;
+            padding: 9px 14px !important;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #FFFFFF !important;
+            transform: translateX(2px);
+        }
+        .sidebar .nav-link.active,
+        .sidebar .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+            transform: translateX(3px);
+        }
+        .sidebar .nav-link .nav-icon {
+            font-size: 1rem;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: #94A3B8;
+        }
+        .sidebar .nav-link.active .nav-icon {
+            color: #FFFFFF !important;
+        }
+
+        /* Primary Cards & Overrides */
+        .card-primary.card-outline {
+            border-top: 3px solid var(--brand-blue) !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card-info.card-outline {
+            border-top: 3px solid #0EA5E9 !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card-success.card-outline {
+            border-top: 3px solid var(--brand-emerald) !important;
+            border-radius: 12px;
+            border-left: 1px solid var(--brand-border);
+            border-right: 1px solid var(--brand-border);
+            border-bottom: 1px solid var(--brand-border);
+            box-shadow: 0 4px 12px -2px rgba(15, 44, 89, 0.05) !important;
+        }
+        .card {
+            border-radius: 12px;
+            border: 1px solid var(--brand-border);
+            box-shadow: 0 2px 8px rgba(15, 44, 89, 0.04);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--brand-border);
+            padding: 1rem 1.25rem;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+        .card-title {
+            color: var(--brand-navy) !important;
+            font-size: 1.05rem;
+            font-weight: 700 !important;
+        }
+
+        /* Primary Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+            border-color: #1D4ED8 !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+            border-color: #1E40AF !important;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4) !important;
+        }
+        .btn-outline-primary {
+            color: var(--brand-blue) !important;
+            border-color: var(--brand-blue) !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--brand-blue) !important;
+            color: #FFFFFF !important;
+        }
+
+        /* KPI Small Boxes in Blue Gradient Theme */
+        .small-box {
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15, 44, 89, 0.08) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .small-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(15, 44, 89, 0.14) !important;
+        }
+        .small-box.bg-info {
+            background: linear-gradient(135deg, #0F2C59 0%, #1E3E7B 100%) !important;
+        }
+        .small-box.bg-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%) !important;
+        }
+        .small-box.bg-warning {
+            background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
+        }
+        .small-box.bg-success {
+            background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+        }
+        .small-box.bg-danger {
+            background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%) !important;
+        }
+        .small-box .inner h3 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            color: #FFFFFF;
+        }
+        .small-box .inner p {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92);
+        }
+        .small-box-footer {
+            background: rgba(0, 0, 0, 0.15) !important;
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600;
+            padding: 6px 0;
         }
 
         /* Bilingual Display Engine (Supports both .admin-lang-* and .lang-*) */
