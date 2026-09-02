@@ -1,32 +1,27 @@
-<!DOCTYPE html>
-<html lang="ja" data-admin-lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminLTE Login | MIRANSH LLC</title>
-    <link rel="icon" type="image/png" href="/images/logo-icon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <style>
-        .login-page {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            min-height: 100vh;
-        }
-        .login-box {
-            width: 440px;
-        }
-        @media (max-width: 576px) {
-            .login-box { width: 90%; }
-        }
-        /* Bilingual Display */
-        html[data-admin-lang="ja"] .admin-lang-en { display: none !important; }
-        html[data-admin-lang="ja"] .admin-lang-ja { display: inline !important; }
-        html[data-admin-lang="en"] .admin-lang-ja { display: none !important; }
-        html[data-admin-lang="en"] .admin-lang-en { display: inline !important; }
-    </style>
-</head>
-<body class="hold-transition login-page">
+@extends('layouts.admin')
+
+@section('title', 'AdminLTE Login | MIRANSH LLC')
+@section('body_class', 'hold-transition login-page')
+
+@push('styles')
+<style>
+    .login-page {
+        background: linear-gradient(135deg, #0A1E3F 0%, #0F2C59 100%) !important;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .login-box {
+        width: 440px;
+    }
+    @media (max-width: 576px) {
+        .login-box { width: 90%; }
+    }
+</style>
+@endpush
+
+@section('content')
 <div class="login-box">
     <div class="card card-outline card-primary shadow-lg">
         <div class="card-header text-center py-3 bg-white position-relative">
@@ -113,10 +108,9 @@
         </div>
     </div>
 </div>
+@endsection
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+@push('scripts')
 <script>
     function setLoginLang(lang) {
         localStorage.setItem('miransh_admin_lang', lang);
@@ -138,5 +132,4 @@
         setLoginLang(savedLang);
     })();
 </script>
-</body>
-</html>
+@endpush
