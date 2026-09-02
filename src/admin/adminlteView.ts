@@ -190,14 +190,14 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 </a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="/admin?tab=dashboard" class="nav-link font-weight-bold ${activeTab === 'dashboard' ? 'text-primary' : ''}">
+                <a href="/admin?tab=dashboard" data-tab="dashboard" onclick="switchAdminTab('dashboard', event)" class="nav-link font-weight-bold ${activeTab === 'dashboard' ? 'text-primary' : ''}">
                     <i class="fas fa-tachometer-alt mr-1"></i>
                     <span class="admin-lang-ja">ダッシュボード</span>
                     <span class="admin-lang-en">Dashboard</span>
                 </a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="/admin?tab=inquiries" class="nav-link ${activeTab === 'inquiries' ? 'text-primary font-weight-bold' : ''}">
+                <a href="/admin?tab=inquiries" data-tab="inquiries" onclick="switchAdminTab('inquiries', event)" class="nav-link ${activeTab === 'inquiries' ? 'text-primary font-weight-bold' : ''}">
                     <i class="fas fa-envelope mr-1"></i>
                     <span class="admin-lang-ja">お問い合わせ</span>
                     <span class="admin-lang-en">Inquiries</span>
@@ -386,7 +386,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false" id="adminSidebarMenu">
                     
                     <li class="nav-item">
-                        <a href="/admin?tab=dashboard" class="nav-link ${activeTab === 'dashboard' ? 'active' : ''}">
+                        <a href="/admin?tab=dashboard" data-tab="dashboard" onclick="switchAdminTab('dashboard', event)" class="nav-link ${activeTab === 'dashboard' ? 'active' : ''}">
                             <i class="nav-icon fas fa-chart-pie"></i>
                             <p>
                                 <span class="admin-lang-ja">ダッシュボード & 分析</span>
@@ -402,7 +402,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
                     
                     <li class="nav-item">
-                        <a href="/admin?tab=inquiries" class="nav-link ${activeTab === 'inquiries' ? 'active' : ''}">
+                        <a href="/admin?tab=inquiries" data-tab="inquiries" onclick="switchAdminTab('inquiries', event)" class="nav-link ${activeTab === 'inquiries' ? 'active' : ''}">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>
                                 <span class="admin-lang-ja">お問い合わせ・リード</span>
@@ -413,7 +413,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=company" class="nav-link ${activeTab === 'company' ? 'active' : ''}">
+                        <a href="/admin?tab=company" data-tab="company" onclick="switchAdminTab('company', event)" class="nav-link ${activeTab === 'company' ? 'active' : ''}">
                             <i class="nav-icon fas fa-building"></i>
                             <p>
                                 <span class="admin-lang-ja">会社情報 & CEOメディア</span>
@@ -423,7 +423,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=about" class="nav-link ${activeTab === 'about' ? 'active' : ''}">
+                        <a href="/admin?tab=about" data-tab="about" onclick="switchAdminTab('about', event)" class="nav-link ${activeTab === 'about' ? 'active' : ''}">
                             <i class="nav-icon fas fa-award"></i>
                             <p>
                                 <span class="admin-lang-ja">企業理念 & About Us</span>
@@ -433,7 +433,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=services" class="nav-link ${activeTab === 'services' ? 'active' : ''}">
+                        <a href="/admin?tab=services" data-tab="services" onclick="switchAdminTab('services', event)" class="nav-link ${activeTab === 'services' ? 'active' : ''}">
                             <i class="nav-icon fas fa-briefcase"></i>
                             <p>
                                 <span class="admin-lang-ja">特定技能・事業内容</span>
@@ -449,7 +449,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=stories" class="nav-link ${activeTab === 'stories' ? 'active' : ''}">
+                        <a href="/admin?tab=stories" data-tab="stories" onclick="switchAdminTab('stories', event)" class="nav-link ${activeTab === 'stories' ? 'active' : ''}">
                             <i class="nav-icon fas fa-newspaper"></i>
                             <p>
                                 <span class="admin-lang-ja">採用事例・お知らせ</span>
@@ -460,7 +460,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=faqs" class="nav-link ${activeTab === 'faqs' ? 'active' : ''}">
+                        <a href="/admin?tab=faqs" data-tab="faqs" onclick="switchAdminTab('faqs', event)" class="nav-link ${activeTab === 'faqs' ? 'active' : ''}">
                             <i class="nav-icon fas fa-question-circle"></i>
                             <p>
                                 <span class="admin-lang-ja">FAQ よくある質問</span>
@@ -476,7 +476,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=ai" class="nav-link ${activeTab === 'ai' ? 'active' : ''}">
+                        <a href="/admin?tab=ai" data-tab="ai" onclick="switchAdminTab('ai', event)" class="nav-link ${activeTab === 'ai' ? 'active' : ''}">
                             <i class="nav-icon fas fa-microchip"></i>
                             <p>
                                 <span class="admin-lang-ja">Sakana AI 相談エンジン</span>
@@ -490,7 +490,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=users" class="nav-link ${activeTab === 'users' ? 'active' : ''}">
+                        <a href="/admin?tab=users" data-tab="users" onclick="switchAdminTab('users', event)" class="nav-link ${activeTab === 'users' ? 'active' : ''}">
                             <i class="nav-icon fas fa-user-shield"></i>
                             <p>
                                 <span class="admin-lang-ja">管理者アカウント設定</span>
@@ -500,7 +500,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                     </li>
 
                     <li class="nav-item">
-                        <a href="/admin?tab=timeline" class="nav-link ${activeTab === 'timeline' ? 'active' : ''}">
+                        <a href="/admin?tab=timeline" data-tab="timeline" onclick="switchAdminTab('timeline', event)" class="nav-link ${activeTab === 'timeline' ? 'active' : ''}">
                             <i class="nav-icon fas fa-history"></i>
                             <p>
                                 <span class="admin-lang-ja">操作ログ・タイムライン</span>
@@ -530,61 +530,23 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
             <div class="container-fluid">
                 <div class="row mb-2 align-items-center">
                     <div class="col-sm-6">
-                        <h1 class="m-0 font-weight-bold text-dark">
-                            ${activeTab === 'dashboard' ? `
-                                <i class="fas fa-chart-pie text-primary mr-2"></i>
-                                <span class="admin-lang-ja">ダッシュボード & KPI分析</span>
-                                <span class="admin-lang-en">Dashboard & KPI Analytics</span>
-                            ` : activeTab === 'company' ? `
-                                <i class="fas fa-building text-primary mr-2"></i>
-                                <span class="admin-lang-ja">会社基本情報・代表者メディア管理</span>
-                                <span class="admin-lang-en">Company Profile & CEO Media</span>
-                            ` : activeTab === 'about' ? `
-                                <i class="fas fa-award text-primary mr-2"></i>
-                                <span class="admin-lang-ja">企業理念・会社紹介 (About Us)</span>
-                                <span class="admin-lang-en">Corporate Philosophy & About Us</span>
-                            ` : activeTab === 'services' ? `
-                                <i class="fas fa-briefcase text-primary mr-2"></i>
-                                <span class="admin-lang-ja">特定技能分野・事業案内 管理</span>
-                                <span class="admin-lang-en">Specified Skilled Worker (SSW) & Services</span>
-                            ` : activeTab === 'stories' ? `
-                                <i class="fas fa-newspaper text-primary mr-2"></i>
-                                <span class="admin-lang-ja">採用事例・お知らせ 記事管理</span>
-                                <span class="admin-lang-en">Case Stories & News Management</span>
-                            ` : activeTab === 'faqs' ? `
-                                <i class="fas fa-question-circle text-primary mr-2"></i>
-                                <span class="admin-lang-ja">よくある質問 (FAQ) 管理</span>
-                                <span class="admin-lang-en">Frequently Asked Questions (FAQ)</span>
-                            ` : activeTab === 'inquiries' ? `
-                                <i class="fas fa-envelope text-primary mr-2"></i>
-                                <span class="admin-lang-ja">お問い合わせ・リード対応管理</span>
-                                <span class="admin-lang-en">Inquiries & Leads Management</span>
-                            ` : activeTab === 'users' ? `
-                                <i class="fas fa-user-shield text-primary mr-2"></i>
-                                <span class="admin-lang-ja">管理者アカウント & セキュリティ</span>
-                                <span class="admin-lang-en">Admin Account & Credentials</span>
-                            ` : activeTab === 'timeline' ? `
-                                <i class="fas fa-history text-primary mr-2"></i>
-                                <span class="admin-lang-ja">システムアクティビティ・操作タイムライン</span>
-                                <span class="admin-lang-en">System Activity & Audit Timeline</span>
-                            ` : `
-                                <i class="fas fa-microchip text-primary mr-2"></i>
-                                <span class="admin-lang-ja">Sakana AI 相談エンジン設定 & 診断</span>
-                                <span class="admin-lang-en">Sakana AI Consultation Engine & Diagnostics</span>
-                            `}
+                        <h1 class="m-0 font-weight-bold text-dark" id="admin-main-page-title">
+                            <i id="admin-page-title-icon" class="fas fa-chart-pie text-primary mr-2"></i>
+                            <span id="admin-page-title-ja" class="admin-lang-ja">ダッシュボード & KPI分析</span>
+                            <span id="admin-page-title-en" class="admin-lang-en">Dashboard & KPI Analytics</span>
                         </h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item">
-                                <a href="/admin">
+                                <a href="/admin?tab=dashboard" onclick="switchAdminTab('dashboard', event)">
                                     <i class="fas fa-home"></i>
                                     <span class="admin-lang-ja">ホーム</span>
                                     <span class="admin-lang-en">Home</span>
                                 </a>
                             </li>
-                            <li class="breadcrumb-item"><a href="/admin">AdminLTE v3</a></li>
-                            <li class="breadcrumb-item active text-capitalize">${activeTab}</li>
+                            <li class="breadcrumb-item"><a href="/admin?tab=dashboard" onclick="switchAdminTab('dashboard', event)">AdminLTE v3</a></li>
+                            <li class="breadcrumb-item active text-capitalize" id="admin-breadcrumb-active">${activeTab}</li>
                         </ol>
                     </div>
                 </div>
@@ -609,7 +571,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                             <div class="icon">
                                 <i class="fas fa-envelope"></i>
                             </div>
-                            <a href="/admin?tab=inquiries" class="small-box-footer">
+                            <a href="/admin?tab=inquiries" data-tab="inquiries" onclick="switchAdminTab('inquiries', event)" class="small-box-footer">
                                 <span class="admin-lang-ja">リード一覧を開く</span>
                                 <span class="admin-lang-en">View Leads</span>
                                 <i class="fas fa-arrow-circle-right ml-1"></i>
@@ -629,7 +591,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                             <div class="icon">
                                 <i class="fas fa-clock"></i>
                             </div>
-                            <a href="/admin?tab=inquiries" class="small-box-footer">
+                            <a href="/admin?tab=inquiries" data-tab="inquiries" onclick="switchAdminTab('inquiries', event)" class="small-box-footer">
                                 <span class="admin-lang-ja">未対応リードを処理</span>
                                 <span class="admin-lang-en">Process Pending Leads</span>
                                 <i class="fas fa-arrow-circle-right ml-1"></i>
@@ -649,7 +611,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                             <div class="icon">
                                 <i class="fas fa-briefcase"></i>
                             </div>
-                            <a href="/admin?tab=services" class="small-box-footer">
+                            <a href="/admin?tab=services" data-tab="services" onclick="switchAdminTab('services', event)" class="small-box-footer">
                                 <span class="admin-lang-ja">分野一覧を管理</span>
                                 <span class="admin-lang-en">Manage Sectors</span>
                                 <i class="fas fa-arrow-circle-right ml-1"></i>
@@ -669,7 +631,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                             <div class="icon">
                                 <i class="fas fa-newspaper"></i>
                             </div>
-                            <a href="/admin?tab=stories" class="small-box-footer">
+                            <a href="/admin?tab=stories" data-tab="stories" onclick="switchAdminTab('stories', event)" class="small-box-footer">
                                 <span class="admin-lang-ja">記事を管理・作成</span>
                                 <span class="admin-lang-en">Create & Manage Stories</span>
                                 <i class="fas fa-arrow-circle-right ml-1"></i>
@@ -679,7 +641,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                 </div>
 
                 <!-- ================= TAB 0: DASHBOARD & CHARTS ================= -->
-                ${activeTab === 'dashboard' ? `
+                <div class="admin-tab-pane" id="tab-pane-dashboard" style="display: ${activeTab === 'dashboard' ? 'block' : 'none'};">
                 <div class="row">
                     <!-- Chart 1: Inquiries Trend -->
                     <div class="col-lg-7">
@@ -855,10 +817,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 0: dashboard -->
 
                 <!-- ================= TAB 1: Company Profile & Media ================= -->
-                ${activeTab === 'company' ? `
+                <div class="admin-tab-pane" id="tab-pane-company" style="display: ${activeTab === 'company' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white">
                         <h3 class="card-title font-weight-bold">
@@ -1154,10 +1116,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </form>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 1: company -->
 
                 <!-- ================= TAB 2: About & Philosophy ================= -->
-                ${activeTab === 'about' ? `
+                <div class="admin-tab-pane" id="tab-pane-about" style="display: ${activeTab === 'about' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h3 class="card-title font-weight-bold mb-0">
@@ -1330,10 +1292,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </form>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 2: about -->
 
                 <!-- ================= TAB 3: Services (SSW & Business) ================= -->
-                ${activeTab === 'services' ? `
+                <div class="admin-tab-pane" id="tab-pane-services" style="display: ${activeTab === 'services' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h3 class="card-title font-weight-bold mb-0">
@@ -1392,10 +1354,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 3: services -->
 
                 <!-- ================= TAB 4: Stories & News ================= -->
-                ${activeTab === 'stories' ? `
+                <div class="admin-tab-pane" id="tab-pane-stories" style="display: ${activeTab === 'stories' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h3 class="card-title font-weight-bold mb-0">
@@ -1469,10 +1431,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 4: stories -->
 
                 <!-- ================= TAB 5: FAQs ================= -->
-                ${activeTab === 'faqs' ? `
+                <div class="admin-tab-pane" id="tab-pane-faqs" style="display: ${activeTab === 'faqs' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h3 class="card-title font-weight-bold mb-0">
@@ -1551,10 +1513,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 5: faqs -->
 
                 <!-- ================= TAB 6: Inquiries & Leads ================= -->
-                ${activeTab === 'inquiries' ? `
+                <div class="admin-tab-pane" id="tab-pane-inquiries" style="display: ${activeTab === 'inquiries' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h3 class="card-title font-weight-bold mb-0">
@@ -1632,10 +1594,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 6: inquiries -->
 
                 <!-- ================= TAB 7: Sakana AI Engine ================= -->
-                ${activeTab === 'ai' ? `
+                <div class="admin-tab-pane" id="tab-pane-ai" style="display: ${activeTab === 'ai' ? 'block' : 'none'};">
                 <div class="row">
                     <!-- Column 1: Configuration Card -->
                     <div class="col-lg-6">
@@ -1795,10 +1757,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 7: ai -->
 
                 <!-- ================= TAB 8: Users & Security ================= -->
-                ${activeTab === 'users' ? `
+                <div class="admin-tab-pane" id="tab-pane-users" style="display: ${activeTab === 'users' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white">
                         <h3 class="card-title font-weight-bold">
@@ -1845,10 +1807,10 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </form>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 8: users -->
 
                 <!-- ================= TAB 9: Activity Timeline ================= -->
-                ${activeTab === 'timeline' ? `
+                <div class="admin-tab-pane" id="tab-pane-timeline" style="display: ${activeTab === 'timeline' ? 'block' : 'none'};">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header bg-white">
                         <h3 class="card-title font-weight-bold">
@@ -1892,7 +1854,7 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                </div> <!-- END TAB 9: timeline -->
 
             </div>
         </section>
@@ -2455,8 +2417,171 @@ export function renderAdminLTEDashboard(data: AdminLTEViewData): string {
         });
     }
 
+    // Tab Navigation Configuration and Switcher
+    const adminTabsMeta = {
+        'dashboard': {
+            icon: 'fas fa-chart-pie',
+            ja: 'ダッシュボード & KPI分析',
+            en: 'Dashboard & KPI Analytics',
+            descJa: 'MIRANSH 運営状況・お問い合わせ推移・特定技能マッチング指標',
+            descEn: 'MIRANSH Live Analytics, Inquiries Trends, SSW KPI Dashboard'
+        },
+        'company': {
+            icon: 'fas fa-building',
+            ja: '会社基本情報・代表者メディア管理',
+            en: 'Company Profile & CEO Media',
+            descJa: '代表者顔写真、トップバナー、所在地、資本金、電話番号等の編集',
+            descEn: 'Update CEO Photo, Hero Visuals, Location, Capital & Corporate Info'
+        },
+        'about': {
+            icon: 'fas fa-award',
+            ja: '企業理念・会社紹介 (About Us)',
+            en: 'Corporate Philosophy & About Us',
+            descJa: 'MIRANSHの理念、ミッション、ビジョン、選ばれる強みの管理',
+            descEn: 'Manage Corporate Mission, Values, Philosophy & Strengths'
+        },
+        'services': {
+            icon: 'fas fa-briefcase',
+            ja: '特定技能分野・事業案内 管理',
+            en: 'Specified Skilled Worker (SSW) & Services',
+            descJa: '12特定技能分野（介護・外食・飲食料品製造等）および登録支援機関サービス',
+            descEn: 'SSW 12 Sectors, Support Agency Services, and Pricing Modules'
+        },
+        'stories': {
+            icon: 'fas fa-newspaper',
+            ja: '採用事例・お知らせ 記事管理',
+            en: 'Case Stories & News Management',
+            descJa: '採用実績ストーリー、インタビュー、最新ニュースの投稿・編集',
+            descEn: 'Success Stories, Worker Testimonials, and Company News'
+        },
+        'faqs': {
+            icon: 'fas fa-question-circle',
+            ja: 'よくある質問 (FAQ) 管理',
+            en: 'Frequently Asked Questions (FAQ)',
+            descJa: '受入れ企業様・外国人材向けQ&Aの新規追加・編集・カテゴリ管理',
+            descEn: 'Manage Bilingual FAQ Entries, Categories & Answers'
+        },
+        'inquiries': {
+            icon: 'fas fa-envelope',
+            ja: 'お問い合わせ・リード対応管理',
+            en: 'Inquiries & Leads Management',
+            descJa: 'Webサイトからのお問い合わせ、相談受付、対応ステータス管理',
+            descEn: 'Customer & Enterprise Leads Pipeline & Status'
+        },
+        'ai': {
+            icon: 'fas fa-microchip',
+            ja: 'Sakana AI 相談エンジン設定 & 診断',
+            en: 'Sakana AI Consultation Engine & Diagnostics',
+            descJa: '日本特化型 AI (EvoLLM / Namazu) パラメータ、API設定、診断テスト',
+            descEn: 'Japan-Specialized AI Engine Parameters, API Keys & Diagnostics'
+        },
+        'users': {
+            icon: 'fas fa-user-shield',
+            ja: '管理者アカウント & セキュリティ',
+            en: 'Admin Account & Credentials',
+            descJa: 'ログイン管理者情報、パスワード変更、アクセス権限管理',
+            descEn: 'Admin User Management, Security Keys & Credentials'
+        },
+        'timeline': {
+            icon: 'fas fa-history',
+            ja: 'システムアクティビティ・操作タイムライン',
+            en: 'System Activity & Audit Timeline',
+            descJa: '管理画面の更新履歴、システム稼働ログ、監査証跡',
+            descEn: 'System Audit Trail, Configuration Updates & Activity Log'
+        }
+    };
+
+    function switchAdminTab(tabKey, event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+
+        if (!tabKey || !adminTabsMeta[tabKey]) {
+            tabKey = 'dashboard';
+        }
+
+        // 1. Hide all tab panes, show targeted tab pane
+        const allPanes = document.querySelectorAll('.admin-tab-pane');
+        allPanes.forEach(pane => {
+            pane.style.display = 'none';
+        });
+
+        const targetPane = document.getElementById('tab-pane-' + tabKey);
+        if (targetPane) {
+            targetPane.style.display = 'block';
+        }
+
+        // 2. Update navigation link active states
+        const navLinks = document.querySelectorAll('[data-tab]');
+        navLinks.forEach(link => {
+            if (link.getAttribute('data-tab') === tabKey) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // 3. Update Content Header (Title, Icon, Description, Breadcrumbs)
+        const meta = adminTabsMeta[tabKey];
+        if (meta) {
+            const iconEl = document.getElementById('admin-page-title-icon');
+            if (iconEl) iconEl.className = meta.icon + ' text-primary mr-2';
+
+            const titleJa = document.getElementById('admin-page-title-ja');
+            if (titleJa) titleJa.innerText = meta.ja;
+
+            const titleEn = document.getElementById('admin-page-title-en');
+            if (titleEn) titleEn.innerText = meta.en;
+
+            const descJa = document.getElementById('admin-page-desc-ja');
+            if (descJa) descJa.innerText = meta.descJa;
+
+            const descEn = document.getElementById('admin-page-desc-en');
+            if (descEn) descEn.innerText = meta.descEn;
+
+            const breadcrumbJa = document.getElementById('admin-breadcrumb-ja');
+            if (breadcrumbJa) breadcrumbJa.innerText = meta.ja;
+
+            const breadcrumbEn = document.getElementById('admin-breadcrumb-en');
+            if (breadcrumbEn) breadcrumbEn.innerText = meta.en;
+        }
+
+        // 4. Update KPI boxes visibility or emphasis
+        const kpiRow = document.getElementById('admin-kpi-summary-row');
+        if (kpiRow) {
+            if (tabKey === 'dashboard' || tabKey === 'inquiries' || tabKey === 'company') {
+                kpiRow.style.display = 'flex';
+            } else {
+                kpiRow.style.display = 'none';
+            }
+        }
+
+        // 5. Update browser URL without reloading
+        try {
+            const newUrl = '/admin?tab=' + tabKey;
+            window.history.pushState({ tab: tabKey }, '', newUrl);
+        } catch (e) {}
+
+        // 6. Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.switchAdminTab = switchAdminTab;
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(e) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab') || 'dashboard';
+        switchAdminTab(tab);
+    });
+
     // Charts Initialization (Dashboard Tab)
     document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlParams.get('tab') || '${activeTab}';
+        if (initialTab && initialTab !== 'dashboard') {
+            switchAdminTab(initialTab);
+        }
+
         const trendCanvas = document.getElementById('inquiriesTrendChart');
         if (trendCanvas) {
             new Chart(trendCanvas, {
