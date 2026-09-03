@@ -1,135 +1,174 @@
-@extends('layouts.admin')
-
-@section('title', 'AdminLTE Login | MIRANSH LLC')
-@section('body_class', 'hold-transition login-page')
-
-@push('styles')
-<style>
-    .login-page {
-        background: linear-gradient(135deg, #0A1E3F 0%, #0F2C59 100%) !important;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .login-box {
-        width: 440px;
-    }
-    @media (max-width: 576px) {
-        .login-box { width: 90%; }
-    }
-</style>
-@endpush
-
-@section('content')
-<div class="login-box">
-    <div class="card card-outline card-primary shadow-lg">
-        <div class="card-header text-center py-3 bg-white position-relative">
-            <!-- Language toggle in login card -->
-            <div class="position-absolute" style="top: 10px; right: 12px;">
-                <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-xs btn-primary font-weight-bold" id="btn-login-ja" onclick="setLoginLang('ja')">🇯🇵 日本語</button>
-                    <button type="button" class="btn btn-xs btn-light font-weight-bold" id="btn-login-en" onclick="setLoginLang('en')">🇺🇸 EN</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | MIRANSH LLC</title>
+    <link rel="icon" type="image/png" href="/images/logo-icon.png">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <style>
+        .admin-login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            padding: 20px;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(15, 76, 129, 0.1), 0 8px 10px -6px rgba(15, 76, 129, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header .brand-badge {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f4c81;
+            margin-bottom: 8px;
+        }
+        .login-header .brand-badge span {
+            color: #d97706;
+        }
+        .login-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .login-header p {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        .form-control:focus {
+            border-color: #0f4c81;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.15);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: #0f4c81;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-submit:hover {
+            background: #0a365c;
+        }
+        .alert-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #64748b;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #0f4c81;
+            text-decoration: underline;
+        }
+        .hint-box {
+            margin-top: 24px;
+            padding: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .hint-box strong {
+            color: #0f4c81;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH LLC" style="width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 6px 16px rgba(15, 44, 89, 0.25);">
                 </div>
+                <div class="brand-badge">MIRANSH <span>LLC</span></div>
+                <h1>Admin Control Panel</h1>
+                <p>Sign in to edit Services, About, & Company Info</p>
             </div>
-
-            <a href="/" class="h1 font-weight-bold text-dark text-decoration-none mt-2 d-inline-block">
-                <img src="/images/logo-icon.png" alt="MIRANSH Logo" class="brand-image img-circle elevation-2 mr-2" style="width: 38px; height: 38px; vertical-align: middle;">
-                <span class="text-primary">MIRANSH</span> <small class="text-muted font-weight-light" style="font-size: 18px;">AdminLTE</small>
-            </a>
-            <div class="text-muted text-xs mt-1">
-                <span class="admin-lang-ja">国際人材ソリューション・特定技能 管理ポータル</span>
-                <span class="admin-lang-en">International HR & SSW Management Portal</span>
-            </div>
-        </div>
-        <div class="card-body login-card-body">
-            <p class="login-box-msg text-secondary text-sm">
-                <span class="admin-lang-ja">管理者アカウントでログインしてください</span>
-                <span class="admin-lang-en">Sign in to start your administrator session</span>
-            </p>
 
             @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show text-sm py-2">
-                    <i class="icon fas fa-ban mr-1"></i> {{ $errors->first() }}
+                <div class="alert-danger">
+                    ⚠️ {{ $errors->first() }}
                 </div>
             @endif
 
             <form action="{{ route('admin.login.submit', [], false) }}" method="POST">
                 @csrf
-                <div class="input-group mb-3">
-                    <input type="text" name="email" class="form-control" placeholder="Email / Username" value="admin@miransh.jp" required>
-                    <div class="input-group-append">
-                        <div class="input-group-text">
-                            <span class="fas fa-envelope"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="input-group mb-3">
-                    <input type="password" name="password" class="form-control" placeholder="Password" required>
-                    <div class="input-group-append">
-                        <div class="input-group-text">
-                            <span class="fas fa-lock"></span>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="email">Username or Email</label>
+                    <input type="text" id="email" name="email" class="form-control" required placeholder="admin@miransh.jp" value="{{ old('email', 'admin@miransh.jp') }}" autofocus>
                 </div>
 
-                <div class="callout callout-info py-2 px-3 mb-3 bg-light">
-                    <h6 class="text-xs font-weight-bold text-info mb-1"><i class="fas fa-info-circle mr-1"></i> Demo Credentials:</h6>
-                    <p class="text-xs text-muted mb-0">Email: <code>admin@miransh.jp</code> | Pass: <code>password</code> or <code>admin123</code></p>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••" value="admin123">
                 </div>
 
-                <div class="row">
-                    <div class="col-7">
-                        <div class="icheck-primary d-flex align-items-center">
-                            <input type="checkbox" id="remember" checked>
-                            <label for="remember" class="text-sm font-weight-normal text-muted ml-2 mb-0">
-                                <span class="admin-lang-ja">ログイン情報を記憶</span>
-                                <span class="admin-lang-en">Remember Me</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-5">
-                        <button type="submit" class="btn btn-primary btn-block font-weight-bold">
-                            <i class="fas fa-sign-in-alt mr-1"></i>
-                            <span class="admin-lang-ja">ログイン</span>
-                            <span class="admin-lang-en">Log In</span>
-                        </button>
-                    </div>
-                </div>
+                <button type="submit" class="btn-submit">
+                    Sign In to Dashboard →
+                </button>
             </form>
 
-            <div class="text-center mt-3 pt-3 border-top">
-                <a href="/" class="text-secondary text-sm text-decoration-none">
-                    <i class="fas fa-arrow-left mr-1"></i>
-                    <span class="admin-lang-ja">公開ホームページへ戻る</span>
-                    <span class="admin-lang-en">Back to Public Website</span>
-                </a>
-            </div>
+            <!-- <div class="hint-box">
+                🔑 <strong>Default Admin Credentials:</strong><br>
+                Username: <code>admin@miransh.jp</code> &nbsp;|&nbsp; Password: <code>admin123</code>
+            </div> -->
+
+            <a href="{{ route('home') }}" class="back-link">← Return to Website</a>
         </div>
     </div>
-</div>
-@endsection
-
-@push('scripts')
-<script>
-    function setLoginLang(lang) {
-        localStorage.setItem('miransh_admin_lang', lang);
-        document.documentElement.setAttribute('data-admin-lang', lang);
-        const btnJa = document.getElementById('btn-login-ja');
-        const btnEn = document.getElementById('btn-login-en');
-        if (btnJa && btnEn) {
-            if (lang === 'ja') {
-                btnJa.className = 'btn btn-xs btn-primary font-weight-bold';
-                btnEn.className = 'btn btn-xs btn-light font-weight-bold';
-            } else {
-                btnEn.className = 'btn btn-xs btn-primary font-weight-bold';
-                btnJa.className = 'btn btn-xs btn-light font-weight-bold';
-            }
-        }
-    }
-    (function() {
-        const savedLang = localStorage.getItem('miransh_admin_lang') || 'ja';
-        setLoginLang(savedLang);
-    })();
-</script>
-@endpush
+</body>
+</html>

@@ -81,12 +81,8 @@ class AdminController extends Controller
         $faqs = Faq::orderBy('sort_order', 'asc')->get();
         $inquiries = Inquiry::orderBy('created_at', 'desc')->get();
         $activeTab = $request->query('tab', 'company');
-        $currentLang = $request->query('lang', session('admin_lang', 'ja'));
-        if ($request->has('lang')) {
-            session(['admin_lang' => $request->query('lang')]);
-        }
 
-        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab', 'currentLang'));
+        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab'));
     }
 
     /**
@@ -368,7 +364,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Update Inquiry Status (read/replied/in_progress/resolved)
+     * Update Inquiry Status (read/replied)
      */
     public function updateInquiryStatus(Request $request, $id)
     {
@@ -377,59 +373,10 @@ class AdminController extends Controller
         }
 
         $inquiry = Inquiry::findOrFail($id);
-        $inquiry->status = $request->status ?? 'resolved';
+        $inquiry->status = $request->status ?? 'read';
         $inquiry->save();
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'id' => $inquiry->id, 'status' => $inquiry->status]);
-        }
-
         return redirect()->route('admin.dashboard', ['tab' => 'inquiries'])->with('success', 'Inquiry marked as ' . $inquiry->status);
-    }
-
-    /**
-     * Delete Inquiry
-     */
-    public function deleteInquiry($id)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('admin.login');
-        }
-
-        $inquiry = Inquiry::findOrFail($id);
-        $inquiry->delete();
-
-        return redirect()->route('admin.dashboard', ['tab' => 'inquiries'])->with('success', 'Inquiry deleted successfully.');
-    }
-
-    /**
-     * Update Admin Profile & Password
-     */
-    public function updateProfile(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('admin.login');
-        }
-
-        /** @var User $user */
-        $user = Auth::user();
-        if (!$user) {
-            $user = User::first();
-        }
-
-        if ($request->filled('name')) {
-            $user->name = $request->name;
-        }
-        if ($request->filled('email')) {
-            $user->email = $request->email;
-        }
-        if ($request->filled('new_password') && trim($request->new_password) !== '') {
-            $user->password = \Illuminate\Support\Facades\Hash::make(trim($request->new_password));
-        }
-
-        $user->save();
-
-        return redirect()->route('admin.dashboard', ['tab' => 'users'])->with('success', 'Profile and credentials updated successfully!');
     }
 
     /**
