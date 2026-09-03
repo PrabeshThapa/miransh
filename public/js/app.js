@@ -52,8 +52,9 @@ function setLanguage(language) {
 function toggleMobileNav() {
     const drawer = document.getElementById("mobile-nav-drawer");
     if (!drawer) return;
+    drawer.classList.toggle("active");
     drawer.classList.toggle("open");
-    if (drawer.classList.contains("open")) {
+    if (drawer.classList.contains("active") || drawer.classList.contains("open")) {
         document.body.style.overflow = "hidden";
     } else {
         document.body.style.overflow = "";
