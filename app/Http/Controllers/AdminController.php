@@ -99,7 +99,45 @@ class AdminController extends Controller
             $company = new CompanyInfo();
         }
 
-        $company->fill($request->all());
+        $inputData = $request->except(['_token', 'ceo_image_file', 'hero_image_file']);
+
+        // Check if CEO image file was directly uploaded with the form
+        if ($request->hasFile('ceo_image_file')) {
+            $file = $request->file('ceo_image_file');
+            $ext = $file->getClientOriginalExtension() ?: 'jpg';
+            $fname = 'ceo_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.' . strtolower($ext);
+            $dest = public_path('uploads');
+            if (!file_exists($dest)) {
+                @mkdir($dest, 0775, true);
+            }
+            $file->move($dest, $fname);
+            $inputData['ceo_image'] = '/uploads/' . $fname;
+            @chmod($dest . '/' . $fname, 0644);
+        }
+
+        // Check if Hero image file was directly uploaded with the form
+        if ($request->hasFile('hero_image_file')) {
+            $file = $request->file('hero_image_file');
+            $ext = $file->getClientOriginalExtension() ?: 'jpg';
+            $fname = 'hero_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.' . strtolower($ext);
+            $dest = public_path('uploads');
+            if (!file_exists($dest)) {
+                @mkdir($dest, 0775, true);
+            }
+            $file->move($dest, $fname);
+            $inputData['hero_image'] = '/uploads/' . $fname;
+            @chmod($dest . '/' . $fname, 0644);
+        }
+
+        // Prevent accidental reversion if image field was submitted empty but an image already exists
+        if (empty($inputData['ceo_image']) && !empty($company->ceo_image)) {
+            $inputData['ceo_image'] = $company->ceo_image;
+        }
+        if (empty($inputData['hero_image']) && !empty($company->hero_image)) {
+            $inputData['hero_image'] = $company->hero_image;
+        }
+
+        $company->fill($inputData);
         $company->save();
 
         return redirect()->route('admin.dashboard', ['tab' => 'company'])->with('success', 'Company Information & Media updated successfully!');
@@ -384,6 +422,10 @@ class AdminController extends Controller
      */
     public function uploadImage(Request $request)
     {
+        // Suppress HTML error output to prevent corrupting JSON responses
+        @ini_set('display_errors', '0');
+        @ini_set('html_errors', '0');
+
         if (!Auth::check()) {
             return response()->json([
                 'success' => false,
@@ -424,24 +466,36 @@ class AdminController extends Controller
         $size = file_exists($fullFilePath) ? filesize($fullFilePath) : 0;
         $relativePath = '/uploads/' . $filename;
 
-        // Write to all possible public web roots on various hosting environments (cPanel, Xserver, Sakura, Nginx)
+        // Safely mirror to other possible web roots without self-copy warnings
+        $realFull = @realpath($fullFilePath);
         $targetDirectories = [
             base_path('uploads'),
-            public_path('uploads'),
-            base_path('public/uploads'),
-            storage_path('app/public/uploads'),
-            base_path('public_html/uploads'),
-            base_path('../public_html/uploads')
+            storage_path('app/public/uploads')
         ];
 
+        // Only add public_html directories if they already exist
+        if (@is_dir(base_path('public_html/uploads'))) {
+            $targetDirectories[] = base_path('public_html/uploads');
+        }
+
         foreach ($targetDirectories as $dir) {
-            if (!file_exists($dir)) {
-                @mkdir($dir, 0775, true);
-            }
-            if (file_exists($dir) && is_dir($dir)) {
-                $targetFile = $dir . '/' . $filename;
-                @copy($fullFilePath, $targetFile);
-                @chmod($targetFile, 0644);
+            try {
+                if (!@file_exists($dir)) {
+                    @mkdir($dir, 0775, true);
+                }
+                if (@file_exists($dir) && @is_dir($dir)) {
+                    $targetFile = $dir . '/' . $filename;
+                    $realTarget = @realpath($targetFile);
+                    if ($realFull && $realTarget && $realFull === $realTarget) {
+                        continue;
+                    }
+                    if ($realFull !== $targetFile) {
+                        @copy($fullFilePath, $targetFile);
+                        @chmod($targetFile, 0644);
+                    }
+                }
+            } catch (\Throwable $t) {
+                // Silently ignore permission warnings
             }
         }
 
@@ -455,7 +509,19 @@ class AdminController extends Controller
                 }
                 $company->$targetField = $relativePath;
                 $company->save();
+            } else if (str_starts_with($targetField, 'story_')) {
+                $storyId = (int) str_replace('story_', '', $targetField);
+                $story = Story::find($storyId);
+                if ($story) {
+                    $story->image = $relativePath;
+                    $story->save();
+                }
             }
+        }
+
+        // Discard any stray buffer output or PHP notices before returning JSON
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
         }
 
         return response()->json([
@@ -464,6 +530,6 @@ class AdminController extends Controller
             'filename' => $filename,
             'size' => $size,
             'auto_saved' => $request->filled('target_field')
-        ]);
+        ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
     }
 }

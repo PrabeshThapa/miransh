@@ -223,11 +223,11 @@
                         <div class="stat-item-label"><span class="lang-ja">在留資格・法令遵守</span><span class="lang-en">Compliance Assured</span></div>
                     </div>
                     <div>
-                        <div class="stat-item-num">ワンストップ</div>
+                        <div class="stat-item-num"><span class="lang-ja">ワンストップ</span><span class="lang-en">End-to-End</span></div>
                         <div class="stat-item-label"><span class="lang-ja">採用から入社後生活支援まで</span><span class="lang-en">End-to-End Support</span></div>
                     </div>
                     <div>
-                        <div class="stat-item-num">ネパール直結</div>
+                        <div class="stat-item-num"><span class="lang-ja">ネパール直結</span><span class="lang-en">Direct Nepal</span></div>
                         <div class="stat-item-label"><span class="lang-ja">現地提携教育機関ネットワーク</span><span class="lang-en">Direct Academic Network</span></div>
                     </div>
                 </div>
@@ -862,7 +862,7 @@
                                 <label class="form-label">
                                     <span class="lang-ja">貴社名 / 法人名</span><span class="lang-en">Company / Organization</span>
                                 </label>
-                                <input type="text" id="input-company" name="company_name" class="form-input" placeholder="例: 株式会社〇〇">
+                                <input type="text" id="input-company" name="company_name" class="form-input" placeholder="例: 株式会社〇〇" data-placeholder-ja="例: 株式会社〇〇" data-placeholder-en="e.g., Acme Corporation">
                             </div>
 
                             <div class="form-group">
@@ -870,7 +870,7 @@
                                     <span class="lang-ja">ご担当者様 お名前</span><span class="lang-en">Full Name</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="text" id="input-name" name="name" class="form-input" required placeholder="例: 山田 太郎">
+                                <input type="text" id="input-name" name="name" class="form-input" required placeholder="例: 山田 太郎" data-placeholder-ja="例: 山田 太郎" data-placeholder-en="e.g., Taro Yamada">
                             </div>
 
                             <div class="form-group">
@@ -878,14 +878,14 @@
                                     <span class="lang-ja">メールアドレス</span><span class="lang-en">Email Address</span>
                                     <span class="req">*</span>
                                 </label>
-                                <input type="email" id="input-email" name="email" class="form-input" required placeholder="name@company.co.jp">
+                                <input type="email" id="input-email" name="email" class="form-input" required placeholder="name@company.co.jp" data-placeholder-ja="name@company.co.jp" data-placeholder-en="name@company.co.jp">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">
                                     <span class="lang-ja">お電話番号</span><span class="lang-en">Phone Number</span>
                                 </label>
-                                <input type="tel" id="input-phone" name="phone" class="form-input" placeholder="03-0000-0000">
+                                <input type="tel" id="input-phone" name="phone" class="form-input" placeholder="03-0000-0000" data-placeholder-ja="03-0000-0000" data-placeholder-en="03-0000-0000">
                             </div>
 
                             <div class="form-group">
@@ -893,11 +893,11 @@
                                     <span class="lang-ja">ご相談分野・ご興味のある内容</span><span class="lang-en">Service of Interest</span>
                                 </label>
                                 <select id="input-service" name="service_interest" class="form-select">
-                                    <option value="介護人材の採用支援">特定技能（介護）人材の採用支援</option>
-                                    <option value="建設・その他特定技能">建設・その他分野の特定技能人材</option>
-                                    <option value="在留資格・ビザ手続き">在留資格（ビザ）手続きの相談</option>
-                                    <option value="入社後の生活・定着支援">入社後の生活・定着支援について</option>
-                                    <option value="その他">その他のお問い合わせ</option>
+                                    <option value="介護人材の採用支援" data-ja="特定技能（介護）人材の採用支援" data-en="Specified Skilled Worker (Caregiver) Recruitment Support">特定技能（介護）人材の採用支援</option>
+                                    <option value="建設・その他特定技能" data-ja="建設・その他分野の特定技能人材" data-en="Construction & Other SSW Fields">建設・その他分野の特定技能人材</option>
+                                    <option value="在留資格・ビザ手続き" data-ja="在留資格（ビザ）手続きの相談" data-en="Visa & Status of Residence Consultation">在留資格（ビザ）手続きの相談</option>
+                                    <option value="入社後の生活・定着支援" data-ja="入社後の生活・定着支援について" data-en="Post-Employment & Living Retention Support">入社後の生活・定着支援について</option>
+                                    <option value="その他" data-ja="その他のお問い合わせ" data-en="Other Inquiries & General Consultation">その他のお問い合わせ</option>
                                 </select>
                             </div>
 
@@ -906,12 +906,15 @@
                                     <span class="lang-ja">ご相談内容・メッセージ</span><span class="lang-en">Inquiry Details</span>
                                     <span class="req">*</span>
                                 </label>
-                                <textarea id="input-message" name="message" class="form-textarea" required minlength="10" placeholder="採用予定人数、時期、職種などのご希望をご記入ください。"></textarea>
+                                <textarea id="input-message" name="message" class="form-textarea" required minlength="10" placeholder="採用予定人数、時期、職種などのご希望をご記入ください。" data-placeholder-ja="採用予定人数、時期、職種などのご希望をご記入ください。" data-placeholder-en="Please enter your hiring schedule, number of positions, desired roles, and any specific requirements."></textarea>
                             </div>
 
                             <!-- Bot Honeypot Field (Invisible to human users) -->
                             <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
-                                <label for="website_url">Do not fill this field if you are human</label>
+                                <label for="website_url">
+                                    <span class="lang-ja">人間の方はこのフィールドを入力しないでください</span>
+                                    <span class="lang-en">Do not fill this field if you are human</span>
+                                </label>
                                 <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
                             </div>
 
@@ -987,9 +990,9 @@
                 <div>
                     &copy; {{ date('Y') }} {{ $company->name_ja ?? 'MIRANSH合同会社' }} (MIRANSH LLC). All Rights Reserved.
                 </div>
-                <!-- <div>
+                <div>
                     <a href="{{ route('admin.login') }}" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a>
-                </div> -->
+                </div>
             </div>
         </div>
     </footer>

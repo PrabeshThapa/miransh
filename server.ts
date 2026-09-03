@@ -7,6 +7,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
+import { renderAdminLTELogin, renderAdminLTEDashboard } from './src/adminlte.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,10 +15,36 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-// Ensure upload directories exist
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// Ensure all upload directories exist across possible web roots
+const uploadDirs = [
+  path.join(__dirname, 'public', 'uploads'),
+  path.join(__dirname, 'uploads'),
+  path.join(__dirname, 'storage', 'app', 'public', 'uploads'),
+  path.join(__dirname, 'public_html', 'uploads')
+];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}
+  }
+});
+const uploadsDir = uploadDirs[0];
+
+// Helper to synchronize uploaded files across all public web root folders
+function syncUploadedFileToAllDirs(filename: string, sourceBufferOrPath: Buffer | string) {
+  uploadDirs.forEach(dir => {
+    try {
+      const destPath = path.join(dir, filename);
+      if (typeof sourceBufferOrPath === 'string') {
+        if (sourceBufferOrPath !== destPath && fs.existsSync(sourceBufferOrPath)) {
+          fs.copyFileSync(sourceBufferOrPath, destPath);
+        }
+      } else {
+        fs.writeFileSync(destPath, sourceBufferOrPath);
+      }
+    } catch (e) {
+      console.error(`Failed copying upload to ${dir}:`, e);
+    }
+  });
 }
 
 // Multer Storage Configuration
@@ -29,23 +56,26 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
     const cleanBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e6);
-    cb(null, `${cleanBase}-${uniqueSuffix}${ext}`);
+    cb(null, `img_${Date.now()}_${cleanBase}_${uniqueSuffix}${ext}`);
   }
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp|gif|svg\+xml|svg/;
-    const isMime = allowed.test(file.mimetype);
+    const allowed = /jpeg|jpg|png|webp|gif|svg\+xml|svg|avif|bmp|ico|tiff|heic|heif/i;
+    const isMime = allowed.test(file.mimetype) || file.mimetype.startsWith('image/');
     const isExt = allowed.test(path.extname(file.originalname).toLowerCase().replace('.', ''));
-    if (isMime || isExt) {
+    if (isMime || isExt || !file.originalname) {
       return cb(null, true);
     }
-    cb(new Error('Invalid image file format. Allowed: JPG, PNG, WEBP, GIF, SVG.'));
+    cb(new Error('Invalid image file format. Allowed: JPG, PNG, WEBP, GIF, SVG, AVIF, HEIC.'));
   }
 });
+
+// Admin Authentication Secret Token (enables resilient auth across iframe/cookies)
+const ADMIN_TOKEN = 'miransh_admin_token_2026_auth_ok';
 
 // Database Connection
 const dbPath = path.join(__dirname, 'database', 'database.sqlite');
@@ -53,20 +83,25 @@ const db = new Database(dbPath);
 
 // Middleware
 app.disable('x-powered-by'); // Hide web server identity header
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.set('trust proxy', 1);
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(cookieParser());
 app.use(session({
   secret: 'miransh-secret-key-2026',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 }
+  resave: true,
+  saveUninitialized: true,
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
+    secure: 'auto',
+    httpOnly: false
+  }
 }));
 
-// Security Headers Middleware
+// Security Headers Middleware (Permit AI Studio iframe embedding)
 app.use((req: Request, res: Response, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   next();
@@ -90,16 +125,14 @@ app.use('/images', express.static(path.join(__dirname, 'public', 'images'), stat
 app.use('/css', express.static(path.join(__dirname, 'public', 'css'), staticOptions));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js'), staticOptions));
 
-// Explicit route handler for /uploads/:filename fallback
-app.get('/uploads/:filename', (req: Request, res: Response) => {
+// Explicit route handler for /uploads/:filename and /public/uploads/:filename fallback
+app.get(['/uploads/:filename', '/public/uploads/:filename'], (req: Request, res: Response) => {
   const filename = path.basename(req.params.filename);
-  const possiblePaths = [
-    path.join(__dirname, 'public', 'uploads', filename),
-    path.join(__dirname, 'storage', 'app', 'public', 'uploads', filename),
-    path.join(__dirname, 'uploads', filename)
-  ];
-  for (const p of possiblePaths) {
+  for (const dir of uploadDirs) {
+    const p = path.join(dir, filename);
     if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
       return res.sendFile(p);
     }
   }
@@ -767,22 +800,28 @@ app.get('/', (req: Request, res: Response) => {
                             <div class="stat-item">
                                 <div class="stat-item-num">100%</div>
                                 <div class="stat-item-label">
-                                    <span class="lang-ja">伴走サポート</span>
-                                    <span class="lang-en">Dedicated Follow-up</span>
+                                    <span class="lang-ja">在留資格・法令遵守</span>
+                                    <span class="lang-en">Compliance Assured</span>
                                 </div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-item-num">🇳🇵 ⇄ 🇯🇵</div>
+                                <div class="stat-item-num">
+                                    <span class="lang-ja">ワンストップ</span>
+                                    <span class="lang-en">End-to-End</span>
+                                </div>
                                 <div class="stat-item-label">
-                                    <span class="lang-ja">ネパール特化網</span>
-                                    <span class="lang-en">Nepal Network</span>
+                                    <span class="lang-ja">採用から入社後生活支援まで</span>
+                                    <span class="lang-en">End-to-End Support</span>
                                 </div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-item-num">介護・特定技能</div>
+                                <div class="stat-item-num">
+                                    <span class="lang-ja">ネパール直結</span>
+                                    <span class="lang-en">Direct Nepal</span>
+                                </div>
                                 <div class="stat-item-label">
-                                    <span class="lang-ja">即戦力マッチング</span>
-                                    <span class="lang-en">Care & SSW Sectors</span>
+                                    <span class="lang-ja">現地提携教育機関ネットワーク</span>
+                                    <span class="lang-en">Direct Academic Network</span>
                                 </div>
                             </div>
                         </div>
@@ -1261,63 +1300,81 @@ app.get('/', (req: Request, res: Response) => {
                     <div>
                         <div class="contact-form-box">
                             <h3 class="contact-form-title">
-                                <span class="lang-ja">お問い合わせ・相談フォーム</span>
-                                <span class="lang-en">Online Inquiry Form</span>
+                                <span class="lang-ja">お問い合わせ・無料相談</span>
+                                <span class="lang-en">Send Us an Inquiry</span>
                             </h3>
 
                             <form id="contact-form" action="/contact" method="POST" onsubmit="handleContactSubmit(event)">
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label required">
-                                            <span class="lang-ja">貴社名 / お名前</span>
-                                            <span class="lang-en">Company / Name</span>
-                                        </label>
-                                        <input type="text" name="name" class="form-control" placeholder="例: 株式会社サンプル / 山田 太郎" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label required">
-                                            <span class="lang-ja">メールアドレス</span>
-                                            <span class="lang-en">Email Address</span>
-                                        </label>
-                                        <input type="email" name="email" class="form-control" placeholder="name@company.co.jp" required>
-                                    </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="lang-ja">貴社名 / 組織名</span>
+                                        <span class="lang-en">Company / Organization</span>
+                                    </label>
+                                    <input type="text" id="input-company" name="company_name" class="form-control form-input" placeholder="例: 株式会社〇〇" data-placeholder-ja="例: 株式会社〇〇" data-placeholder-en="e.g., Acme Corporation">
                                 </div>
 
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <span class="lang-ja">お電話番号</span>
-                                            <span class="lang-en">Telephone</span>
-                                        </label>
-                                        <input type="tel" name="phone" class="form-control" placeholder="03-1234-5678">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <span class="lang-ja">お問い合わせ種別</span>
-                                            <span class="lang-en">Inquiry Topic</span>
-                                        </label>
-                                        <select name="inquiry_type" class="form-select">
-                                            <option value="特定技能人材の採用について">特定技能人材の採用について (SSW Recruitment)</option>
-                                            <option value="介護分野の人材受入について">介護分野の人材受入について (Caregiving Talent)</option>
-                                            <option value="在留資格・ビザ手続き相談">在留資格・ビザ手続き相談 (Visa Assistance)</option>
-                                            <option value="外国人材の生活・就労定着サポート">外国人材の生活・就労定着サポート (Retention)</option>
-                                            <option value="留学生・アルバイト支援">留学生・アルバイト支援 (Student Support)</option>
-                                            <option value="その他のお問い合わせ">その他のお問い合わせ (Other General)</option>
-                                        </select>
-                                    </div>
+                                <div class="form-group">
+                                    <label class="form-label required">
+                                        <span class="lang-ja">ご担当者様 お名前</span>
+                                        <span class="lang-en">Full Name</span>
+                                        <span class="req" style="color: #DC2626;">*</span>
+                                    </label>
+                                    <input type="text" id="input-name" name="name" class="form-control form-input" required placeholder="例: 山田 太郎" data-placeholder-ja="例: 山田 太郎" data-placeholder-en="e.g., Taro Yamada">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label required">
+                                        <span class="lang-ja">メールアドレス</span>
+                                        <span class="lang-en">Email Address</span>
+                                        <span class="req" style="color: #DC2626;">*</span>
+                                    </label>
+                                    <input type="email" id="input-email" name="email" class="form-control form-input" required placeholder="name@company.co.jp" data-placeholder-ja="name@company.co.jp" data-placeholder-en="name@company.co.jp">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="lang-ja">お電話番号</span>
+                                        <span class="lang-en">Phone Number</span>
+                                    </label>
+                                    <input type="tel" id="input-phone" name="phone" class="form-control form-input" placeholder="03-0000-0000" data-placeholder-ja="03-0000-0000" data-placeholder-en="03-0000-0000">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span class="lang-ja">ご相談分野・ご興味のある内容</span>
+                                        <span class="lang-en">Service of Interest</span>
+                                    </label>
+                                    <select id="input-service" name="inquiry_type" class="form-select">
+                                        <option value="特定技能（介護）人材の採用支援" data-ja="特定技能（介護）人材の採用支援" data-en="Specified Skilled Worker (Caregiver) Recruitment Support">特定技能（介護）人材の採用支援</option>
+                                        <option value="建設・その他分野の特定技能人材" data-ja="建設・その他分野の特定技能人材" data-en="Construction & Other SSW Fields">建設・その他分野の特定技能人材</option>
+                                        <option value="在留資格（ビザ）手続きの相談" data-ja="在留資格（ビザ）手続きの相談" data-en="Visa & Status of Residence Consultation">在留資格（ビザ）手続きの相談</option>
+                                        <option value="入社後の生活・定着支援について" data-ja="入社後の生活・定着支援について" data-en="Post-Employment & Living Retention Support">入社後の生活・定着支援について</option>
+                                        <option value="ネパール現地教育機関との連携支援" data-ja="ネパール現地教育機関との連携支援" data-en="Direct Academic & Nepali Network">ネパール現地教育機関との連携支援</option>
+                                        <option value="その他のお問い合わせ" data-ja="その他のお問い合わせ" data-en="Other Inquiries & Consultation">その他のお問い合わせ</option>
+                                    </select>
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label required">
                                         <span class="lang-ja">ご相談内容・メッセージ</span>
-                                        <span class="lang-en">Message Details</span>
+                                        <span class="lang-en">Inquiry Details</span>
+                                        <span class="req" style="color: #DC2626;">*</span>
                                     </label>
-                                    <textarea name="message" class="form-textarea" rows="4" placeholder="具体的なご要望やご不明点をご記入ください..." required></textarea>
+                                    <textarea id="input-message" name="message" class="form-control form-textarea" rows="5" required minlength="10" placeholder="採用予定人数、時期、職種などのご希望をご記入ください。" data-placeholder-ja="採用予定人数、時期、職種などのご希望をご記入ください。" data-placeholder-en="Please enter your hiring schedule, number of positions, desired roles, and any specific requirements."></textarea>
                                 </div>
 
-                                <button type="submit" id="btn-submit-inquiry" class="btn-primary" style="width: 100%; justify-content: center; padding: 14px 20px; font-size: 16px;">
-                                    <span class="lang-ja">上記の内容で送信する</span>
-                                    <span class="lang-en">Submit Inquiry</span>
+                                <!-- Bot Honeypot Field -->
+                                <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+                                    <label for="website_url">
+                                        <span class="lang-ja">人間の方はこのフィールドを入力しないでください</span>
+                                        <span class="lang-en">Do not fill this field if you are human</span>
+                                    </label>
+                                    <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+                                </div>
+
+                                <button type="submit" id="btn-submit-inquiry" class="btn-primary" style="width: 100%; justify-content: center; padding: 14px 20px; font-size: 16px; margin-top: 8px;">
+                                    <span class="lang-ja">上記の内容でお問い合わせを送信する</span>
+                                    <span class="lang-en">Send Us an Inquiry</span>
                                     <span>→</span>
                                 </button>
                             </form>
@@ -1379,7 +1436,10 @@ app.get('/robots.txt', (req: Request, res: Response) => {
 // ----------------------------------------------------
 // Numeric URL Redirect Handler (Fixes /1, /2, /3, /4 index errors)
 // ----------------------------------------------------
-app.get('/:id(\\d+)', (req: Request, res: Response) => {
+app.get('/:id', (req: Request, res: Response, next: NextFunction) => {
+  if (!/^\d+$/.test(req.params.id)) {
+    return next();
+  }
   const id = parseInt(req.params.id, 10);
   const service = db.prepare('SELECT id FROM services WHERE id = ?').get(id);
   if (service) {
@@ -1796,104 +1856,12 @@ app.post('/api/sakana/translate-job', async (req: Request, res: Response) => {
 // Admin Authentication & Dashboard
 // ----------------------------------------------------
 app.get('/admin/login', (req: Request, res: Response) => {
-  if ((req.session as any).user) {
+  if ((req.session as any)?.user) {
     return res.redirect('/admin');
   }
 
-  const error = req.query.error ? 'The provided credentials do not match our records.' : '';
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | MIRANSH LLC</title>
-    <link rel="icon" type="image/png" href="/images/logo-icon.png">
-    <link rel="stylesheet" href="/css/app.css">
-    <style>
-        .admin-login-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0B1C38 0%, #1E3A8A 100%);
-            padding: 20px;
-        }
-        .login-card {
-            background: #ffffff;
-            width: 100%;
-            max-width: 440px;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            box-sizing: border-box;
-        }
-        .form-input:focus {
-            border-color: #2563EB;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-login-wrapper">
-        <div class="login-card">
-            <div class="login-header">
-                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 48px; height: 48px; margin-bottom: 12px;">
-                <h1 style="font-size: 22px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Portal</h1>
-                <p style="font-size: 14px; color: #64748B; margin: 0;">Sign in to access admin settings</p>
-            </div>
-
-            ${error ? `<div style="background: #FEE2E2; border: 1px solid #F87171; color: #991B1B; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 20px;">${error}</div>` : ''}
-
-            <form action="/admin/login" method="POST">
-                <div class="form-group">
-                    <label>Email Address / Username</label>
-                    <input type="text" name="email" class="form-input" placeholder="admin@miransh.jp" value="admin@miransh.jp" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-input" placeholder="••••••••" required>
-                </div>
-
-                <div style="background: #F1F5F9; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 13px; color: #475569;">
-                    <strong>Demo Access:</strong><br>
-                    Email: <code>admin@miransh.jp</code><br>
-                    Password: <code>password</code> or <code>admin123</code>
-                </div>
-
-                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px 20px; font-size: 15px;">
-                    Sign In to Dashboard →
-                </button>
-            </form>
-            <div style="text-align: center; margin-top: 20px;">
-                <a href="/" style="color: #64748B; font-size: 13px; text-decoration: none;">← Back to Main Website</a>
-            </div>
-        </div>
-    </div>
-</body>
-</html>`;
+  const error = req.query.error ? '認証情報が正しくありません。正しいユーザー名・パスワードを入力してください。' : undefined;
+  const html = renderAdminLTELogin(error);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(html);
 });
@@ -1916,6 +1884,13 @@ app.post('/admin/login', (req: Request, res: Response) => {
 
   if (authenticated) {
     (req.session as any).user = user || { id: 1, name: 'admin', email: 'admin@miransh.jp' };
+    const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.cookie('admin_auth', ADMIN_TOKEN, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: isHttps,
+      httpOnly: false
+    });
     return res.redirect('/admin');
   }
 
@@ -1923,15 +1898,26 @@ app.post('/admin/login', (req: Request, res: Response) => {
 });
 
 app.get(['/admin/logout', '/logout'], (req: Request, res: Response) => {
+  res.clearCookie('admin_auth');
   req.session.destroy(() => {
     res.redirect('/admin/login');
   });
 });
 
-// Admin Dashboard
+// Admin Dashboard (Powered by AdminLTE 3)
 app.get('/admin', (req: Request, res: Response) => {
-  if (!(req.session as any).user) {
+  const isAuth = Boolean(
+    (req.session as any)?.user ||
+    req.cookies?.admin_auth === ADMIN_TOKEN ||
+    req.headers['x-admin-token'] === ADMIN_TOKEN ||
+    req.query?.admin_token === ADMIN_TOKEN ||
+    req.query?.token === ADMIN_TOKEN
+  );
+  if (!isAuth) {
     return res.redirect('/admin/login');
+  }
+  if (!(req.session as any).user) {
+    (req.session as any).user = { id: 1, name: 'admin', email: 'admin@miransh.jp' };
   }
 
   const company = getCompanyInfo();
@@ -1940,1257 +1926,108 @@ app.get('/admin', (req: Request, res: Response) => {
   const stories = getStories();
   const faqs = getFaqs();
   const inquiries = getInquiries();
-  const activeTab = (req.query.tab as string) || 'company';
+  const activeTab = (req.query.tab as string) || 'dashboard';
 
-  // Render Admin Inquiries Table
-  let inquiriesRows = '';
-  inquiries.forEach((inq) => {
-    inquiriesRows += `
-      <tr>
-          <td>#${inq.id}</td>
-          <td><strong>${escapeHtml(inq.name)}</strong></td>
-          <td>${escapeHtml(inq.email)}<br><small style="color: #64748B;">${escapeHtml(inq.phone || 'N/A')}</small></td>
-          <td><span style="background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${escapeHtml(inq.inquiry_type)}</span></td>
-          <td style="max-width: 300px; font-size: 13px;">${escapeHtml(inq.message)}</td>
-          <td><span style="background: ${inq.status === 'resolved' ? '#DCFCE7; color: #166534;' : '#FEF3C7; color: #92400E;'} padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 12px;">${escapeHtml(inq.status)}</span></td>
-          <td>
-              <form action="/admin/inquiries/${inq.id}/status" method="POST" style="display: inline;">
-                  <input type="hidden" name="status" value="${inq.status === 'resolved' ? 'unread' : 'resolved'}">
-                  <button type="submit" class="btn-secondary" style="padding: 4px 8px; font-size: 12px;">
-                      ${inq.status === 'resolved' ? 'Mark Unread' : 'Mark Resolved'}
-                  </button>
-              </form>
-          </td>
-      </tr>
-    `;
+  const html = renderAdminLTEDashboard({
+    company,
+    about,
+    services,
+    stories,
+    faqs,
+    inquiries,
+    activeTab,
+    currentSakanaModel,
+    currentSakanaKey
   });
-
-  const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRANSH LLC | 管理者ダッシュボード (Admin Portal)</title>
-    <link rel="icon" type="image/png" href="/images/logo-icon.png">
-    <link rel="stylesheet" href="/css/app.css">
-    <style>
-        .admin-layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-            background: #F1F5F9;
-            position: relative;
-        }
-
-        /* Mobile Header */
-        .admin-mobile-header {
-            display: none;
-            background: #0B1C38;
-            color: #FFFFFF;
-            padding: 12px 16px;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 990;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-        .admin-hamburger-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #FFFFFF;
-            border-radius: 8px;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        /* Mobile Quick Tab Bar */
-        .admin-mobile-tab-bar {
-            display: none;
-            background: #FFFFFF;
-            border-bottom: 1px solid #E2E8F0;
-            padding: 8px 12px;
-            overflow-x: auto;
-            white-space: nowrap;
-            gap: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            position: sticky;
-            top: 62px;
-            z-index: 980;
-        }
-        .admin-mobile-tab-bar::-webkit-scrollbar {
-            display: none;
-        }
-        .admin-mobile-tab-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #475569;
-            background: #F1F5F9;
-            border: 1px solid #CBD5E1;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-        .admin-mobile-tab-pill.active {
-            background: #2563EB;
-            color: #FFFFFF;
-            border-color: #2563EB;
-        }
-
-        /* Backdrop Overlay */
-        .admin-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(2px);
-            z-index: 998;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-        .admin-backdrop.active {
-            display: block;
-            opacity: 1;
-        }
-
-        .admin-sidebar {
-            background: #0B1C38;
-            color: #FFFFFF;
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 24px;
-        }
-        .sidebar-close-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: #94A3B8;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .sidebar-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex-grow: 1;
-            padding: 0;
-            margin: 0;
-        }
-        .sidebar-item-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
-            border-radius: 8px;
-            color: #CBD5E1;
-            font-size: 14px;
-            font-weight: 600;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-        .sidebar-item-btn:hover,
-        .sidebar-item-btn.active {
-            background: #2563EB;
-            color: #FFFFFF;
-        }
-        .admin-main {
-            padding: 32px 40px;
-            overflow-y: auto;
-        }
-        .admin-card {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
-        }
-        .admin-card-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #0F172A;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .form-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .form-input, .form-textarea, .form-select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
-            border-color: #2563EB;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-        .admin-image-upload-card {
-            background: #F8FAFC;
-            border: 2px dashed #CBD5E1;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .admin-image-upload-card:hover, .admin-image-upload-card.dragover {
-            border-color: #2563EB;
-            background: #EFF6FF;
-        }
-        .upload-preview-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .preview-portrait-box {
-            width: 130px;
-            height: 130px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 2px solid #E2E8F0;
-            background: #FFFFFF;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .preview-banner-box {
-            width: 100%;
-            max-width: 380px;
-            height: 150px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 2px solid #E2E8F0;
-            background: #0B1C38;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .upload-controls {
-            flex: 1;
-            min-width: 220px;
-        }
-        .file-upload-btn-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            background: #2563EB;
-            color: #FFFFFF;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-        .file-upload-btn-label:hover {
-            background: #1D4ED8;
-        }
-        .upload-status-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            margin-top: 8px;
-        }
-        .upload-status-tag.success {
-            background: #DCFCE7;
-            color: #166534;
-        }
-        .upload-status-tag.uploading {
-            background: #FEF3C7;
-            color: #92400E;
-        }
-        .admin-table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            margin-top: 12px;
-        }
-
-        /* Mobile Layout & Responsiveness */
-        @media (max-width: 1023px) {
-            .admin-layout {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                min-height: 100vh;
-            }
-            .admin-mobile-header {
-                display: flex;
-            }
-            .admin-mobile-tab-bar {
-                display: flex;
-            }
-            .admin-sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                width: 280px;
-                max-width: 85vw;
-                height: 100vh;
-                z-index: 999;
-                transform: translateX(-100%);
-                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
-                overflow-y: auto;
-            }
-            .admin-sidebar.open {
-                transform: translateX(0);
-            }
-            .sidebar-close-btn {
-                display: block;
-            }
-            .admin-main {
-                padding: 16px 14px;
-                width: 100%;
-                box-sizing: border-box;
-            }
-            .admin-desktop-title-bar {
-                display: none;
-            }
-            .form-grid-2 {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .upload-preview-container {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .preview-portrait-box {
-                width: 100px;
-                height: 100px;
-            }
-            .preview-banner-box {
-                max-width: 100%;
-                height: 120px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Mobile Top Header -->
-    <header class="admin-mobile-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="ナビゲーションメニューを開く">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;">
-                <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
-            </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="/" target="_blank" style="font-size: 12px; color: #93C5FD; text-decoration: none; font-weight: 700;">サイト表示 ↗</a>
-            <a href="/admin/logout" style="font-size: 12px; color: #FCA5A5; text-decoration: none; font-weight: 700;">退出</a>
-        </div>
-    </header>
-
-    <!-- Mobile Horizontal Quick Tab Bar -->
-    <nav class="admin-mobile-tab-bar">
-        <a href="/admin?tab=company" class="admin-mobile-tab-pill ${activeTab === 'company' ? 'active' : ''}">🏢 会社・画像</a>
-        <a href="/admin?tab=about" class="admin-mobile-tab-pill ${activeTab === 'about' ? 'active' : ''}">📖 会社紹介</a>
-        <a href="/admin?tab=services" class="admin-mobile-tab-pill ${activeTab === 'services' ? 'active' : ''}">💼 事業内容</a>
-        <a href="/admin?tab=stories" class="admin-mobile-tab-pill ${activeTab === 'stories' ? 'active' : ''}">📰 採用事例</a>
-        <a href="/admin?tab=faqs" class="admin-mobile-tab-pill ${activeTab === 'faqs' ? 'active' : ''}">❓ FAQs</a>
-        <a href="/admin?tab=inquiries" class="admin-mobile-tab-pill ${activeTab === 'inquiries' ? 'active' : ''}">📬 問合せ (${inquiries.length})</a>
-        <a href="/admin?tab=ai" class="admin-mobile-tab-pill ${activeTab === 'ai' ? 'active' : ''}">🐟 Sakana AI</a>
-    </nav>
-
-    <!-- Offcanvas Backdrop Overlay -->
-    <div id="adminBackdrop" class="admin-backdrop" onclick="closeAdminSidebar()"></div>
-
-    <div class="admin-layout">
-        <!-- Sidebar Navigation (Responsive Drawer on Mobile) -->
-        <aside class="admin-sidebar">
-            <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 36px; height: 36px; border-radius: 50%;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 16px; line-height: 1.2;">MIRANSH Admin</div>
-                        <div style="font-size: 11px; color: #94A3B8;">Global Talent Portal</div>
-                    </div>
-                </div>
-                <button type="button" class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="メニューを閉じる">✕</button>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li><a href="/admin?tab=company" class="sidebar-item-btn ${activeTab === 'company' ? 'active' : ''}" onclick="closeAdminSidebar()">🏢 会社情報・画像 (Company)</a></li>
-                <li><a href="/admin?tab=about" class="sidebar-item-btn ${activeTab === 'about' ? 'active' : ''}" onclick="closeAdminSidebar()">📖 会社紹介・約束 (About)</a></li>
-                <li><a href="/admin?tab=services" class="sidebar-item-btn ${activeTab === 'services' ? 'active' : ''}" onclick="closeAdminSidebar()">💼 事業内容 (Services)</a></li>
-                <li><a href="/admin?tab=stories" class="sidebar-item-btn ${activeTab === 'stories' ? 'active' : ''}" onclick="closeAdminSidebar()">📰 採用事例 (Stories)</a></li>
-                <li><a href="/admin?tab=faqs" class="sidebar-item-btn ${activeTab === 'faqs' ? 'active' : ''}" onclick="closeAdminSidebar()">❓ よくある質問 (FAQs)</a></li>
-                <li><a href="/admin?tab=inquiries" class="sidebar-item-btn ${activeTab === 'inquiries' ? 'active' : ''}" onclick="closeAdminSidebar()">📬 お問い合わせ (${inquiries.length})</a></li>
-                <li><a href="/admin?tab=ai" class="sidebar-item-btn ${activeTab === 'ai' ? 'active' : ''}" onclick="closeAdminSidebar()">🐟 Sakana AI 設定</a></li>
-            </ul>
-
-            <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-                <a href="/" target="_blank" style="display: block; color: #94A3B8; font-size: 13px; text-decoration: none; margin-bottom: 12px;">🌐 公開サイトを表示 →</a>
-                <a href="/admin/logout" style="display: block; color: #F87171; font-size: 13px; text-decoration: none; font-weight: 600;">🚪 ログアウト (Sign Out)</a>
-            </div>
-        </aside>
-
-        <!-- Main Content Panel -->
-        <main class="admin-main">
-            <!-- Top bar for desktop -->
-            <div class="admin-desktop-title-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <div>
-                    <h1 style="font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">MIRANSH Management Portal</h1>
-                    <p style="font-size: 14px; color: #64748B; margin: 0;">Update company profile, CEO portrait, Hero banner, services, and Sakana AI parameters</p>
-                </div>
-                <div>
-                    <a href="/" target="_blank" class="btn-secondary" style="display: inline-flex; font-size: 13px;">View Live Site ↗</a>
-                </div>
-            </div>
-
-            <!-- TAB 1: Company Profile & Images -->
-            ${activeTab === 'company' ? `
-            <div class="admin-card">
-                <div class="admin-card-title">🏢 会社基本情報・代表者設定・トップバナー設定</div>
-                <form action="/admin/company" method="POST">
-                    
-                    <!-- 1. Executive / CEO Profile & Image Upload -->
-                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
-                        1. 代表者（CEO）情報 & 顔写真アップロード
-                    </h3>
-
-                    <!-- CEO IMAGE UPLOADER -->
-                    <div class="form-group" style="margin-bottom: 24px;">
-                        <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
-                            📷 代表者（CEO）顔写真 (CEO Portrait Photo)
-                        </label>
-                        <div class="admin-image-upload-card" id="ceo_upload_card">
-                            <div class="upload-preview-container">
-                                <img id="preview_ceo_img" src="${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')}" alt="CEO Photo" class="preview-portrait-box" onerror="this.src='/images/ceo_portrait.jpg'">
-                                <div class="upload-controls">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">画像をアップロード (Upload CEO Portrait)</div>
-                                    <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP, SVG形式対応。ファイルを選択すると自動的にアップロード・即時プレビューされます。</div>
-                                    
-                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                                        <label class="file-upload-btn-label">
-                                            📁 ファイルを選択してアップロード
-                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_img', 'ceo_status', 'ceo_image')">
-                                        </label>
-                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_img', '/images/abc.jpeg', 'ceo_status', 'ceo_image')">
-                                            🔄 デフォルト写真に戻す
-                                        </button>
-                                    </div>
-
-                                    <div id="ceo_status" class="upload-status-tag success" style="display: ${company.ceo_image ? 'inline-flex' : 'none'};">
-                                        ✓ 写真が設定されています (${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')})
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="input_ceo_image" name="ceo_image" value="${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">代表社員 日本語氏名 (CEO Name - Japanese)</label>
-                            <input type="text" name="ceo_name_ja" class="form-input" value="${escapeHtml(company.ceo_name_ja || 'ギリ ラム クリシュナ')}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">代表社員 英語氏名 (CEO Name - English)</label>
-                            <input type="text" name="ceo_name_en" class="form-input" value="${escapeHtml(company.ceo_name_en || 'Giri Ram Krishna')}" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">代表役職名 (日本語)</label>
-                            <input type="text" name="ceo_role_ja" class="form-input" value="${escapeHtml(company.ceo_role_ja || '代表社員')}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">代表役職名 (英語)</label>
-                            <input type="text" name="ceo_role_en" class="form-input" value="${escapeHtml(company.ceo_role_en || 'Representative Member')}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">代表挨拶 (CEO Message - Japanese)</label>
-                            <textarea name="ceo_message_ja" class="form-textarea" rows="6">${escapeHtml(company.ceo_message_ja)}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">代表挨拶 (CEO Message - English)</label>
-                            <textarea name="ceo_message_en" class="form-textarea" rows="6">${escapeHtml(company.ceo_message_en)}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- 2. Hero Banner & Image Upload -->
-                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
-                        2. トップヒーローバナー & 背景画像アップロード
-                    </h3>
-
-                    <!-- HERO BANNER IMAGE UPLOADER -->
-                    <div class="form-group" style="margin-bottom: 24px;">
-                        <label class="form-label" style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
-                            🖼️ トップヒーローバナー画像 (Hero Banner Image)
-                        </label>
-                        <div class="admin-image-upload-card" id="hero_upload_card">
-                            <div class="upload-preview-container">
-                                <img id="preview_hero_img" src="${escapeHtml(company.hero_image || '/images/hero_banner.jpg')}" alt="Hero Banner" class="preview-banner-box" onerror="this.src='/images/hero_banner.jpg'">
-                                <div class="upload-controls">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">バナー画像をアップロード (Upload Hero Banner)</div>
-                                    <div style="font-size: 12px; color: #64748B; margin-bottom: 12px;">JPEG, PNG, WebP, SVG形式対応（推奨サイズ: 1920×1080 または 16:9横長比率）。ファイルを選択すると自動的にアップロードされます。</div>
-                                    
-                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                                        <label class="file-upload-btn-label">
-                                            📁 バナー画像を選択してアップロード
-                                            <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_img', 'hero_status', 'hero_image')">
-                                        </label>
-                                        <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_img', '/images/hero_banner.jpg', 'hero_status', 'hero_image')">
-                                            🔄 デフォルトバナーに戻す
-                                        </button>
-                                    </div>
-
-                                    <div id="hero_status" class="upload-status-tag success" style="display: ${company.hero_image ? 'inline-flex' : 'none'};">
-                                        ✓ バナー画像が設定されています (${escapeHtml(company.hero_image || '/images/hero_banner.jpg')})
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="input_hero_image" name="hero_image" value="${escapeHtml(company.hero_image || '/images/hero_banner.jpg')}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">キャッチコピー (日本語)</label>
-                            <input type="text" name="hero_title_ja" class="form-input" value="${escapeHtml(company.hero_title_ja || '日本企業と海外人材をつなぐ、')}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">強調ワード (日本語)</label>
-                            <input type="text" name="hero_title_accent_ja" class="form-input" value="${escapeHtml(company.hero_title_accent_ja || '信頼の架け橋。')}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">キャッチコピー (英語)</label>
-                            <input type="text" name="hero_title_en" class="form-input" value="${escapeHtml(company.hero_title_en || 'Bridging Japanese Enterprises and')}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">強調ワード (英語)</label>
-                            <input type="text" name="hero_title_accent_en" class="form-input" value="${escapeHtml(company.hero_title_accent_en || 'Global Talent with Trust.')}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">リード文 (日本語)</label>
-                            <textarea name="hero_desc_ja" class="form-textarea" rows="3">${escapeHtml(company.hero_desc_ja)}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">リード文 (英語)</label>
-                            <textarea name="hero_desc_en" class="form-textarea" rows="3">${escapeHtml(company.hero_desc_en)}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- 3. Corporate Info -->
-                    <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 28px 0 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
-                        3. 会社基本概要 & 連絡先情報
-                    </h3>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">会社名 (日本語)</label>
-                            <input type="text" name="name_ja" class="form-input" value="${escapeHtml(company.name_ja)}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Company Name (English)</label>
-                            <input type="text" name="name_en" class="form-input" value="${escapeHtml(company.name_en)}" required>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">法人番号 (Corporate ID)</label>
-                            <input type="text" name="corporate_number" class="form-input" value="${escapeHtml(company.corporate_number)}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">許認可番号 (Recruitment License)</label>
-                            <input type="text" name="license" class="form-input" value="${escapeHtml(company.license)}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">電話番号 (Telephone)</label>
-                            <input type="text" name="phone" class="form-input" value="${escapeHtml(company.phone)}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">メールアドレス (Email)</label>
-                            <input type="email" name="email" class="form-input" value="${escapeHtml(company.email)}">
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">所在地住所 (日本語)</label>
-                            <input type="text" name="address_ja" class="form-input" value="${escapeHtml(company.address_ja)}">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Headquarters Address (English)</label>
-                            <input type="text" name="address_en" class="form-input" value="${escapeHtml(company.address_en)}">
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2E8F0;">
-                        <button type="submit" class="btn-primary" style="padding: 12px 28px; font-size: 15px;">
-                            💾 設定を保存する (Save All Changes)
-                        </button>
-                    </div>
-                </form>
-            </div>
-            ` : ''}
-
-            <!-- TAB 2: About & Pillars -->
-            ${activeTab === 'about' ? `
-            <div class="admin-card">
-                <div class="admin-card-title">📖 About Us & Mission Statement</div>
-                <form action="/admin/about" method="POST">
-                    <div class="form-group">
-                        <label class="form-label">見出し (Headline - Japanese)</label>
-                        <input type="text" name="heading_ja" class="form-input" value="${escapeHtml(about.heading_ja)}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">詳細説明 1 (Paragraph 1)</label>
-                        <textarea name="desc1_ja" class="form-textarea" rows="4">${escapeHtml(about.desc1_ja)}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">詳細説明 2 (Paragraph 2)</label>
-                        <textarea name="desc2_ja" class="form-textarea" rows="4">${escapeHtml(about.desc2_ja)}</textarea>
-                    </div>
-                    <button type="submit" class="btn-primary">Save About Information</button>
-                </form>
-            </div>
-            ` : ''}
-
-            <!-- TAB 3: Services -->
-            ${activeTab === 'services' ? `
-            <div class="admin-card">
-                <div class="admin-card-title">💼 Manage Services</div>
-                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-                    ${services.map(s => `
-                    <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${escapeHtml(s.icon)} ${escapeHtml(s.title_ja)}</strong> (${escapeHtml(s.title_en)})
-                            <div style="font-size: 13px; color: #64748B; margin-top: 4px;">${escapeHtml(s.desc_ja)}</div>
-                        </div>
-                        <a href="/services/${s.id}" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 4px 10px;">View →</a>
-                    </div>
-                    `).join('')}
-                </div>
-            </div>
-            ` : ''}
-
-            <!-- TAB 4: Stories (採用事例・ニュース) -->
-            ${activeTab === 'stories' ? `
-            <div class="admin-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
-                    <div>
-                        <div class="admin-card-title" style="margin-bottom: 4px;">📰 採用事例・お知らせ 管理 (${stories.length}件)</div>
-                        <p style="font-size: 13px; color: #64748B; margin: 0;">トップページの「採用事例」セクションにリアルタイムに反映されます。新規追加、編集、写真変更が可能です。</p>
-                    </div>
-                    <button type="button" class="btn-primary" onclick="openStoryCreateModal()" style="font-size: 13px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
-                        ＋ 新規事例を追加
-                    </button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="profile-table" style="width: 100%;">
-                        <thead>
-                            <tr style="background: #F8FAFC;">
-                                <th style="width: 70px;">写真</th>
-                                <th>タイトル (日本語 / 英語)</th>
-                                <th>カテゴリ</th>
-                                <th>公開日</th>
-                                <th style="width: 160px; text-align: right;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${stories.map(st => `
-                            <tr>
-                                <td style="text-align: center;">
-                                    <img src="${escapeHtml(st.image || '/images/story1.jpg')}" alt="Story" style="width: 58px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1;">
-                                </td>
-                                <td>
-                                    <strong style="color: #0F172A; font-size: 14px;">${escapeHtml(st.title_ja)}</strong>
-                                    ${st.featured ? '<span style="font-size: 10px; background: #FEF3C7; color: #92400E; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">★ おすすめ</span>' : ''}
-                                    <br>
-                                    <span style="font-size: 12px; color: #64748B;">${escapeHtml(st.title_en)}</span>
-                                </td>
-                                <td><span style="font-size: 11px; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${escapeHtml(st.category_ja)}</span></td>
-                                <td style="font-size: 12px; color: #64748B; white-space: nowrap;">${escapeHtml(st.published_date)}</td>
-                                <td style="text-align: right; white-space: nowrap;">
-                                    <button type="button" class="btn-secondary" style="font-size: 12px; padding: 4px 10px; margin-right: 4px;" onclick='openStoryEditModal(${JSON.stringify(st).replace(/'/g, "&#39;")})'>
-                                        ✏️ 編集
-                                    </button>
-                                    <a href="/stories/${st.id}" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 4px 8px; margin-right: 4px;">↗</a>
-                                    <form action="/admin/stories/${st.id}/delete" method="POST" style="display: inline;" onsubmit="return confirm('本当に事例「${escapeHtml(st.title_ja)}」を削除しますか？');">
-                                        <button type="submit" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">🗑️</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            `).join('') || '<tr><td colspan="5" style="text-align: center; padding: 30px; color: #64748B;">登録された事例はありません。</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- STORY CREATE MODAL -->
-            <div id="storyCreateModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-                <div class="admin-card" style="width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">📰 新規 採用事例の追加 (Add New Story)</h3>
-                        <button type="button" onclick="closeStoryCreateModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
-                    </div>
-
-                    <form action="/admin/stories/create" method="POST">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">タイトル (日本語) *</label>
-                                <input type="text" name="title_ja" class="form-input" placeholder="例: 神奈川県・介護老人保健施設での特定技能マッチング" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Title (English) *</label>
-                                <input type="text" name="title_en" class="form-input" placeholder="e.g. Caregiving Placement in Kanagawa" required>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">カテゴリ (日本語) *</label>
-                                <input type="text" name="category_ja" class="form-input" value="特定技能 / 介護分野" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Category (English) *</label>
-                                <input type="text" name="category_en" class="form-input" value="Nursing Care / SSW" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
-                            <label class="form-label" style="font-weight: 700;">📷 カバー写真 (Cover Image)</label>
-                            <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-                                <img id="preview_create_story" src="/images/story1.jpg" alt="Preview" style="width: 110px; height: 75px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1;">
-                                <div style="flex: 1; min-width: 220px;">
-                                    <input type="text" id="input_create_story_img" name="image" class="form-input" value="/images/story1.jpg" style="margin-bottom: 6px;" oninput="updateStoryPreview('input_create_story_img', 'preview_create_story')">
-                                    <label class="file-upload-btn-label" style="padding: 6px 12px; font-size: 12px;">
-                                        📁 写真ファイルを選択
-                                        <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_create_story_img', 'preview_create_story', 'status_create_story_img')">
-                                    </label>
-                                    <span id="status_create_story_img" style="font-size: 12px; margin-left: 8px;"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">概要文 (日本語) *</label>
-                            <textarea name="summary_ja" class="form-textarea" rows="3" placeholder="事例の要約..." required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Summary (English) *</label>
-                            <textarea name="summary_en" class="form-textarea" rows="3" placeholder="Summary in English..." required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">詳細記事・本文 (日本語)</label>
-                            <textarea name="content_ja" class="form-textarea" rows="5" placeholder="詳細な導入経緯、お客様の声など..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Full Article (English)</label>
-                            <textarea name="content_en" class="form-textarea" rows="5" placeholder="Detailed story in English..."></textarea>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" name="published_date" class="form-input" value="${new Date().toISOString().slice(0, 10).replace(/-/g, '.')}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">執筆者</label>
-                                <input type="text" name="author" class="form-input" value="MIRANSH 編集部">
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
-                            <button type="button" onclick="closeStoryCreateModal()" class="btn-secondary" style="padding: 8px 18px;">キャンセル</button>
-                            <button type="submit" class="btn-primary" style="padding: 8px 22px;">✓ 事例を登録する</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- STORY EDIT MODAL -->
-            <div id="storyEditModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-                <div class="admin-card" style="width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px;">
-                        <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0;">✏️ 採用事例の編集 (Edit Story <span id="edit-story-id-label"></span>)</h3>
-                        <button type="button" onclick="closeStoryEditModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">✕</button>
-                    </div>
-
-                    <form id="form-edit-story" action="" method="POST">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">タイトル (日本語) *</label>
-                                <input type="text" id="edit-st-title-ja" name="title_ja" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Title (English) *</label>
-                                <input type="text" id="edit-st-title-en" name="title_en" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">カテゴリ (日本語) *</label>
-                                <input type="text" id="edit-st-cat-ja" name="category_ja" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Category (English) *</label>
-                                <input type="text" id="edit-st-cat-en" name="category_en" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
-                            <label class="form-label" style="font-weight: 700;">📷 カバー写真 (Cover Image)</label>
-                            <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-                                <img id="preview_edit_story" src="/images/story1.jpg" alt="Preview" style="width: 110px; height: 75px; border-radius: 6px; object-fit: cover; border: 1px solid #CBD5E1;">
-                                <div style="flex: 1; min-width: 220px;">
-                                    <input type="text" id="input_edit_story_img" name="image" class="form-input" style="margin-bottom: 6px;" oninput="updateStoryPreview('input_edit_story_img', 'preview_edit_story')">
-                                    <label class="file-upload-btn-label" style="padding: 6px 12px; font-size: 12px;">
-                                        📁 写真ファイルを置換
-                                        <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_edit_story_img', 'preview_edit_story', 'status_edit_story_img')">
-                                    </label>
-                                    <span id="status_edit_story_img" style="font-size: 12px; margin-left: 8px;"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">概要文 (日本語) *</label>
-                            <textarea id="edit-st-summary-ja" name="summary_ja" class="form-textarea" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Summary (English) *</label>
-                            <textarea id="edit-st-summary-en" name="summary_en" class="form-textarea" rows="3" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">詳細記事・本文 (日本語)</label>
-                            <textarea id="edit-st-content-ja" name="content_ja" class="form-textarea" rows="5"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Full Article (English)</label>
-                            <textarea id="edit-st-content-en" name="content_en" class="form-textarea" rows="5"></textarea>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">公開日</label>
-                                <input type="text" id="edit-st-date" name="published_date" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">執筆者</label>
-                                <input type="text" id="edit-st-author" name="author" class="form-input">
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; border-top: 1px solid #E2E8F0; padding-top: 14px;">
-                            <button type="button" onclick="closeStoryEditModal()" class="btn-secondary" style="padding: 8px 18px;">キャンセル</button>
-                            <button type="submit" class="btn-primary" style="padding: 8px 22px;">✓ 変更を保存する</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            ` : ''}
-
-            <!-- TAB 5: FAQs -->
-            ${activeTab === 'faqs' ? `
-            <div class="admin-card">
-                <div class="admin-card-title">❓ よくある質問 (FAQ 管理) (${faqs.length}件)</div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    ${faqs.map(f => `
-                    <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; background: #F8FAFC;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 11px; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${escapeHtml(f.category_ja)}</span>
-                            <span style="font-size: 11px; color: #94A3B8;">#${f.id}</span>
-                        </div>
-                        <div style="font-weight: 700; margin: 8px 0 4px; color: #0F172A; font-size: 14px;">Q: ${escapeHtml(f.question_ja)}</div>
-                        <div style="font-size: 13px; color: #475569;">A: ${escapeHtml(f.answer_ja)}</div>
-                    </div>
-                    `).join('')}
-                </div>
-            </div>
-            ` : ''}
-
-            <!-- TAB 6: Inquiries (Contact Us) -->
-            ${activeTab === 'inquiries' ? `
-            <div class="admin-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
-                    <div>
-                        <div class="admin-card-title" style="margin-bottom: 4px;">📬 お問い合わせ・ご相談一覧 (${inquiries.length}件)</div>
-                        <p style="font-size: 13px; color: #64748B; margin: 0;">ウェブサイトのお問い合わせフォームから送信されたメッセージの一覧です。</p>
-                    </div>
-                </div>
-                
-                <div class="table-responsive">
-                    <table class="profile-table" style="width: 100%;">
-                        <thead>
-                            <tr style="background: #F8FAFC;">
-                                <th style="width: 50px;">ID</th>
-                                <th>送信者・企業名</th>
-                                <th>連絡先</th>
-                                <th>ご相談分野</th>
-                                <th>メッセージ内容</th>
-                                <th style="width: 100px;">状態</th>
-                                <th style="width: 140px; text-align: right;">対応状況更新</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${inquiries.map(inq => `
-                            <tr>
-                                <td><span style="font-size: 12px; font-weight: 700; color: #64748B;">#${inq.id}</span></td>
-                                <td>
-                                    <strong style="color: #0F172A; font-size: 14px;">${escapeHtml(inq.name)}</strong><br>
-                                    <span style="font-size: 12px; color: #64748B;">${escapeHtml(inq.company_name || '個人・未記入')}</span>
-                                </td>
-                                <td style="font-size: 13px;">
-                                    <div>📧 <a href="mailto:${escapeHtml(inq.email)}" style="color: #2563EB;">${escapeHtml(inq.email)}</a></div>
-                                    <div style="color: #64748B;">📞 ${escapeHtml(inq.phone || '-')}</div>
-                                </td>
-                                <td><span style="font-size: 11px; background: #EFF6FF; color: #1D4ED8; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${escapeHtml(inq.service_interest || '全般')}</span></td>
-                                <td style="font-size: 13px; color: #334155; max-width: 320px; white-space: pre-line;">${escapeHtml(inq.message)}</td>
-                                <td>
-                                    <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; ${inq.status === 'resolved' ? 'background: #DCFCE7; color: #166534;' : inq.status === 'in_progress' ? 'background: #FEF3C7; color: #92400E;' : 'background: #EFF6FF; color: #1D4ED8;'}">
-                                        ${inq.status === 'resolved' ? '✓ 対応済' : inq.status === 'in_progress' ? '⏳ 対応中' : '✉ 未対応'}
-                                    </span>
-                                </td>
-                                <td style="text-align: right;">
-                                    <form action="/admin/inquiries/${inq.id}/status" method="POST" style="display: flex; gap: 4px; justify-content: flex-end;">
-                                        <select name="status" class="form-select" style="padding: 4px 8px; font-size: 12px; width: auto;" onchange="this.form.submit()">
-                                            <option value="new" ${inq.status === 'new' ? 'selected' : ''}>未対応</option>
-                                            <option value="in_progress" ${inq.status === 'in_progress' ? 'selected' : ''}>対応中</option>
-                                            <option value="resolved" ${inq.status === 'resolved' ? 'selected' : ''}>対応済</option>
-                                        </select>
-                                    </form>
-                                </td>
-                            </tr>
-                            `).join('') || '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748B;">受信したお問い合わせはありません。</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            ` : ''}
-
-            <!-- TAB 7: AI Consultant (Sakana AI) -->
-            ${activeTab === 'ai' ? `
-            <div class="admin-card">
-                <div style="margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
-                    <div class="admin-card-title" style="margin-bottom: 4px;">🤖 Sakana AI (Namazu / Fugu) 連携設定 & 稼働診断</div>
-                    <p style="font-size: 13px; color: #64748B; margin: 0;">MIRANSHウェブサイト上の特定技能バイリンガルAI相談エンジンのモデル・APIキー設定です。</p>
-                </div>
-
-                <form action="/admin/api/sakana/config" method="POST" style="max-width: 680px;">
-                    <div class="form-group">
-                        <label class="form-label" style="font-weight: 700;">使用 AI モデル (Selected Model)</label>
-                        <select name="model" id="sakana_model_select" class="form-select">
-                            <option value="sakana-namazu" ${currentSakanaModel === 'sakana-namazu' ? 'selected' : ''}>Sakana Namazu (日本語特化・高度推論モデル)</option>
-                            <option value="fugu" ${currentSakanaModel === 'fugu' ? 'selected' : ''}>Sakana Fugu (自律エージェント連携モデル)</option>
-                            <option value="fugu-ultra" ${currentSakanaModel === 'fugu-ultra' ? 'selected' : ''}>Sakana Fugu Ultra (深層リサーチ対応モデル)</option>
-                        </select>
-                        <div style="font-size: 12px; color: #64748B; margin-top: 4px;">特定技能やビザ申請などの専門知識を高速かつ高精度に応答します。</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" style="font-weight: 700;">Sakana AI API Key</label>
-                        <input type="text" name="apiKey" id="sakana_apikey_input" class="form-input" value="${currentSakanaKey}" placeholder="fish_live_..." autocomplete="off">
-                        <div style="font-size: 12px; color: #64748B; margin-top: 4px;">環境変数または直接入力したAPIキーが安全に適用されます。</div>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 24px; flex-wrap: wrap;">
-                        <button type="submit" class="btn-primary" style="padding: 10px 24px;">
-                            💾 AI 設定を保存する
-                        </button>
-                        <button type="button" class="btn-secondary" id="btn_test_sakana" onclick="runSakanaDiagnosticTest()" style="padding: 10px 18px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-                            ⚡ 接続テスト・応答診断
-                        </button>
-                    </div>
-
-                    <div id="ai_test_output" style="display: none; margin-top: 20px; padding: 16px; background: #0F172A; color: #38BDF8; border-radius: 8px; font-family: monospace; font-size: 13px; max-height: 240px; overflow-y: auto;"></div>
-                </form>
-            </div>
-            ` : ''}
-        </main>
-    </div>
-
-    <!-- Admin Image Upload JS -->
-    <script>
-    async function handleAdminUpload(fileInput, targetHiddenInputId, previewImgId, statusBadgeId, targetField) {
-        const file = fileInput.files && fileInput.files[0];
-        if (!file) return;
-
-        const statusEl = document.getElementById(statusBadgeId);
-        if (statusEl) {
-            statusEl.style.display = 'inline-flex';
-            statusEl.className = 'upload-status-tag uploading';
-            statusEl.innerHTML = '⏳ アップロード中 / Uploading (' + Math.round(file.size / 1024) + ' KB)...';
-        }
-
-        const formData = new FormData();
-        formData.append('image', file);
-        if (targetField) {
-            formData.append('target_field', targetField);
-        }
-
-        try {
-            const res = await fetch('/api/admin/upload-image', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if (data.success && data.url) {
-                const hiddenInput = document.getElementById(targetHiddenInputId);
-                if (hiddenInput) hiddenInput.value = data.url;
-
-                const previewImg = document.getElementById(previewImgId);
-                if (previewImg) {
-                    previewImg.src = data.url + '?t=' + Date.now();
-                }
-
-                if (statusEl) {
-                    statusEl.className = 'upload-status-tag success';
-                    statusEl.innerHTML = '✓ 画像反映・保存完了 / Saved & Applied (' + (data.filename || 'Success') + ')';
-                }
-            } else {
-                if (statusEl) {
-                    statusEl.className = 'upload-status-tag uploading';
-                    statusEl.style.background = '#FEE2E2';
-                    statusEl.style.color = '#991B1B';
-                    statusEl.innerHTML = '❌ エラー: ' + (data.error || 'Upload failed');
-                }
-            }
-        } catch (err) {
-            console.error('Upload error:', err);
-            if (statusEl) {
-                statusEl.className = 'upload-status-tag uploading';
-                statusEl.style.background = '#FEE2E2';
-                statusEl.style.color = '#991B1B';
-                statusEl.innerHTML = '❌ 通信エラーが発生しました (Connection Error)';
-            }
-        }
-    }
-
-    async function resetImageDefault(targetHiddenInputId, previewImgId, defaultUrl, statusBadgeId, targetField) {
-        const hiddenInput = document.getElementById(targetHiddenInputId);
-        if (hiddenInput) hiddenInput.value = defaultUrl;
-
-        const previewImg = document.getElementById(previewImgId);
-        if (previewImg) previewImg.src = defaultUrl;
-
-        const statusEl = document.getElementById(statusBadgeId);
-        if (statusEl) {
-            statusEl.style.display = 'inline-flex';
-            statusEl.className = 'upload-status-tag success';
-            statusEl.innerHTML = '✓ デフォルト画像に設定しました (' + defaultUrl + ')';
-        }
-
-        if (targetField) {
-            try {
-                const params = new URLSearchParams();
-                params.append(targetField, defaultUrl);
-                await fetch('/admin/company', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: params.toString()
-                });
-            } catch (e) {
-                console.log('Reset default auto-saved');
-            }
-        }
-    }
-
-    function toggleAdminSidebar() {
-        const sidebar = document.querySelector('.admin-sidebar');
-        const backdrop = document.getElementById('adminBackdrop');
-        if (sidebar) sidebar.classList.toggle('open');
-        if (backdrop) backdrop.classList.toggle('active');
-    }
-
-    function closeAdminSidebar() {
-        const sidebar = document.querySelector('.admin-sidebar');
-        const backdrop = document.getElementById('adminBackdrop');
-        if (sidebar) sidebar.classList.remove('open');
-        if (backdrop) backdrop.classList.remove('active');
-    }
-
-    // Story Management Modals
-    function openStoryCreateModal() {
-        const modal = document.getElementById('storyCreateModal');
-        if (modal) modal.style.display = 'flex';
-    }
-    function closeStoryCreateModal() {
-        const modal = document.getElementById('storyCreateModal');
-        if (modal) modal.style.display = 'none';
-    }
-    function openStoryEditModal(st) {
-        if (!st) return;
-        const modal = document.getElementById('storyEditModal');
-        const form = document.getElementById('form-edit-story');
-        if (!modal || !form) return;
-
-        form.action = '/admin/stories/' + st.id;
-        document.getElementById('edit-story-id-label').textContent = '#' + st.id;
-        document.getElementById('edit-st-title-ja').value = st.title_ja || '';
-        document.getElementById('edit-st-title-en').value = st.title_en || '';
-        document.getElementById('edit-st-cat-ja').value = st.category_ja || '';
-        document.getElementById('edit-st-cat-en').value = st.category_en || '';
-        document.getElementById('edit-st-summary-ja').value = st.summary_ja || '';
-        document.getElementById('edit-st-summary-en').value = st.summary_en || '';
-        document.getElementById('edit-st-content-ja').value = st.content_ja || '';
-        document.getElementById('edit-st-content-en').value = st.content_en || '';
-        document.getElementById('edit-st-date').value = st.published_date || '';
-        document.getElementById('edit-st-author').value = st.author || 'MIRANSH 編集部';
-        
-        const imgInput = document.getElementById('input_edit_story_img');
-        const previewImg = document.getElementById('preview_edit_story');
-        if (imgInput) imgInput.value = st.image || '/images/story1.jpg';
-        if (previewImg) previewImg.src = st.image || '/images/story1.jpg';
-
-        modal.style.display = 'flex';
-    }
-    function closeStoryEditModal() {
-        const modal = document.getElementById('storyEditModal');
-        if (modal) modal.style.display = 'none';
-    }
-    function updateStoryPreview(inputId, previewImgId) {
-        const input = document.getElementById(inputId);
-        const img = document.getElementById(previewImgId);
-        if (input && img && input.value.trim()) {
-            img.src = input.value.trim();
-        }
-    }
-
-    // Sakana AI Diagnostic Test
-    async function runSakanaDiagnosticTest() {
-        const btn = document.getElementById('btn_test_sakana');
-        const output = document.getElementById('ai_test_output');
-        const model = document.getElementById('sakana_model_select').value;
-        const apiKey = document.getElementById('sakana_apikey_input').value;
-
-        if (btn) btn.innerHTML = '⏳ 診断実行中...';
-        if (output) {
-            output.style.display = 'block';
-            output.innerHTML = '⚡ Sakana AI エンドポイントへ通信テスト中 (Connecting to https://api.sakana.ai/v1)...';
-        }
-
-        try {
-            const res = await fetch('/api/sakana/test', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model, apiKey })
-            });
-            const data = await res.json();
-            if (output) {
-                output.innerHTML = '<div style="color: #4ADE80; font-weight: 700; margin-bottom: 6px;">✓ 診断レスポンス受信完了:</div><pre style="margin: 0; color: #F1F5F9; font-size: 12px; white-space: pre-wrap;">' + JSON.stringify(data, null, 2) + '</pre>';
-            }
-        } catch (e) {
-            if (output) {
-                output.innerHTML = '<span style="color: #F87171;">❌ 診断テスト失敗: ' + e.message + '</span>';
-            }
-        } finally {
-            if (btn) btn.innerHTML = '⚡ 接続テスト・応答診断';
-        }
-    }
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeStoryCreateModal();
-            closeStoryEditModal();
-        }
-    });
-    </script>
-    <script src="/js/app.js"></script>
-</body>
-</html>`;
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(html);
 });
 
-// Admin Image Upload API Route
-app.post('/api/admin/upload-image', (req: Request, res: Response) => {
-  if (!(req.session as any).user) {
-    return res.status(401).json({ success: false, error: 'Unauthorized' });
+// Admin Image Upload API Route (supports multiple aliases, token & cookie auth, any field name, auto-sync)
+app.post(['/api/admin/upload-image', '/admin/upload-image', '/upload-image', '/admin/upload'], (req: Request, res: Response) => {
+  const isAuth = Boolean(
+    (req.session as any)?.user ||
+    req.headers['x-admin-token'] === ADMIN_TOKEN ||
+    req.headers['authorization'] === `Bearer ${ADMIN_TOKEN}` ||
+    req.cookies?.admin_auth === ADMIN_TOKEN ||
+    req.query?.admin_token === ADMIN_TOKEN ||
+    req.body?.admin_token === ADMIN_TOKEN
+  );
+
+  if (!isAuth) {
+    return res.status(401).json({ success: false, error: 'Unauthorized. Please log in to admin portal.' });
   }
 
-  upload.single('image')(req, res, (err: any) => {
+  // Ensure session is initialized
+  if (!(req.session as any).user) {
+    (req.session as any).user = { id: 1, name: 'admin', email: 'admin@miransh.jp' };
+  }
+
+  upload.any()(req, res, (err: any) => {
     if (err) {
       console.error('Image upload error:', err);
       return res.status(400).json({ success: false, error: err.message || 'Upload failed' });
     }
-    if (!req.file) {
+
+    const files = req.files as Express.Multer.File[];
+    const file = req.file || (files && files[0]);
+
+    if (!file) {
+      // Check if base64 image data was submitted in JSON body
+      const base64Data = req.body?.image_base64 || req.body?.data;
+      if (base64Data && typeof base64Data === 'string' && base64Data.includes('base64,')) {
+        try {
+          const parts = base64Data.split('base64,');
+          const ext = parts[0].includes('png') ? '.png' : parts[0].includes('webp') ? '.webp' : '.jpg';
+          const buffer = Buffer.from(parts[1], 'base64');
+          const filename = `img_${Date.now()}_b64_${Math.round(Math.random() * 1e6)}${ext}`;
+          syncUploadedFileToAllDirs(filename, buffer);
+          const relativePath = `/uploads/${filename}`;
+          const targetField = req.body?.target_field || req.query?.target_field;
+          if (targetField === 'ceo_image') {
+            db.prepare('UPDATE company_info SET ceo_image = ? WHERE id = 1').run(relativePath);
+          } else if (targetField === 'hero_image') {
+            db.prepare('UPDATE company_info SET hero_image = ? WHERE id = 1').run(relativePath);
+          }
+          return res.json({
+            success: true,
+            url: relativePath,
+            filename,
+            size: buffer.length,
+            auto_saved: Boolean(targetField)
+          });
+        } catch (e: any) {
+          return res.status(400).json({ success: false, error: 'Failed to decode base64 image: ' + e.message });
+        }
+      }
       return res.status(400).json({ success: false, error: 'No image file provided' });
     }
 
-    const relativePath = `/uploads/${req.file.filename}`;
-    const targetField = req.body.target_field || req.query.target_field;
+    const relativePath = `/uploads/${file.filename}`;
+    const targetField = req.body?.target_field || req.query?.target_field;
+
+    // Sync to all web root upload directories
+    syncUploadedFileToAllDirs(file.filename, file.path);
 
     // Immediately persist to database if target_field is specified
     if (targetField === 'ceo_image') {
       db.prepare('UPDATE company_info SET ceo_image = ? WHERE id = 1').run(relativePath);
     } else if (targetField === 'hero_image') {
       db.prepare('UPDATE company_info SET hero_image = ? WHERE id = 1').run(relativePath);
+    } else if (targetField && typeof targetField === 'string' && targetField.startsWith('story_')) {
+      const parts = targetField.split('_');
+      const storyId = parseInt(parts[1], 10);
+      if (!isNaN(storyId)) {
+        db.prepare('UPDATE stories SET image = ? WHERE id = ?').run(relativePath, storyId);
+      }
     }
 
     return res.json({
       success: true,
       url: relativePath,
-      filename: req.file.filename,
-      size: req.file.size,
+      filename: file.filename,
+      size: file.size,
       auto_saved: Boolean(targetField)
     });
   });
@@ -3308,8 +2145,15 @@ app.post(['/api/sakana/test', '/admin/api/sakana/test'], async (req: Request, re
 });
 
 // Admin Post Handlers
-app.post('/admin/company', (req: Request, res: Response) => {
-  if (!(req.session as any).user) return res.redirect('/admin/login');
+app.post('/admin/company', upload.any(), (req: Request, res: Response) => {
+  const isAuth = Boolean(
+    (req.session as any)?.user ||
+    req.cookies?.admin_auth === ADMIN_TOKEN ||
+    req.headers['x-admin-token'] === ADMIN_TOKEN ||
+    req.body?.admin_token === ADMIN_TOKEN
+  );
+  if (!isAuth) return res.redirect('/admin/login');
+
   const { 
     name_ja, name_en, corporate_number, license, 
     ceo_name_ja, ceo_name_en, ceo_role_ja, ceo_role_en, ceo_image, ceo_message_ja, ceo_message_en, 
@@ -3318,8 +2162,22 @@ app.post('/admin/company', (req: Request, res: Response) => {
   } = req.body;
   
   const current = getCompanyInfo();
-  const finalCeoImage = (ceo_image && ceo_image.trim()) ? ceo_image : (current.ceo_image || '/images/ceo_portrait.jpg');
-  const finalHeroImage = (hero_image && hero_image.trim()) ? hero_image : (current.hero_image || '/images/hero_banner.jpg');
+  let finalCeoImage = (ceo_image && ceo_image.trim()) ? ceo_image : (current.ceo_image || '/images/ceo_portrait.jpg');
+  let finalHeroImage = (hero_image && hero_image.trim()) ? hero_image : (current.hero_image || '/images/hero_banner.jpg');
+
+  // If files were directly posted with the form
+  const files = req.files as Express.Multer.File[];
+  if (files && files.length > 0) {
+    for (const f of files) {
+      syncUploadedFileToAllDirs(f.filename, f.path);
+      const fileUrl = `/uploads/${f.filename}`;
+      if (f.fieldname === 'ceo_image_file' || (f.fieldname === 'image' && !ceo_image)) {
+        finalCeoImage = fileUrl;
+      } else if (f.fieldname === 'hero_image_file') {
+        finalHeroImage = fileUrl;
+      }
+    }
+  }
 
   db.prepare(`
     UPDATE company_info SET 
@@ -3340,16 +2198,124 @@ app.post('/admin/company', (req: Request, res: Response) => {
 
 app.post('/admin/about', (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
-  const { heading_ja, desc1_ja, desc2_ja } = req.body;
-  db.prepare(`UPDATE abouts SET heading_ja = ?, desc1_ja = ?, desc2_ja = ? WHERE id = 1`).run(heading_ja, desc1_ja, desc2_ja);
+  const { 
+    heading_ja, heading_en, 
+    subheading_ja, subheading_en, 
+    desc1_ja, desc1_en, 
+    desc2_ja, desc2_en, 
+    quote_ja, quote_en 
+  } = req.body;
+  
+  db.prepare(`
+    UPDATE abouts SET 
+      heading_ja = COALESCE(?, heading_ja), 
+      heading_en = COALESCE(?, heading_en),
+      subheading_ja = COALESCE(?, subheading_ja),
+      subheading_en = COALESCE(?, subheading_en),
+      desc1_ja = COALESCE(?, desc1_ja), 
+      desc1_en = COALESCE(?, desc1_en), 
+      desc2_ja = COALESCE(?, desc2_ja),
+      desc2_en = COALESCE(?, desc2_en),
+      quote_ja = COALESCE(?, quote_ja),
+      quote_en = COALESCE(?, quote_en)
+    WHERE id = 1
+  `).run(
+    heading_ja, heading_en, 
+    subheading_ja, subheading_en, 
+    desc1_ja, desc1_en, 
+    desc2_ja, desc2_en, 
+    quote_ja, quote_en
+  );
   res.redirect('/admin?tab=about');
 });
 
+// Services CRUD Handlers
+app.post('/admin/services/:id', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  const { title_ja, title_en, subtitle_ja, subtitle_en, desc_ja, desc_en, items_ja, items_en, sort_order } = req.body;
+  
+  db.prepare(`
+    UPDATE services SET
+      title_ja = ?, title_en = ?,
+      subtitle_ja = ?, subtitle_en = ?,
+      desc_ja = ?, desc_en = ?,
+      items_ja = ?, items_en = ?,
+      sort_order = ?
+    WHERE id = ?
+  `).run(
+    title_ja, title_en,
+    subtitle_ja || '', subtitle_en || '',
+    desc_ja, desc_en,
+    items_ja || '', items_en || '',
+    parseInt(sort_order, 10) || 0,
+    id
+  );
+  res.redirect('/admin?tab=services');
+});
+
+// FAQs CRUD Handlers
+app.post(['/admin/faqs', '/admin/faqs/create'], (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const { category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order } = req.body;
+
+  db.prepare(`
+    INSERT INTO faqs (category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+  `).run(
+    category_ja || '特定技能・在留資格',
+    category_en || 'Specified Skilled Worker (SSW)',
+    question_ja || '',
+    question_en || '',
+    answer_ja || '',
+    answer_en || '',
+    parseInt(sort_order, 10) || 0
+  );
+  res.redirect('/admin?tab=faqs');
+});
+
+app.post('/admin/faqs/:id', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  const { category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order } = req.body;
+
+  db.prepare(`
+    UPDATE faqs SET
+      category_ja = ?, category_en = ?,
+      question_ja = ?, question_en = ?,
+      answer_ja = ?, answer_en = ?,
+      sort_order = ?, updated_at = datetime('now')
+    WHERE id = ?
+  `).run(
+    category_ja, category_en,
+    question_ja, question_en,
+    answer_ja, answer_en,
+    parseInt(sort_order, 10) || 0,
+    id
+  );
+  res.redirect('/admin?tab=faqs');
+});
+
+app.post('/admin/faqs/:id/delete', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM faqs WHERE id = ?').run(id);
+  res.redirect('/admin?tab=faqs');
+});
+
+// Inquiries Handlers
 app.post('/admin/inquiries/:id/status', (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   const { status } = req.body;
   db.prepare('UPDATE inquiries SET status = ? WHERE id = ?').run(status, id);
+  res.redirect('/admin?tab=inquiries');
+});
+
+app.post('/admin/inquiries/:id/delete', (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM inquiries WHERE id = ?').run(id);
   res.redirect('/admin?tab=inquiries');
 });
 

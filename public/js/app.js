@@ -7,12 +7,14 @@ function setLanguage(language) {
 
     const enBtns = [
         document.getElementById("enBtn"),
-        document.getElementById("btn-lang-en")
+        document.getElementById("btn-lang-en"),
+        document.getElementById("btn-mobile-lang-en")
     ].filter(Boolean);
 
     const jaBtns = [
         document.getElementById("jaBtn"),
-        document.getElementById("btn-lang-ja")
+        document.getElementById("btn-lang-ja"),
+        document.getElementById("btn-mobile-lang-ja")
     ].filter(Boolean);
 
     if (language === "en") {
@@ -27,6 +29,18 @@ function setLanguage(language) {
         document.title = "MIRANSH合同会社 | 国際人材紹介・留学生紹介";
     }
 
+    // Dynamically update input and textarea placeholders for 100% complete translation
+    document.querySelectorAll("[data-placeholder-" + language + "]").forEach(el => {
+        const ph = el.getAttribute("data-placeholder-" + language);
+        if (ph) el.setAttribute("placeholder", ph);
+    });
+
+    // Dynamically update select option labels for bilingual display
+    document.querySelectorAll("option[data-" + language + "]").forEach(el => {
+        const optText = el.getAttribute("data-" + language);
+        if (optText) el.textContent = optText;
+    });
+
     try {
         localStorage.setItem("miransh_language", language);
     } catch (e) {
@@ -38,8 +52,9 @@ function setLanguage(language) {
 function toggleMobileNav() {
     const drawer = document.getElementById("mobile-nav-drawer");
     if (!drawer) return;
+    drawer.classList.toggle("active");
     drawer.classList.toggle("open");
-    if (drawer.classList.contains("open")) {
+    if (drawer.classList.contains("active") || drawer.classList.contains("open")) {
         document.body.style.overflow = "hidden";
     } else {
         document.body.style.overflow = "";

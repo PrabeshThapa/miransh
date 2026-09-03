@@ -199,7 +199,7 @@ header {
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    flex-shrink: 1;
+    flex-shrink: 0;
     min-width: 0;
 }
 
@@ -2199,7 +2199,8 @@ footer {
     transition: opacity 0.3s ease;
 }
 
-.mobile-nav-drawer.active {
+.mobile-nav-drawer.active,
+.mobile-nav-drawer.open {
     display: block;
     opacity: 1;
 }
@@ -2221,7 +2222,8 @@ footer {
     -webkit-overflow-scrolling: touch;
 }
 
-.mobile-nav-drawer.active .mobile-nav-content {
+.mobile-nav-drawer.active .mobile-nav-content,
+.mobile-nav-drawer.open .mobile-nav-content {
     transform: translateX(0);
 }
 
@@ -2457,13 +2459,92 @@ footer {
     }
 }
 
-/* Standard Mobile & Phablet (max-width: 768px) */
-@media (max-width: 768px) {
+/* Compact Desktop Viewports (1081px - 1240px) */
+@media (min-width: 1081px) and (max-width: 1240px) {
+    .navbar {
+        gap: 8px;
+    }
+
+    .brand-wrapper {
+        flex-shrink: 0;
+    }
+
+    .brand-title {
+        font-size: 16px;
+    }
+
+    .brand-subtitle {
+        font-size: 10px;
+    }
+
+    .nav-links {
+        gap: 12px;
+    }
+
+    .nav-link {
+        font-size: 13px;
+        padding: 6px 0;
+    }
+
+    .btn-header-cta {
+        padding: 7px 11px;
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    .lang-btn {
+        padding: 3px 7px;
+        font-size: 11px;
+    }
+}
+
+/* Tablet & Medium Screen Header Navigation (max-width: 1080px) */
+@media (max-width: 1080px) {
+    .navbar {
+        min-height: 60px;
+        gap: 10px;
+    }
+
     .nav-links {
         display: none !important;
     }
 
+    .mobile-menu-btn {
+        display: inline-flex !important;
+    }
+
+    .brand-wrapper {
+        flex-shrink: 0;
+    }
+
+    .brand-title {
+        font-size: 16px;
+    }
+
+    .brand-subtitle {
+        font-size: 11px;
+    }
+
+    .nav-right-actions {
+        gap: 8px;
+    }
+
     .btn-header-cta {
+        display: inline-flex !important;
+        padding: 7px 12px;
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    .lang-btn {
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Standard Mobile & Phablet (max-width: 768px) */
+@media (max-width: 768px) {
+    .nav-links {
         display: none !important;
     }
 
@@ -2473,10 +2554,6 @@ footer {
 
     .brand-title {
         font-size: clamp(15px, 4vw, 18px);
-    }
-
-    .brand-subtitle {
-        display: none;
     }
 
     .hero-section {
@@ -2605,6 +2682,21 @@ footer {
 
     .faq-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Smartphones & Small Phablets (max-width: 680px) */
+@media (max-width: 680px) {
+    .btn-header-cta {
+        display: none !important;
+    }
+
+    .brand-subtitle {
+        display: none !important;
+    }
+
+    .brand-title {
+        font-size: clamp(14px, 4vw, 17px) !important;
     }
 }
 
