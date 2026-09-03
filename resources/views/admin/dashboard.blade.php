@@ -272,7 +272,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%;background:white">
+                <img src="/images/logo-icon.png" alt="MIRANSH" style="width: 30px; height: 30px; border-radius: 50%; background: white;">
                 <span style="font-weight: 800; font-size: 15px; color: #FFFFFF;">MIRANSH Admin</span>
             </div>
         </div>
@@ -301,7 +301,7 @@
         <aside class="admin-sidebar">
             <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="/images/logo-icon.png" alt="MIRANSH LLC" style="width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;">
+                    <img src="/images/logo-icon.png" alt="MIRANSH LLC" style="width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; background: white">
                     <div>
                         <div style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.02em;">MIRANSH Admin</div>
                         <!-- <div style="font-size: 11px; color: #94A3B8;">Laravel Content Manager</div> -->
