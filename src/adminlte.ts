@@ -677,7 +677,7 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
                     <div class="text-xs text-muted mb-2">または下のボタンから写真ファイルを選択</div>
                     <label class="btn btn-sm btn-primary mb-0 shadow-sm">
                       <i class="fas fa-folder-open mr-1"></i> 写真を選択して即時反映
-                      <input type="file" accept="image/*" style="display: none;" onchange="uploadAdminImageFile(this, 'ceo_image')">
+                      <input type="file" name="ceo_image_file" accept="image/*" style="display: none;" onchange="uploadAdminImageFile(this, 'ceo_image')">
                     </label>
                   </div>
                   <div id="ceo_upload_status" class="text-xs font-weight-bold"></div>
@@ -708,7 +708,7 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
                     <div class="text-xs text-muted mb-2">または下のボタンから画像ファイルを選択</div>
                     <label class="btn btn-sm btn-primary mb-0 shadow-sm">
                       <i class="fas fa-folder-open mr-1"></i> 画像を選択して即時反映
-                      <input type="file" accept="image/*" style="display: none;" onchange="uploadAdminImageFile(this, 'hero_image')">
+                      <input type="file" name="hero_image_file" accept="image/*" style="display: none;" onchange="uploadAdminImageFile(this, 'hero_image')">
                     </label>
                   </div>
                   <div id="hero_upload_status" class="text-xs font-weight-bold"></div>
@@ -729,7 +729,7 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
                 <i class="fas fa-id-card text-primary mr-1"></i> 企業基本情報およびトップメッセージ設定
               </h3>
             </div>
-            <form action="/admin/company" method="POST">
+            <form action="/admin/company" method="POST" enctype="multipart/form-data">
               <input type="hidden" name="ceo_image" id="input_form_ceo_image" value="${escapeHtml(company.ceo_image || '/images/ceo_portrait.jpg')}">
               <input type="hidden" name="hero_image" id="input_form_hero_image" value="${escapeHtml(company.hero_image || '/images/hero_banner.jpg')}">
               
@@ -1491,6 +1491,20 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
     if (!fileInput.files || !fileInput.files[0]) return;
     const file = fileInput.files[0];
     
+    // Instant preview using local blob URL
+    try {
+      const blobUrl = URL.createObjectURL(file);
+      if (targetField === 'ceo_image') {
+        const ceoPreview = document.getElementById('ceo_photo_preview');
+        if (ceoPreview) ceoPreview.src = blobUrl;
+        const sidebarImg = document.getElementById('sidebar_user_img');
+        if (sidebarImg) sidebarImg.src = blobUrl;
+      } else if (targetField === 'hero_image') {
+        const heroPreview = document.getElementById('hero_banner_preview');
+        if (heroPreview) heroPreview.src = blobUrl;
+      }
+    } catch (e) {}
+
     const statusEl = document.getElementById(targetField === 'ceo_image' ? 'ceo_upload_status' : 'hero_upload_status');
     if (statusEl) {
       statusEl.className = 'text-xs text-primary font-weight-bold';
@@ -1505,29 +1519,50 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
       const res = await fetch('/api/admin/upload-image', {
         method: 'POST',
         headers: {
+          'X-Requested-With': 'XMLHttpRequest',
           'X-Admin-Token': 'miransh_admin_token_2026_auth_ok'
         },
         body: formData
       });
-      const data = await res.json();
-      if (data.success) {
+
+      const rawText = await res.text();
+      let data = null;
+      try {
+        data = JSON.parse(rawText);
+      } catch (jsonErr) {
+        const firstBrace = rawText.indexOf('{');
+        const lastBrace = rawText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          data = JSON.parse(rawText.substring(firstBrace, lastBrace + 1));
+        } else {
+          throw jsonErr;
+        }
+      }
+
+      if (data && data.success && data.url) {
         if (targetField === 'ceo_image') {
-          document.getElementById('ceo_photo_preview').src = data.url;
-          document.getElementById('sidebar_user_img').src = data.url;
-          document.getElementById('input_form_ceo_image').value = data.url;
+          const ceoPreview = document.getElementById('ceo_photo_preview');
+          if (ceoPreview) ceoPreview.src = data.url + '?t=' + Date.now();
+          const sidebarImg = document.getElementById('sidebar_user_img');
+          if (sidebarImg) sidebarImg.src = data.url + '?t=' + Date.now();
+          const hiddenCeo = document.getElementById('input_form_ceo_image');
+          if (hiddenCeo) hiddenCeo.value = data.url;
         } else if (targetField === 'hero_image') {
-          document.getElementById('hero_banner_preview').src = data.url;
-          document.getElementById('input_form_hero_image').value = data.url;
+          const heroPreview = document.getElementById('hero_banner_preview');
+          if (heroPreview) heroPreview.src = data.url + '?t=' + Date.now();
+          const hiddenHero = document.getElementById('input_form_hero_image');
+          if (hiddenHero) hiddenHero.value = data.url;
         }
         if (statusEl) {
           statusEl.className = 'text-xs text-success font-weight-bold';
-          statusEl.innerHTML = '✓ 画像が正常に更新されました';
+          statusEl.innerHTML = '✓ 画像が正常に更新・反映されました (' + (data.filename || '') + ')';
           setTimeout(() => { statusEl.innerHTML = ''; }, 4000);
         }
       } else {
-        throw new Error(data.error || 'Upload error');
+        throw new Error((data && data.error) || 'Upload error');
       }
     } catch (err) {
+      console.error('Upload error:', err);
       if (statusEl) {
         statusEl.className = 'text-xs text-danger font-weight-bold';
         statusEl.innerHTML = '✕ アップロード失敗: ' + err.message;
@@ -1545,14 +1580,33 @@ export function renderAdminLTEDashboard(data: AdminDashboardData): string {
     try {
       const res = await fetch('/api/admin/upload-image', {
         method: 'POST',
-        headers: { 'X-Admin-Token': 'miransh_admin_token_2026_auth_ok' },
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-Admin-Token': 'miransh_admin_token_2026_auth_ok'
+        },
         body: formData
       });
-      const data = await res.json();
-      if (data.success) {
-        document.getElementById(targetInputId).value = data.url;
+
+      const rawText = await res.text();
+      let data = null;
+      try {
+        data = JSON.parse(rawText);
+      } catch (jsonErr) {
+        const firstBrace = rawText.indexOf('{');
+        const lastBrace = rawText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          data = JSON.parse(rawText.substring(firstBrace, lastBrace + 1));
+        } else {
+          throw jsonErr;
+        }
+      }
+
+      if (data && data.success && data.url) {
+        const targetEl = document.getElementById(targetInputId);
+        if (targetEl) targetEl.value = data.url;
       }
     } catch (e) {
+      console.error('Upload error:', e);
       alert('アップロード失敗: ' + e.message);
     }
   }

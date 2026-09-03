@@ -363,7 +363,7 @@
                         会社基本情報・代表者（CEO）設定・ヒーロー設定
                     </h2>
 
-                    <form action="{{ route('admin.company.update', [], false) }}" method="POST">
+                    <form action="{{ route('admin.company.update', [], false) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <h3 style="font-size: 16px; font-weight: 700; color: #2563EB; margin: 16px 0 12px;">1. 代表者（CEO）バイリンガル氏名・役職・写真</h3>
                         
@@ -404,7 +404,7 @@
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                                 <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
                                                     📁 画像ファイルを選択
-                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status', 'ceo_image')">
+                                                    <input type="file" name="ceo_image_file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_ceo_image', 'preview_ceo_image', 'preview_ceo_status', 'ceo_image')">
                                                 </label>
                                                 <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_ceo_image', 'preview_ceo_image', '/images/abc.jpeg', 'preview_ceo_status', 'ceo_image')">
                                                     🔄 デフォルト写真に戻す
@@ -448,7 +448,7 @@
                                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                                 <label class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer;">
                                                     📁 バナー画像を選択
-                                                    <input type="file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_image', 'preview_hero_status', 'hero_image')">
+                                                    <input type="file" name="hero_image_file" accept="image/*" style="display: none;" onchange="handleAdminUpload(this, 'input_hero_image', 'preview_hero_image', 'preview_hero_status', 'hero_image')">
                                                 </label>
                                                 <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="resetImageDefault('input_hero_image', 'preview_hero_image', '/images/hero_banner.jpg', 'preview_hero_status', 'hero_image')">
                                                     🔄 デフォルトバナーに戻す
@@ -1642,6 +1642,11 @@
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;
 
+            const previewImg = document.getElementById(previewImgId);
+            if (previewImg) {
+                try { previewImg.src = URL.createObjectURL(file); } catch (e) {}
+            }
+
             const statusEl = document.getElementById(statusBadgeId);
             if (statusEl) {
                 statusEl.style.color = '#92400E';
@@ -1654,14 +1659,31 @@
             try {
                 const res = await fetch('/api/admin/upload-image', {
                     method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-Admin-Token': 'miransh_admin_token_2026_auth_ok'
+                    },
                     body: formData
                 });
-                const data = await res.json();
-                if (data.success && data.url) {
+
+                const rawText = await res.text();
+                let data = null;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (jsonErr) {
+                    const firstBrace = rawText.indexOf('{');
+                    const lastBrace = rawText.lastIndexOf('}');
+                    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                        data = JSON.parse(rawText.substring(firstBrace, lastBrace + 1));
+                    } else {
+                        throw jsonErr;
+                    }
+                }
+
+                if (data && data.success && data.url) {
                     const hiddenInput = document.getElementById(targetHiddenInputId);
                     if (hiddenInput) hiddenInput.value = data.url;
 
-                    const previewImg = document.getElementById(previewImgId);
                     if (previewImg) previewImg.src = data.url + '?t=' + Date.now();
 
                     if (statusEl) {
@@ -1671,10 +1693,11 @@
                 } else {
                     if (statusEl) {
                         statusEl.style.color = '#DC2626';
-                        statusEl.innerHTML = '❌ ' + (data.error || 'Failed');
+                        statusEl.innerHTML = '❌ ' + ((data && data.error) || 'Failed');
                     }
                 }
             } catch (err) {
+                console.error('Story upload error:', err);
                 if (statusEl) {
                     statusEl.style.color = '#DC2626';
                     statusEl.innerHTML = '❌ アップロードエラー';
@@ -1764,6 +1787,12 @@
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;
 
+            // Immediately show preview from local blob URL
+            const previewImg = document.getElementById(previewImgId);
+            if (previewImg) {
+                try { previewImg.src = URL.createObjectURL(file); } catch (e) {}
+            }
+
             const statusEl = document.getElementById(statusBadgeId);
             if (statusEl) {
                 statusEl.style.color = '#92400E';
@@ -1779,14 +1808,33 @@
             try {
                 const res = await fetch('/api/admin/upload-image', {
                     method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-Admin-Token': 'miransh_admin_token_2026_auth_ok'
+                    },
                     body: formData
                 });
-                const data = await res.json();
-                if (data.success && data.url) {
-                    const hiddenInput = document.getElementById(targetHiddenInputId);
-                    if (hiddenInput) hiddenInput.value = data.url;
 
-                    const previewImg = document.getElementById(previewImgId);
+                const rawText = await res.text();
+                let data = null;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (jsonErr) {
+                    const firstBrace = rawText.indexOf('{');
+                    const lastBrace = rawText.lastIndexOf('}');
+                    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                        data = JSON.parse(rawText.substring(firstBrace, lastBrace + 1));
+                    } else {
+                        throw jsonErr;
+                    }
+                }
+
+                if (data && data.success && data.url) {
+                    const hiddenInput = document.getElementById(targetHiddenInputId);
+                    if (hiddenInput) {
+                        hiddenInput.value = data.url;
+                    }
+
                     if (previewImg) {
                         previewImg.src = data.url + '?t=' + Date.now();
                     }
@@ -1798,14 +1846,14 @@
                 } else {
                     if (statusEl) {
                         statusEl.style.color = '#DC2626';
-                        statusEl.innerHTML = '❌ エラー: ' + (data.error || 'Upload failed');
+                        statusEl.innerHTML = '❌ エラー: ' + ((data && data.error) || 'Upload failed');
                     }
                 }
             } catch (err) {
                 console.error('Upload error:', err);
                 if (statusEl) {
                     statusEl.style.color = '#DC2626';
-                    statusEl.innerHTML = '❌ 通信エラーが発生しました (Connection Error)';
+                    statusEl.innerHTML = '❌ 通信エラーが発生しました: ' + err.message;
                 }
             }
         }
