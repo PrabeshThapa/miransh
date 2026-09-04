@@ -119,6 +119,29 @@
 
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
+            <!-- Language Switcher Dropdown -->
+            @php
+                $currLang = request()->cookie('admin_lang', session('admin_lang', 'ja'));
+            @endphp
+            <li class="nav-item dropdown">
+                <a class="nav-link font-weight-bold" data-toggle="dropdown" href="#" title="Switch Language / 言語切替">
+                    <i class="fas fa-globe mr-1 text-primary"></i>
+                    <span>{{ $currLang === 'en' ? 'EN' : '日本語' }}</span>
+                    <i class="fas fa-caret-down ml-1 text-xs"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <span class="dropdown-header text-xs text-uppercase font-weight-bold">Select Language / 言語切替</span>
+                    <a href="/admin/lang/ja" class="dropdown-item {{ $currLang === 'ja' ? 'active font-weight-bold' : '' }}">
+                        <i class="fas fa-check mr-2 {{ $currLang === 'ja' ? '' : 'text-transparent' }}"></i>
+                        🇯🇵 日本語 (Japanese)
+                    </a>
+                    <a href="/admin/lang/en" class="dropdown-item {{ $currLang === 'en' ? 'active font-weight-bold' : '' }}">
+                        <i class="fas fa-check mr-2 {{ $currLang === 'en' ? '' : 'text-transparent' }}"></i>
+                        🇺🇸 English (英語)
+                    </a>
+                </div>
+            </li>
+
             <!-- Inquiries Notifications Dropdown -->
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">

@@ -19,6 +19,7 @@ import {
   renderPasswordContent,
   renderAiContent
 } from './src/admin/pages.ts';
+import { i18n, AdminLang } from './src/admin/i18n.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1864,16 +1865,46 @@ app.post('/api/sakana/translate-job', async (req: Request, res: Response) => {
   });
 });
 
+// Helper to get active admin language (from query, cookie, or session)
+function getAdminLang(req: Request, res?: Response): AdminLang {
+  const qLang = req.query.lang as string;
+  if (qLang === 'en' || qLang === 'ja') {
+    if ((req.session as any)) (req.session as any).adminLang = qLang;
+    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
+    return qLang;
+  }
+  const sessionLang = (req.session as any)?.adminLang;
+  if (sessionLang === 'en' || sessionLang === 'ja') {
+    return sessionLang;
+  }
+  const cookieLang = req.cookies?.admin_lang;
+  if (cookieLang === 'en' || cookieLang === 'ja') {
+    return cookieLang;
+  }
+  return 'ja';
+}
+
 // ----------------------------------------------------
 // Admin Authentication & Dashboard
 // ----------------------------------------------------
+app.get('/admin/lang/:lang', (req: Request, res: Response) => {
+  const newLang = req.params.lang === 'en' ? 'en' : 'ja';
+  (req.session as any).adminLang = newLang;
+  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
+  const referer = req.header('Referer') || '/admin';
+  const cleanReferer = referer.replace(/([?&])lang=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+  res.redirect(cleanReferer);
+});
+
 app.get('/admin/login', (req: Request, res: Response) => {
   if ((req.session as any)?.user) {
     return res.redirect('/admin');
   }
 
-  const error = req.query.error ? '認証情報が正しくありません。正しいユーザー名・パスワードを入力してください。' : undefined;
-  const html = renderAdminLTELogin(error);
+  const lang = getAdminLang(req, res);
+  const error = req.query.error ? (lang === 'en' ? 'Invalid credentials. Please enter correct username and password.' : '認証情報が正しくありません。正しいユーザー名・パスワードを入力してください。') : undefined;
+  const success = req.query.logout ? (lang === 'en' ? 'You have logged out successfully.' : 'ログアウトしました。') : undefined;
+  const html = renderAdminLTELogin(error, success, lang);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(html);
 });
@@ -1936,27 +1967,28 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-function getAdminFlash(req: Request): { type: 'success' | 'danger' | 'info' | 'warning'; message: string } | undefined {
+function getAdminFlash(req: Request, lang: AdminLang = 'ja'): { type: 'success' | 'danger' | 'info' | 'warning'; message: string } | undefined {
+  const t = i18n[lang].flash;
   if (req.query.saved === 'true') {
-    return { type: 'success', message: '設定内容を正常に保存・更新しました。' };
+    return { type: 'success', message: t.saved };
   }
   if (req.query.deleted === 'true') {
-    return { type: 'success', message: '項目を正常に削除しました。' };
+    return { type: 'success', message: t.deleted };
   }
   if (req.query.updated === 'true') {
-    return { type: 'success', message: 'ステータスを正常に更新しました。' };
+    return { type: 'success', message: t.statusUpdated };
   }
   if (req.query.success === 'password_updated') {
-    return { type: 'success', message: '管理者パスワードを正常に変更しました。新しいパスワードが有効です。' };
+    return { type: 'success', message: t.passwordUpdated };
   }
   if (req.query.error === 'invalid_current_password') {
-    return { type: 'danger', message: '現在のパスワードが正しくありません。正しいパスワードを入力してください。' };
+    return { type: 'danger', message: t.invalidCurrentPassword };
   }
   if (req.query.error === 'password_mismatch') {
-    return { type: 'danger', message: '新しいパスワードと確認入力が一致しません。' };
+    return { type: 'danger', message: t.passwordMismatch };
   }
   if (req.query.error === 'password_too_short') {
-    return { type: 'danger', message: 'パスワードは6文字以上で指定してください。' };
+    return { type: 'danger', message: t.passwordTooShort };
   }
   if (req.query.error) {
     return { type: 'danger', message: String(req.query.error) };
@@ -1979,6 +2011,8 @@ app.get(['/admin', '/admin/dashboard'], requireAdmin, (req: Request, res: Respon
     if (tab === 'ai') return res.redirect('/admin/ai');
   }
 
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const services = getServices();
   const stories = getStories();
@@ -1991,18 +2025,19 @@ app.get(['/admin', '/admin/dashboard'], requireAdmin, (req: Request, res: Respon
     stories,
     inquiries,
     unreadCount
-  });
+  }, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: 'ダッシュボード概要',
+    pageTitle: t.nav.dashboard,
     activePage: 'dashboard',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2011,21 +2046,24 @@ app.get(['/admin', '/admin/dashboard'], requireAdmin, (req: Request, res: Respon
 
 // 2. Company Information & Visuals Page
 app.get('/admin/company', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderCompanyContent(company);
+  const content = renderCompanyContent(company, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: '会社情報・画像設定',
+    pageTitle: t.nav.company,
     activePage: 'company',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2034,22 +2072,25 @@ app.get('/admin/company', requireAdmin, (req: Request, res: Response) => {
 
 // 3. About & Philosophy Page
 app.get('/admin/about', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const about = getAboutInfo();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderAboutContent(about);
+  const content = renderAboutContent(about, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: '企業理念・メッセージ',
+    pageTitle: t.nav.about,
     activePage: 'about',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2058,22 +2099,25 @@ app.get('/admin/about', requireAdmin, (req: Request, res: Response) => {
 
 // 4. Services Management Page
 app.get('/admin/services', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const services = getServices();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderServicesContent(services);
+  const content = renderServicesContent(services, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: '提供サービス管理',
+    pageTitle: t.nav.services,
     activePage: 'services',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2082,22 +2126,25 @@ app.get('/admin/services', requireAdmin, (req: Request, res: Response) => {
 
 // 5. Case Studies & Stories Page
 app.get('/admin/stories', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const stories = getStories();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderStoriesContent(stories);
+  const content = renderStoriesContent(stories, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: '採用事例・実績管理',
+    pageTitle: t.nav.stories,
     activePage: 'stories',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2106,22 +2153,25 @@ app.get('/admin/stories', requireAdmin, (req: Request, res: Response) => {
 
 // 6. FAQ Management Page
 app.get('/admin/faqs', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const faqs = getFaqs();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderFaqsContent(faqs);
+  const content = renderFaqsContent(faqs, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: 'よくある質問管理',
+    pageTitle: t.nav.faqs,
     activePage: 'faqs',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2130,22 +2180,25 @@ app.get('/admin/faqs', requireAdmin, (req: Request, res: Response) => {
 
 // 7. Contact Inquiries Management Page
 app.get('/admin/inquiries', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
   const filterStatus = req.query.status as string;
-  const content = renderInquiriesContent(inquiries, filterStatus);
+  const content = renderInquiriesContent(inquiries, filterStatus, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: 'お問い合わせ管理',
+    pageTitle: t.nav.inquiries,
     activePage: 'inquiries',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2154,23 +2207,26 @@ app.get('/admin/inquiries', requireAdmin, (req: Request, res: Response) => {
 
 // 8. Admin Password Change Page (GET)
 app.get('/admin/password', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
   const userId = (req.session as any).user?.id || 1;
   const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId) || (req.session as any).user;
-  const content = renderPasswordContent(user);
+  const content = renderPasswordContent(user, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: '管理者パスワード変更',
+    pageTitle: t.nav.password,
     activePage: 'password',
+    lang,
     unreadCount,
     company,
     user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2228,21 +2284,24 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
 
 // 9. Sakana AI Diagnostics & Configuration Page
 app.get('/admin/ai', requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
   const company = getCompanyInfo();
   const inquiries = getInquiries();
   const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
-  const content = renderAiContent(currentSakanaModel, currentSakanaKey);
+  const content = renderAiContent(currentSakanaModel, currentSakanaKey, lang);
 
   const html = renderAdminLTELayout({
-    pageTitle: 'Sakana AI 設定・診断',
+    pageTitle: t.nav.ai,
     activePage: 'ai',
+    lang,
     unreadCount,
     company,
     user: (req.session as any).user,
     bodyContent: content.body,
     modalsContent: content.modals,
     extraScripts: content.scripts,
-    flash: getAdminFlash(req)
+    flash: getAdminFlash(req, lang)
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
