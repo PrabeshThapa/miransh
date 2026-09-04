@@ -135,6 +135,7 @@ app.use('/uploads', express.static(uploadsDir, staticOptions));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images'), staticOptions));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css'), staticOptions));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js'), staticOptions));
+app.use('/adminlte', express.static(path.join(__dirname, 'node_modules', 'admin-lte', 'dist'), staticOptions));
 
 // Explicit route handler for /uploads/:filename and /public/uploads/:filename fallback
 app.get(['/uploads/:filename', '/public/uploads/:filename'], (req: Request, res: Response) => {
