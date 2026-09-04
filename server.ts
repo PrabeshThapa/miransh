@@ -7,7 +7,18 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
-import { renderAdminLTELogin, renderAdminLTEDashboard } from './src/adminlte.ts';
+import { renderAdminLTELogin, renderAdminLTELayout } from './src/adminlte.ts';
+import {
+  renderDashboardContent,
+  renderCompanyContent,
+  renderAboutContent,
+  renderServicesContent,
+  renderStoriesContent,
+  renderFaqsContent,
+  renderInquiriesContent,
+  renderPasswordContent,
+  renderAiContent
+} from './src/admin/pages.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
