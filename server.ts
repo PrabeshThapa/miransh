@@ -1879,8 +1879,8 @@ app.get('/admin/login', (req: Request, res: Response) => {
 });
 
 app.post('/admin/login', (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const loginInput = (email || '').trim();
+  const { email, username, password } = req.body;
+  const loginInput = (email || username || '').trim();
 
   const user: any = db.prepare('SELECT * FROM users WHERE email = ? OR name = ?').get(loginInput, loginInput);
 
@@ -2179,7 +2179,8 @@ app.get('/admin/password', requireAdmin, (req: Request, res: Response) => {
 
 // 8. Admin Password Change Action (POST)
 app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
-  const { current_password, new_password, confirm_password } = req.body;
+  const { current_password, new_password, confirm_password, new_password_confirmation } = req.body;
+  const confirmation = confirm_password || new_password_confirmation;
   const userId = (req.session as any).user?.id || 1;
   let user: any = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
   if (!user) {
@@ -2190,7 +2191,7 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
     return res.redirect('/admin/password?error=password_too_short');
   }
 
-  if (new_password !== confirm_password) {
+  if (new_password !== confirmation) {
     return res.redirect('/admin/password?error=password_mismatch');
   }
 
