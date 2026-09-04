@@ -118,27 +118,77 @@
         </ul>
 
         <!-- Right navbar links -->
-        <ul class="navbar-nav ml-auto">
-            <!-- Language Switcher Dropdown -->
+        <ul class="navbar-nav ml-auto align-items-center">
+            <!-- Language Switcher Component (Bilingual Enterprise Switcher) -->
             @php
-                $currLang = request()->cookie('admin_lang', session('admin_lang', 'ja'));
+                $currLang = strtolower(request()->query('lang', request()->cookie('admin_lang', session('admin_lang', 'ja'))));
+                if (!in_array($currLang, ['ja', 'en'])) $currLang = 'ja';
             @endphp
-            <li class="nav-item dropdown">
-                <a class="nav-link font-weight-bold" data-toggle="dropdown" href="#" title="Switch Language / 言語切替">
-                    <i class="fas fa-globe mr-1 text-primary"></i>
-                    <span>{{ $currLang === 'en' ? 'EN' : '日本語' }}</span>
-                    <i class="fas fa-caret-down ml-1 text-xs"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <span class="dropdown-header text-xs text-uppercase font-weight-bold">Select Language / 言語切替</span>
-                    <a href="/admin/lang/ja" class="dropdown-item {{ $currLang === 'ja' ? 'active font-weight-bold' : '' }}">
-                        <i class="fas fa-check mr-2 {{ $currLang === 'ja' ? '' : 'text-transparent' }}"></i>
-                        🇯🇵 日本語 (Japanese)
+            <li class="nav-item d-flex align-items-center mr-3" id="admin-lang-switcher-component">
+                <!-- 1-Click Segmented Toggle Pill (Desktop & Tablet) -->
+                <div class="admin-lang-switcher d-none d-sm-inline-flex border rounded-pill overflow-hidden bg-light shadow-xs p-1" role="group" aria-label="Bilingual Language Switcher">
+                    <button type="button"
+                            id="btn-lang-ja"
+                            class="btn btn-xs font-weight-bold px-2 py-1 rounded-pill {{ $currLang === 'ja' ? 'btn-primary active text-white shadow-xs' : 'btn-light text-muted' }}"
+                            onclick="switchAdminLanguage('ja', event)"
+                            title="日本語に切り替え (Japanese)"
+                            aria-pressed="{{ $currLang === 'ja' ? 'true' : 'false' }}">
+                        <span class="mr-1">🇯🇵</span><span>日本語</span>
+                    </button>
+                    <button type="button"
+                            id="btn-lang-en"
+                            class="btn btn-xs font-weight-bold px-2 py-1 rounded-pill {{ $currLang === 'en' ? 'btn-primary active text-white shadow-xs' : 'btn-light text-muted' }}"
+                            onclick="switchAdminLanguage('en', event)"
+                            title="Switch to English (英語)"
+                            aria-pressed="{{ $currLang === 'en' ? 'true' : 'false' }}">
+                        <span class="mr-1">🇬🇧</span><span>English</span>
+                    </button>
+                </div>
+
+                <!-- Dropdown Details Switcher (For mobile & dropdown context) -->
+                <div class="dropdown ml-1">
+                    <a class="nav-link dropdown-toggle btn btn-xs btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark rounded-pill border shadow-xs"
+                       data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
+                       title="Language Switcher Menu / 言語切り替えメニュー ({{ $currLang === 'en' ? 'English' : '日本語' }})">
+                        <i class="fas fa-globe text-primary mr-1"></i>
+                        <span class="badge badge-pill {{ $currLang === 'en' ? 'badge-primary' : 'badge-dark' }} text-xs font-weight-bold px-1 py-0">{{ strtoupper($currLang) }}</span>
                     </a>
-                    <a href="/admin/lang/en" class="dropdown-item {{ $currLang === 'en' ? 'active font-weight-bold' : '' }}">
-                        <i class="fas fa-check mr-2 {{ $currLang === 'en' ? '' : 'text-transparent' }}"></i>
-                        🇺🇸 English (英語)
-                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 p-2" style="min-width: 230px; border-radius: 10px;">
+                        <div class="dropdown-header text-xs text-uppercase font-weight-bold text-muted px-2 py-1 d-flex align-items-center justify-content-between">
+                            <span><i class="fas fa-language mr-1 text-primary"></i>{{ $currLang === 'en' ? 'Language Switcher' : '言語切り替え' }}</span>
+                            <span class="badge badge-light border">{{ $currLang === 'en' ? 'Live Context' : '状態保持' }}</span>
+                        </div>
+                        <div class="dropdown-divider my-1"></div>
+                        <a href="/admin/lang/ja"
+                           class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 {{ $currLang === 'ja' ? 'active font-weight-bold' : '' }}"
+                           onclick="switchAdminLanguage('ja', event)">
+                            <div class="d-flex align-items-center">
+                                <span class="mr-2" style="font-size: 1.2rem;">🇯🇵</span>
+                                <div>
+                                    <div class="font-weight-bold">日本語</div>
+                                    <small class="{{ $currLang === 'ja' ? 'text-white-50' : 'text-muted' }}">Japanese (JA)</small>
+                                </div>
+                            </div>
+                            {!! $currLang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">切替</span>' !!}
+                        </a>
+                        <a href="/admin/lang/en"
+                           class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 mt-1 {{ $currLang === 'en' ? 'active font-weight-bold' : '' }}"
+                           onclick="switchAdminLanguage('en', event)">
+                            <div class="d-flex align-items-center">
+                                <span class="mr-2" style="font-size: 1.2rem;">🇬🇧</span>
+                                <div>
+                                    <div class="font-weight-bold">English</div>
+                                    <small class="{{ $currLang === 'en' ? 'text-white-50' : 'text-muted' }}">英語 (EN)</small>
+                                </div>
+                            </div>
+                            {!! $currLang === 'en' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">Switch</span>' !!}
+                        </a>
+                        <div class="dropdown-divider my-2"></div>
+                        <div class="px-2 py-1 text-xs text-muted d-flex align-items-center">
+                            <i class="fas fa-shield-alt text-success mr-2"></i>
+                            <span>{{ $currLang === 'en' ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持' }}</span>
+                        </div>
+                    </div>
                 </div>
             </li>
 
@@ -387,6 +437,68 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="/adminlte/js/adminlte.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js'"></script>
+
+<script>
+function switchAdminLanguage(newLang, e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var btnJa = document.getElementById('btn-lang-ja');
+    var btnEn = document.getElementById('btn-lang-en');
+    if (btnJa && btnEn) {
+        if (newLang === 'ja') {
+            btnJa.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-primary active text-white shadow-xs';
+            btnEn.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-light text-muted';
+            btnJa.setAttribute('aria-pressed', 'true');
+            btnEn.setAttribute('aria-pressed', 'false');
+        } else {
+            btnEn.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-primary active text-white shadow-xs';
+            btnJa.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-light text-muted';
+            btnEn.setAttribute('aria-pressed', 'true');
+            btnJa.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    try {
+        document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
+        localStorage.setItem('admin_lang', newLang);
+    } catch(err) {}
+
+    var currentUrl = new URL(window.location.href);
+    var path = currentUrl.pathname;
+
+    if (path.indexOf('/admin/en/') === 0) {
+        path = '/admin/' + newLang + '/' + path.substring(10);
+    } else if (path === '/admin/en') {
+        path = '/admin/' + newLang;
+    } else if (path.indexOf('/admin/ja/') === 0) {
+        path = '/admin/' + newLang + '/' + path.substring(10);
+    } else if (path === '/admin/ja') {
+        path = '/admin/' + newLang;
+    }
+
+    currentUrl.pathname = path;
+    currentUrl.searchParams.set('lang', newLang);
+    var targetHref = currentUrl.toString();
+
+    fetch('/admin/api/set-lang?lang=' + newLang, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: newLang }),
+        credentials: 'same-origin'
+    })
+    .catch(function() {
+        return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+    })
+    .catch(function() {})
+    .finally(function() {
+        window.location.href = targetHref;
+    });
+}
+window.setAdminLang = switchAdminLanguage;
+</script>
 
 @stack('scripts')
 </body>

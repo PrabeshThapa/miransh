@@ -1865,9 +1865,17 @@ app.post('/api/sakana/translate-job', async (req: Request, res: Response) => {
   });
 });
 
-// Helper to get active admin language (from path, query, cookie, or session)
+// Helper to get active admin language (from query, path, cookie, or session)
 function getAdminLang(req: Request, res?: Response): AdminLang {
-  // 1. Check path prefix/segments (e.g., /admin/en/*, /admin/en, /en/admin/*)
+  // 1. Check explicit query parameter (?lang=en or ?lang=ja) - highest priority
+  const qLang = (req.query.lang as string)?.toLowerCase();
+  if (qLang === 'en' || qLang === 'ja') {
+    if ((req.session as any)) (req.session as any).adminLang = qLang;
+    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    return qLang as AdminLang;
+  }
+
+  // 2. Check path prefix/segments (e.g., /admin/en/*, /admin/en, /en/admin/*)
   const pathParts = req.path.toLowerCase().split('/').filter(Boolean);
   if (pathParts.includes('en') || req.params?.lang === 'en') {
     if ((req.session as any)) (req.session as any).adminLang = 'en';
@@ -1878,14 +1886,6 @@ function getAdminLang(req: Request, res?: Response): AdminLang {
     if ((req.session as any)) (req.session as any).adminLang = 'ja';
     if (res) res.cookie('admin_lang', 'ja', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
     return 'ja';
-  }
-
-  // 2. Check query parameter (?lang=en or ?lang=ja)
-  const qLang = (req.query.lang as string)?.toLowerCase();
-  if (qLang === 'en' || qLang === 'ja') {
-    if ((req.session as any)) (req.session as any).adminLang = qLang;
-    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
-    return qLang as AdminLang;
   }
 
   // 3. Check session
@@ -1906,6 +1906,21 @@ function getAdminLang(req: Request, res?: Response): AdminLang {
 // ----------------------------------------------------
 // Admin Authentication & Dashboard
 // ----------------------------------------------------
+// Dedicated API endpoint for asynchronous language switching without losing session
+app.all(['/admin/api/set-lang', '/api/admin/set-lang'], (req: Request, res: Response) => {
+  const reqLang = (req.body?.lang || req.query?.lang || req.params?.lang || '').toString().toLowerCase();
+  const newLang = reqLang === 'en' ? 'en' : 'ja';
+  if ((req.session as any)) {
+    (req.session as any).adminLang = newLang;
+  }
+  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+  return res.json({
+    success: true,
+    lang: newLang,
+    message: newLang === 'en' ? 'Language switched to English' : '言語を日本語に切り替えました'
+  });
+});
+
 app.get(['/admin/lang/:lang', '/admin/language/:lang', '/admin/switch-lang/:lang'], (req: Request, res: Response) => {
   const newLang = req.params.lang === 'en' ? 'en' : 'ja';
   (req.session as any).adminLang = newLang;
@@ -1916,16 +1931,26 @@ app.get(['/admin/lang/:lang', '/admin/language/:lang', '/admin/switch-lang/:lang
   if (referer) {
     try {
       const parsed = new URL(referer, `http://${req.headers.host || 'localhost'}`);
-      const p = parsed.pathname;
+      let p = parsed.pathname;
       if (!p.includes('/admin/lang') && !p.includes('/admin/language') && !p.includes('/admin/switch-lang')) {
-        target = p;
+        // Adjust language prefix if path contains /admin/en/ or /admin/ja/
+        if (p.startsWith('/admin/en/')) {
+          p = '/admin/' + newLang + '/' + p.substring(10);
+        } else if (p === '/admin/en') {
+          p = '/admin/' + newLang;
+        } else if (p.startsWith('/admin/ja/')) {
+          p = '/admin/' + newLang + '/' + p.substring(10);
+        } else if (p === '/admin/ja') {
+          p = '/admin/' + newLang;
+        }
+        target = p + parsed.search;
       }
     } catch {
       target = '/admin';
     }
   }
 
-  // Preserve page target and attach ?lang=newLang so it works even if cookies are dropped in iframes
+  // Preserve page target and attach ?lang=newLang so it works reliably everywhere
   const cleanTarget = target.replace(/([?&])lang=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
   const joiner = cleanTarget.includes('?') ? '&' : '?';
   res.redirect(`${cleanTarget}${joiner}lang=${newLang}`);

@@ -50,6 +50,24 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
       gap: 12px;
       margin-bottom: 8px;
     }
+    .admin-lang-switcher {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .admin-lang-switcher .btn {
+      border-radius: 9999px !important;
+      font-size: 0.76rem;
+      padding: 0.22rem 0.65rem;
+      transition: all 0.15s ease-in-out;
+      line-height: 1.2;
+    }
+    .admin-lang-switcher .btn.active {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
   </style>
 </head>
 <body class="hold-transition login-page">
@@ -68,9 +86,13 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
     <div class="card-body login-card-body p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="login-box-msg font-weight-bold text-dark m-0 p-0">${t.login.title}</p>
-        <div class="btn-group btn-group-sm" role="group">
-          <a href="/admin/lang/ja" class="btn btn-xs ${lang === 'ja' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('ja', event)">🇯🇵 JP</a>
-          <a href="/admin/lang/en" class="btn btn-xs ${lang === 'en' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('en', event)">🇬🇧 EN</a>
+        <div class="admin-lang-switcher shadow-xs" role="group" aria-label="Language Switcher">
+          <button type="button" class="btn btn-xs ${lang === 'ja' ? 'btn-primary font-weight-bold active text-white' : 'btn-light text-muted'}" onclick="switchAdminLanguage('ja', event)" title="日本語 (Japanese)">
+            <span class="mr-1">🇯🇵</span>JP
+          </button>
+          <button type="button" class="btn btn-xs ${lang === 'en' ? 'btn-primary font-weight-bold active text-white' : 'btn-light text-muted'}" onclick="switchAdminLanguage('en', event)" title="English (英語)">
+            <span class="mr-1">🇬🇧</span>EN
+          </button>
         </div>
       </div>
 
@@ -136,16 +158,39 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 <script>
-function setAdminLang(l, e) {
-  if (e) e.preventDefault();
+function switchAdminLanguage(newLang, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
   try {
-    document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000; SameSite=Lax';
-    localStorage.setItem('admin_lang', l);
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
+    localStorage.setItem('admin_lang', newLang);
   } catch(err) {}
-  var u = new URL(window.location.href);
-  u.searchParams.set('lang', l);
-  window.location.href = u.toString();
+
+  var currentUrl = new URL(window.location.href);
+  var path = currentUrl.pathname;
+  if (path.indexOf('/admin/en') === 0) {
+    path = '/admin/' + newLang + path.substring(9);
+  } else if (path.indexOf('/admin/ja') === 0) {
+    path = '/admin/' + newLang + path.substring(9);
+  }
+  currentUrl.pathname = path;
+  currentUrl.searchParams.set('lang', newLang);
+  var targetHref = currentUrl.toString();
+
+  fetch('/admin/api/set-lang?lang=' + newLang, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang: newLang }),
+    credentials: 'same-origin'
+  })
+  .catch(function() {
+    return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+  })
+  .catch(function() {})
+  .finally(function() {
+    window.location.href = targetHref;
+  });
 }
+window.setAdminLang = switchAdminLanguage;
 </script>
 </body>
 </html>`;
@@ -263,6 +308,25 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
       font-size: 0.72rem;
       letter-spacing: 0.05em;
     }
+    .admin-lang-switcher {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .admin-lang-switcher .btn {
+      border-radius: 9999px !important;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.22rem 0.65rem;
+      transition: all 0.15s ease-in-out;
+      line-height: 1.2;
+    }
+    .admin-lang-switcher .btn.active {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed text-sm">
@@ -287,18 +351,72 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
     </ul>
 
     <ul class="navbar-nav ml-auto align-items-center">
-      <!-- Language Switcher Dropdown -->
-      <li class="nav-item dropdown mr-2">
-        <a class="nav-link dropdown-toggle btn btn-sm btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Language / 言語切替">
-          <i class="fas fa-globe mr-1 text-primary"></i> ${lang === 'en' ? '🇬🇧 English' : '🇯🇵 日本語'}
-        </a>
-        <div class="dropdown-menu dropdown-menu-right shadow-sm">
-          <a href="/admin/lang/ja" class="dropdown-item ${lang === 'ja' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('ja', event)">
-            <span class="mr-2">🇯🇵</span> 日本語 (Japanese)
+      <!-- Language Switcher Component (Bilingual Enterprise Switcher) -->
+      <li class="nav-item d-flex align-items-center mr-3" id="admin-lang-switcher-component">
+        <!-- 1-Click Segmented Toggle Pill (Desktop & Tablet) -->
+        <div class="admin-lang-switcher d-none d-sm-inline-flex shadow-xs" role="group" aria-label="Bilingual Language Switcher">
+          <button type="button"
+                  id="btn-lang-ja"
+                  class="btn btn-xs font-weight-bold ${lang === 'ja' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
+                  onclick="switchAdminLanguage('ja', event)"
+                  title="日本語に切り替え (Japanese)"
+                  aria-pressed="${lang === 'ja'}">
+            <span class="mr-1">🇯🇵</span><span>日本語</span>
+          </button>
+          <button type="button"
+                  id="btn-lang-en"
+                  class="btn btn-xs font-weight-bold ${lang === 'en' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
+                  onclick="switchAdminLanguage('en', event)"
+                  title="Switch to English (英語)"
+                  aria-pressed="${lang === 'en'}">
+            <span class="mr-1">🇬🇧</span><span>English</span>
+          </button>
+        </div>
+
+        <!-- Dropdown Details Switcher (For mobile & full menu options) -->
+        <div class="dropdown ml-1">
+          <a class="nav-link dropdown-toggle btn btn-xs btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark rounded-pill border shadow-xs"
+             data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
+             title="Language Switcher Menu / 言語切り替えメニュー (${lang === 'en' ? 'English' : '日本語'})">
+            <i class="fas fa-globe text-primary mr-1"></i>
+            <span class="badge badge-pill ${lang === 'en' ? 'badge-primary' : 'badge-dark'} text-xs font-weight-bold px-1 py-0">${lang.toUpperCase()}</span>
           </a>
-          <a href="/admin/lang/en" class="dropdown-item ${lang === 'en' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('en', event)">
-            <span class="mr-2">🇬🇧</span> English (英語)
-          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow border-0 p-2" style="min-width: 230px; border-radius: 10px;">
+            <div class="dropdown-header text-xs text-uppercase font-weight-bold text-muted px-2 py-1 d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-language mr-1 text-primary"></i>${lang === 'en' ? 'Language Switcher' : '言語切り替え'}</span>
+              <span class="badge badge-light border">${lang === 'en' ? 'Live Context' : '状態保持'}</span>
+            </div>
+            <div class="dropdown-divider my-1"></div>
+            <a href="/admin/lang/ja"
+               class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 ${lang === 'ja' ? 'active font-weight-bold' : ''}"
+               onclick="switchAdminLanguage('ja', event)">
+              <div class="d-flex align-items-center">
+                <span class="mr-2" style="font-size: 1.2rem;">🇯🇵</span>
+                <div>
+                  <div class="font-weight-bold">日本語</div>
+                  <small class="${lang === 'ja' ? 'text-white-50' : 'text-muted'}">Japanese (JA)</small>
+                </div>
+              </div>
+              ${lang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">切替</span>'}
+            </a>
+            <a href="/admin/lang/en"
+               class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 mt-1 ${lang === 'en' ? 'active font-weight-bold' : ''}"
+               onclick="switchAdminLanguage('en', event)">
+              <div class="d-flex align-items-center">
+                <span class="mr-2" style="font-size: 1.2rem;">🇬🇧</span>
+                <div>
+                  <div class="font-weight-bold">English</div>
+                  <small class="${lang === 'en' ? 'text-white-50' : 'text-muted'}">英語 (EN)</small>
+                </div>
+              </div>
+              ${lang === 'en' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">Switch</span>'}
+            </a>
+            <div class="dropdown-divider my-2"></div>
+            <div class="px-2 py-1 text-xs text-muted d-flex align-items-center">
+              <i class="fas fa-shield-alt text-success mr-2"></i>
+              <span>${lang === 'en' ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持'}</span>
+            </div>
+          </div>
         </div>
       </li>
 
@@ -422,16 +540,78 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 <script>
-function setAdminLang(l, e) {
-  if (e) e.preventDefault();
+function switchAdminLanguage(newLang, e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Visual button state update immediately for instantaneous feedback
+  var btnJa = document.getElementById('btn-lang-ja');
+  var btnEn = document.getElementById('btn-lang-en');
+  if (btnJa && btnEn) {
+    if (newLang === 'ja') {
+      btnJa.className = 'btn btn-xs font-weight-bold btn-primary active text-white';
+      btnEn.className = 'btn btn-xs font-weight-bold btn-light text-muted';
+      btnJa.setAttribute('aria-pressed', 'true');
+      btnEn.setAttribute('aria-pressed', 'false');
+    } else {
+      btnEn.className = 'btn btn-xs font-weight-bold btn-primary active text-white';
+      btnJa.className = 'btn btn-xs font-weight-bold btn-light text-muted';
+      btnEn.setAttribute('aria-pressed', 'true');
+      btnJa.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  // 1. Persist in cookie (1-year lifetime, SameSite=Lax, root path)
   try {
-    document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000; SameSite=Lax';
-    localStorage.setItem('admin_lang', l);
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
+    localStorage.setItem('admin_lang', newLang);
   } catch(err) {}
-  var u = new URL(window.location.href);
-  u.searchParams.set('lang', l);
-  window.location.href = u.toString();
+
+  // 2. Compute exact destination URL preserving pathname, query parameters, and hash
+  var currentUrl = new URL(window.location.href);
+  var path = currentUrl.pathname;
+
+  if (path.indexOf('/admin/en/') === 0) {
+    path = '/admin/' + newLang + '/' + path.substring(10);
+  } else if (path === '/admin/en') {
+    path = '/admin/' + newLang;
+  } else if (path.indexOf('/admin/ja/') === 0) {
+    path = '/admin/' + newLang + '/' + path.substring(10);
+  } else if (path === '/admin/ja') {
+    path = '/admin/' + newLang;
+  } else if (path.indexOf('/en/admin') === 0) {
+    path = '/' + newLang + path.substring(3);
+  } else if (path.indexOf('/ja/admin') === 0) {
+    path = '/' + newLang + path.substring(3);
+  }
+
+  currentUrl.pathname = path;
+  currentUrl.searchParams.set('lang', newLang);
+  var targetHref = currentUrl.toString();
+
+  // Dispatch client-side event for reactive widgets
+  try {
+    window.dispatchEvent(new CustomEvent('adminLanguageChanged', { detail: { lang: newLang } }));
+  } catch(err) {}
+
+  // 3. Background session synchronization without unmounting session
+  fetch('/admin/api/set-lang?lang=' + newLang, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang: newLang }),
+    credentials: 'same-origin'
+  })
+  .catch(function() {
+    return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+  })
+  .catch(function() {})
+  .finally(function() {
+    window.location.href = targetHref;
+  });
 }
+window.setAdminLang = switchAdminLanguage;
 </script>
 ${extraScripts}
 </body>
