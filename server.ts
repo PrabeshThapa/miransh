@@ -1865,40 +1865,83 @@ app.post('/api/sakana/translate-job', async (req: Request, res: Response) => {
   });
 });
 
-// Helper to get active admin language (from query, cookie, or session)
+// Helper to get active admin language (from path, query, cookie, or session)
 function getAdminLang(req: Request, res?: Response): AdminLang {
-  const qLang = req.query.lang as string;
+  // 1. Check path prefix/segments (e.g., /admin/en/*, /admin/en, /en/admin/*)
+  const pathParts = req.path.toLowerCase().split('/').filter(Boolean);
+  if (pathParts.includes('en') || req.params?.lang === 'en') {
+    if ((req.session as any)) (req.session as any).adminLang = 'en';
+    if (res) res.cookie('admin_lang', 'en', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    return 'en';
+  }
+  if (pathParts.includes('ja') || req.params?.lang === 'ja') {
+    if ((req.session as any)) (req.session as any).adminLang = 'ja';
+    if (res) res.cookie('admin_lang', 'ja', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    return 'ja';
+  }
+
+  // 2. Check query parameter (?lang=en or ?lang=ja)
+  const qLang = (req.query.lang as string)?.toLowerCase();
   if (qLang === 'en' || qLang === 'ja') {
     if ((req.session as any)) (req.session as any).adminLang = qLang;
-    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
-    return qLang;
+    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    return qLang as AdminLang;
   }
+
+  // 3. Check session
   const sessionLang = (req.session as any)?.adminLang;
   if (sessionLang === 'en' || sessionLang === 'ja') {
     return sessionLang;
   }
+
+  // 4. Check cookie
   const cookieLang = req.cookies?.admin_lang;
   if (cookieLang === 'en' || cookieLang === 'ja') {
     return cookieLang;
   }
+
   return 'ja';
 }
 
 // ----------------------------------------------------
 // Admin Authentication & Dashboard
 // ----------------------------------------------------
-app.get('/admin/lang/:lang', (req: Request, res: Response) => {
+app.get(['/admin/lang/:lang', '/admin/language/:lang', '/admin/switch-lang/:lang'], (req: Request, res: Response) => {
   const newLang = req.params.lang === 'en' ? 'en' : 'ja';
   (req.session as any).adminLang = newLang;
-  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
-  const referer = req.header('Referer') || '/admin';
-  const cleanReferer = referer.replace(/([?&])lang=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
-  res.redirect(cleanReferer);
+  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+
+  let target = '/admin';
+  const referer = req.header('Referer');
+  if (referer) {
+    try {
+      const parsed = new URL(referer, `http://${req.headers.host || 'localhost'}`);
+      const p = parsed.pathname;
+      if (!p.includes('/admin/lang') && !p.includes('/admin/language') && !p.includes('/admin/switch-lang')) {
+        target = p;
+      }
+    } catch {
+      target = '/admin';
+    }
+  }
+
+  // Preserve page target and attach ?lang=newLang so it works even if cookies are dropped in iframes
+  const cleanTarget = target.replace(/([?&])lang=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+  const joiner = cleanTarget.includes('?') ? '&' : '?';
+  res.redirect(`${cleanTarget}${joiner}lang=${newLang}`);
 });
 
-app.get('/admin/login', (req: Request, res: Response) => {
+const ADMIN_LOGIN_ROUTES = [
+  '/admin/login',
+  '/admin/en/login', '/admin/ja/login',
+  '/admin/login/en', '/admin/login/ja',
+  '/en/admin/login', '/ja/admin/login'
+];
+
+app.get(ADMIN_LOGIN_ROUTES, (req: Request, res: Response) => {
   if ((req.session as any)?.user) {
-    return res.redirect('/admin');
+    const lang = getAdminLang(req, res);
+    return res.redirect(lang === 'en' ? '/admin?lang=en' : '/admin');
   }
 
   const lang = getAdminLang(req, res);
@@ -1934,16 +1977,19 @@ app.post('/admin/login', (req: Request, res: Response) => {
       secure: isHttps,
       httpOnly: false
     });
-    return res.redirect('/admin');
+    const lang = getAdminLang(req, res);
+    return res.redirect(lang === 'en' ? '/admin?lang=en' : '/admin');
   }
 
-  return res.redirect('/admin/login?error=invalid');
+  const lang = getAdminLang(req, res);
+  return res.redirect(lang === 'en' ? '/admin/login?error=invalid&lang=en' : '/admin/login?error=invalid');
 });
 
 app.get(['/admin/logout', '/logout'], (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
   res.clearCookie('admin_auth');
   req.session.destroy(() => {
-    res.redirect('/admin/login');
+    res.redirect(lang === 'en' ? '/admin/login?logout=1&lang=en' : '/admin/login?logout=1');
   });
 });
 
@@ -1959,7 +2005,8 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
     req.query?.token === ADMIN_TOKEN
   );
   if (!isAuth) {
-    return res.redirect('/admin/login');
+    const lang = getAdminLang(req, res);
+    return res.redirect(lang === 'en' ? '/admin/login?lang=en' : '/admin/login');
   }
   if (!(req.session as any).user) {
     (req.session as any).user = { id: 1, name: 'admin', email: 'admin@miransh.jp' };
@@ -1996,8 +2043,65 @@ function getAdminFlash(req: Request, lang: AdminLang = 'ja'): { type: 'success' 
   return undefined;
 }
 
+// Bilingual route path arrays supporting both direct paths and /en /ja prefixes
+const DASHBOARD_ROUTES = [
+  '/admin', '/admin/dashboard',
+  '/admin/en', '/admin/ja',
+  '/admin/en/dashboard', '/admin/ja/dashboard',
+  '/en/admin', '/ja/admin',
+  '/en/admin/dashboard', '/ja/admin/dashboard'
+];
+const COMPANY_ROUTES = [
+  '/admin/company',
+  '/admin/en/company', '/admin/ja/company',
+  '/admin/company/en', '/admin/company/ja',
+  '/en/admin/company', '/ja/admin/company'
+];
+const ABOUT_ROUTES = [
+  '/admin/about',
+  '/admin/en/about', '/admin/ja/about',
+  '/admin/about/en', '/admin/about/ja',
+  '/en/admin/about', '/ja/admin/about'
+];
+const SERVICES_ROUTES = [
+  '/admin/services',
+  '/admin/en/services', '/admin/ja/services',
+  '/admin/services/en', '/admin/services/ja',
+  '/en/admin/services', '/ja/admin/services'
+];
+const STORIES_ROUTES = [
+  '/admin/stories',
+  '/admin/en/stories', '/admin/ja/stories',
+  '/admin/stories/en', '/admin/stories/ja',
+  '/en/admin/stories', '/ja/admin/stories'
+];
+const FAQS_ROUTES = [
+  '/admin/faqs',
+  '/admin/en/faqs', '/admin/ja/faqs',
+  '/admin/faqs/en', '/admin/faqs/ja',
+  '/en/admin/faqs', '/ja/admin/faqs'
+];
+const INQUIRIES_ROUTES = [
+  '/admin/inquiries',
+  '/admin/en/inquiries', '/admin/ja/inquiries',
+  '/admin/inquiries/en', '/admin/inquiries/ja',
+  '/en/admin/inquiries', '/ja/admin/inquiries'
+];
+const PASSWORD_ROUTES = [
+  '/admin/password',
+  '/admin/en/password', '/admin/ja/password',
+  '/admin/password/en', '/admin/password/ja',
+  '/en/admin/password', '/ja/admin/password'
+];
+const AI_ROUTES = [
+  '/admin/ai',
+  '/admin/en/ai', '/admin/ja/ai',
+  '/admin/ai/en', '/admin/ai/ja',
+  '/en/admin/ai', '/ja/admin/ai'
+];
+
 // 1. Admin Dashboard Overview
-app.get(['/admin', '/admin/dashboard'], requireAdmin, (req: Request, res: Response) => {
+app.get(DASHBOARD_ROUTES, requireAdmin, (req: Request, res: Response) => {
   // Backwards compatibility for tab param
   const tab = req.query.tab as string;
   if (tab && tab !== 'dashboard') {
@@ -2045,7 +2149,7 @@ app.get(['/admin', '/admin/dashboard'], requireAdmin, (req: Request, res: Respon
 });
 
 // 2. Company Information & Visuals Page
-app.get('/admin/company', requireAdmin, (req: Request, res: Response) => {
+app.get(COMPANY_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2071,7 +2175,7 @@ app.get('/admin/company', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 3. About & Philosophy Page
-app.get('/admin/about', requireAdmin, (req: Request, res: Response) => {
+app.get(ABOUT_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2098,7 +2202,7 @@ app.get('/admin/about', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 4. Services Management Page
-app.get('/admin/services', requireAdmin, (req: Request, res: Response) => {
+app.get(SERVICES_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2125,7 +2229,7 @@ app.get('/admin/services', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 5. Case Studies & Stories Page
-app.get('/admin/stories', requireAdmin, (req: Request, res: Response) => {
+app.get(STORIES_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2152,7 +2256,7 @@ app.get('/admin/stories', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 6. FAQ Management Page
-app.get('/admin/faqs', requireAdmin, (req: Request, res: Response) => {
+app.get(FAQS_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2179,7 +2283,7 @@ app.get('/admin/faqs', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 7. Contact Inquiries Management Page
-app.get('/admin/inquiries', requireAdmin, (req: Request, res: Response) => {
+app.get(INQUIRIES_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2206,7 +2310,7 @@ app.get('/admin/inquiries', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 8. Admin Password Change Page (GET)
-app.get('/admin/password', requireAdmin, (req: Request, res: Response) => {
+app.get(PASSWORD_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2283,7 +2387,7 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
 });
 
 // 9. Sakana AI Diagnostics & Configuration Page
-app.get('/admin/ai', requireAdmin, (req: Request, res: Response) => {
+app.get(AI_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const lang = getAdminLang(req, res);
   const t = i18n[lang];
   const company = getCompanyInfo();
@@ -2426,7 +2530,7 @@ app.post(['/admin/stories', '/admin/stories/create'], (req: Request, res: Respon
   res.redirect('/admin/stories?saved=true');
 });
 
-app.post('/admin/stories/:id', (req: Request, res: Response) => {
+app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/update/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   const { title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, image, published_date, author, featured, sort_order } = req.body;
@@ -2449,7 +2553,7 @@ app.post('/admin/stories/:id', (req: Request, res: Response) => {
   res.redirect('/admin/stories?saved=true');
 });
 
-app.post('/admin/stories/:id/delete', (req: Request, res: Response) => {
+app.post(['/admin/stories/:id/delete', '/admin/stories/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM stories WHERE id = ?').run(id);
@@ -2594,7 +2698,7 @@ app.post('/admin/about', (req: Request, res: Response) => {
 });
 
 // Services CRUD Handlers
-app.post('/admin/services/:id', (req: Request, res: Response) => {
+app.post(['/admin/services/:id', '/admin/services/:id/update', '/admin/services/update/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   const { title_ja, title_en, subtitle_ja, subtitle_en, desc_ja, desc_en, items_ja, items_en, sort_order } = req.body;
@@ -2618,6 +2722,13 @@ app.post('/admin/services/:id', (req: Request, res: Response) => {
   res.redirect('/admin/services?saved=true');
 });
 
+app.post(['/admin/services/:id/delete', '/admin/services/delete/:id'], (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.redirect('/admin/login');
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM services WHERE id = ?').run(id);
+  res.redirect('/admin/services?deleted=true');
+});
+
 // FAQs CRUD Handlers
 app.post(['/admin/faqs', '/admin/faqs/create'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
@@ -2638,7 +2749,7 @@ app.post(['/admin/faqs', '/admin/faqs/create'], (req: Request, res: Response) =>
   res.redirect('/admin/faqs?saved=true');
 });
 
-app.post('/admin/faqs/:id', (req: Request, res: Response) => {
+app.post(['/admin/faqs/:id', '/admin/faqs/:id/update', '/admin/faqs/update/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   const { category_ja, category_en, question_ja, question_en, answer_ja, answer_en, sort_order } = req.body;
@@ -2660,7 +2771,7 @@ app.post('/admin/faqs/:id', (req: Request, res: Response) => {
   res.redirect('/admin/faqs?saved=true');
 });
 
-app.post('/admin/faqs/:id/delete', (req: Request, res: Response) => {
+app.post(['/admin/faqs/:id/delete', '/admin/faqs/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM faqs WHERE id = ?').run(id);
@@ -2668,7 +2779,7 @@ app.post('/admin/faqs/:id/delete', (req: Request, res: Response) => {
 });
 
 // Inquiries Handlers
-app.post('/admin/inquiries/:id/status', (req: Request, res: Response) => {
+app.post(['/admin/inquiries/:id/status', '/admin/inquiries/status/:id', '/admin/inquiries/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   const { status } = req.body;
@@ -2676,7 +2787,7 @@ app.post('/admin/inquiries/:id/status', (req: Request, res: Response) => {
   res.redirect('/admin/inquiries?updated=true');
 });
 
-app.post('/admin/inquiries/:id/delete', (req: Request, res: Response) => {
+app.post(['/admin/inquiries/:id/delete', '/admin/inquiries/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM inquiries WHERE id = ?').run(id);

@@ -66,6 +66,25 @@ class AdminController extends Controller
     }
 
     /**
+     * Switch admin language (ja/en)
+     */
+    public function setLang($lang, Request $request)
+    {
+        $lang = in_array(strtolower($lang), ['en', 'ja']) ? strtolower($lang) : 'ja';
+        session(['admin_lang' => $lang]);
+        
+        $referer = $request->header('referer');
+        if ($referer && !str_contains($referer, '/admin/lang') && !str_contains($referer, '/admin/language')) {
+            $clean = preg_replace('/([?&])lang=[^&]+(&|$)/', '$1', $referer);
+            $clean = rtrim($clean, '?&');
+            $joiner = str_contains($clean, '?') ? '&' : '?';
+            return redirect($clean . $joiner . 'lang=' . $lang)->withCookie(cookie('admin_lang', $lang, 60 * 24 * 365, '/', null, false, false));
+        }
+        
+        return redirect('/admin?lang=' . $lang)->withCookie(cookie('admin_lang', $lang, 60 * 24 * 365, '/', null, false, false));
+    }
+
+    /**
      * Admin Dashboard Overview (AdminLTE 3)
      */
     public function dashboard(Request $request)

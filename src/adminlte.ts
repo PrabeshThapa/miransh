@@ -69,8 +69,8 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
       <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="login-box-msg font-weight-bold text-dark m-0 p-0">${t.login.title}</p>
         <div class="btn-group btn-group-sm" role="group">
-          <a href="?lang=ja" class="btn btn-xs ${lang === 'ja' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('ja', event)">🇯🇵 JP</a>
-          <a href="?lang=en" class="btn btn-xs ${lang === 'en' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('en', event)">🇬🇧 EN</a>
+          <a href="/admin/lang/ja" class="btn btn-xs ${lang === 'ja' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('ja', event)">🇯🇵 JP</a>
+          <a href="/admin/lang/en" class="btn btn-xs ${lang === 'en' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary'}" onclick="setAdminLang('en', event)">🇬🇧 EN</a>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
         </button>
       </div>` : ''}
 
-      <form action="/admin/login" method="post">
+      <form action="/admin/login${lang === 'en' ? '?lang=en' : ''}" method="post">
         <div class="input-group mb-3">
           <input type="text" name="email" class="form-control" placeholder="${t.login.emailPlaceholder}" value="admin@miransh.jp" required autofocus>
           <div class="input-group-append">
@@ -138,7 +138,10 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
 <script>
 function setAdminLang(l, e) {
   if (e) e.preventDefault();
-  document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000';
+  try {
+    document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    localStorage.setItem('admin_lang', l);
+  } catch(err) {}
   var u = new URL(window.location.href);
   u.searchParams.set('lang', l);
   window.location.href = u.toString();
@@ -178,17 +181,18 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
   const t = i18n[lang];
   const ceoImg = company.ceo_image || '/images/ceo_portrait.jpg';
   const userName = user?.name || (lang === 'en' ? (company?.ceo_name_en || 'Admin') : (company?.ceo_name_ja || '管理者'));
+  const langSuffix = lang === 'en' ? '?lang=en' : '';
 
   const menuItems = [
-    { id: 'dashboard', href: '/admin', icon: 'fas fa-tachometer-alt', label: t.nav.dashboard, badge: '' },
-    { id: 'company', href: '/admin/company', icon: 'fas fa-building', label: t.nav.company, badge: '' },
-    { id: 'about', href: '/admin/about', icon: 'fas fa-award', label: t.nav.about, badge: '' },
-    { id: 'services', href: '/admin/services', icon: 'fas fa-concierge-bell', label: t.nav.services, badge: '' },
-    { id: 'stories', href: '/admin/stories', icon: 'fas fa-book-open', label: t.nav.stories, badge: '' },
-    { id: 'faqs', href: '/admin/faqs', icon: 'fas fa-question-circle', label: t.nav.faqs, badge: '' },
-    { id: 'inquiries', href: '/admin/inquiries', icon: 'fas fa-envelope', label: t.nav.inquiries, badge: unreadCount > 0 ? `<span class="badge badge-warning right font-weight-bold">${unreadCount}</span>` : '' },
-    { id: 'password', href: '/admin/password', icon: 'fas fa-key', label: t.nav.password, badge: '<span class="badge badge-light right"><i class="fas fa-shield-alt text-primary"></i></span>' },
-    { id: 'ai', href: '/admin/ai', icon: 'fas fa-robot', label: t.nav.ai, badge: '<span class="badge badge-info right">AI</span>' },
+    { id: 'dashboard', href: `/admin${langSuffix}`, icon: 'fas fa-tachometer-alt', label: t.nav.dashboard, badge: '' },
+    { id: 'company', href: `/admin/company${langSuffix}`, icon: 'fas fa-building', label: t.nav.company, badge: '' },
+    { id: 'about', href: `/admin/about${langSuffix}`, icon: 'fas fa-award', label: t.nav.about, badge: '' },
+    { id: 'services', href: `/admin/services${langSuffix}`, icon: 'fas fa-concierge-bell', label: t.nav.services, badge: '' },
+    { id: 'stories', href: `/admin/stories${langSuffix}`, icon: 'fas fa-book-open', label: t.nav.stories, badge: '' },
+    { id: 'faqs', href: `/admin/faqs${langSuffix}`, icon: 'fas fa-question-circle', label: t.nav.faqs, badge: '' },
+    { id: 'inquiries', href: `/admin/inquiries${langSuffix}`, icon: 'fas fa-envelope', label: t.nav.inquiries, badge: unreadCount > 0 ? `<span class="badge badge-warning right font-weight-bold">${unreadCount}</span>` : '' },
+    { id: 'password', href: `/admin/password${langSuffix}`, icon: 'fas fa-key', label: t.nav.password, badge: '<span class="badge badge-light right"><i class="fas fa-shield-alt text-primary"></i></span>' },
+    { id: 'ai', href: `/admin/ai${langSuffix}`, icon: 'fas fa-robot', label: t.nav.ai, badge: '<span class="badge badge-info right">AI</span>' },
   ];
 
   const sidebarNavHtml = menuItems.map(item => {
@@ -289,10 +293,10 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
           <i class="fas fa-globe mr-1 text-primary"></i> ${lang === 'en' ? '🇬🇧 English' : '🇯🇵 日本語'}
         </a>
         <div class="dropdown-menu dropdown-menu-right shadow-sm">
-          <a href="?lang=ja" class="dropdown-item ${lang === 'ja' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('ja', event)">
+          <a href="/admin/lang/ja" class="dropdown-item ${lang === 'ja' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('ja', event)">
             <span class="mr-2">🇯🇵</span> 日本語 (Japanese)
           </a>
-          <a href="?lang=en" class="dropdown-item ${lang === 'en' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('en', event)">
+          <a href="/admin/lang/en" class="dropdown-item ${lang === 'en' ? 'active font-weight-bold' : ''}" onclick="setAdminLang('en', event)">
             <span class="mr-2">🇬🇧</span> English (英語)
           </a>
         </div>
@@ -420,7 +424,10 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
 <script>
 function setAdminLang(l, e) {
   if (e) e.preventDefault();
-  document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000';
+  try {
+    document.cookie = 'admin_lang=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    localStorage.setItem('admin_lang', l);
+  } catch(err) {}
   var u = new URL(window.location.href);
   u.searchParams.set('lang', l);
   window.location.href = u.toString();
