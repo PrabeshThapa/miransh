@@ -34,7 +34,7 @@
                                 <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
                             </div>
                         </div>
-                        <small class="text-muted">※ 初期設定値: <code>admin123</code> または <code>admin</code></small>
+                        <!-- <small class="text-muted">※ 初期設定値: <code>admin123</code> または <code>admin</code></small> -->
                     </div>
 
                     <div class="form-group mb-3">

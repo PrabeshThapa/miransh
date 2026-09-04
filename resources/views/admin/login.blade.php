@@ -123,12 +123,12 @@
                 </div>
             </form>
 
-            <div class="callout callout-info p-2 mt-3 text-xs bg-light">
+            <!-- <div class="callout callout-info p-2 mt-3 text-xs bg-light">
                 <i class="fas fa-info-circle text-info mr-1"></i>
                 <strong>初期アカウント情報:</strong><br>
                 ユーザー名: <code>admin</code> (または <code>admin@miransh.jp</code>)<br>
                 初期パスワード: <code>admin123</code> (または <code>admin</code>)
-            </div>
+            </div> -->
 
             <div class="text-center mt-3 pt-2 border-top">
                 <a href="/" class="text-xs text-muted">
