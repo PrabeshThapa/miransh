@@ -20,42 +20,80 @@ Route::post('/api/sakana/service-consult', [SakanaController::class, 'serviceCon
 Route::post('/api/sakana/translate-job', [SakanaController::class, 'translateJob'])->name('sakana.translateJob');
 Route::get('/api/sakana/status', [SakanaController::class, 'getStatus'])->name('sakana.status');
 
-// Admin Authentication Routes
+// Admin Authentication & Language Routes
+Route::get('/admin/lang/{lang}', [AdminController::class, 'setLang'])->name('admin.lang');
+Route::get('/admin/language/{lang}', [AdminController::class, 'setLang']);
+Route::get('/admin/switch-lang/{lang}', [AdminController::class, 'setLang']);
+
+// URL language prefix redirects (e.g., /admin/en, /admin/ja, /admin/en/company)
+Route::get('/admin/en', function () {
+    return redirect('/admin?lang=en');
+});
+Route::get('/admin/ja', function () {
+    return redirect('/admin?lang=ja');
+});
+Route::get('/admin/{lang}/{page}', function ($lang, $page) {
+    if (in_array(strtolower($lang), ['en', 'ja'])) {
+        return redirect('/admin/' . $page . '?lang=' . strtolower($lang));
+    }
+    abort(404);
+})->where('page', '[a-zA-Z0-9_\-]+');
+
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
 Route::get('/admin/logout', [AdminController::class, 'logout']);
 
-// Admin Management Dashboard Routes
+// Admin Management Dashboard Routes (AdminLTE 3 Dedicated Page Routing)
 Route::prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    
+    // Company Info & Media
+    Route::get('/company', [AdminController::class, 'company'])->name('admin.company');
     Route::post('/company', [AdminController::class, 'updateCompany'])->name('admin.company.update');
+    
+    // About & Philosophy
+    Route::get('/about', [AdminController::class, 'about'])->name('admin.about');
     Route::post('/about', [AdminController::class, 'updateAbout'])->name('admin.about.update');
     
     // Services
+    Route::get('/services', [AdminController::class, 'services'])->name('admin.services');
     Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
     Route::post('/services/{id}', [AdminController::class, 'updateService'])->name('admin.services.update');
+    Route::post('/services/{id}/update', [AdminController::class, 'updateService']);
     Route::post('/services/{id}/delete', [AdminController::class, 'deleteService'])->name('admin.services.delete');
     
-    // Stories
+    // Stories & Case Studies
+    Route::get('/stories', [AdminController::class, 'stories'])->name('admin.stories');
     Route::post('/stories', [AdminController::class, 'storeStory'])->name('admin.stories.store');
     Route::post('/stories/{id}', [AdminController::class, 'updateStory'])->name('admin.stories.update');
+    Route::post('/stories/{id}/update', [AdminController::class, 'updateStory']);
     Route::post('/stories/{id}/delete', [AdminController::class, 'deleteStory'])->name('admin.stories.delete');
 
     // FAQs
+    Route::get('/faqs', [AdminController::class, 'faqs'])->name('admin.faqs');
     Route::post('/faqs', [AdminController::class, 'storeFaq'])->name('admin.faqs.store');
     Route::post('/faqs/{id}', [AdminController::class, 'updateFaq'])->name('admin.faqs.update');
+    Route::post('/faqs/{id}/update', [AdminController::class, 'updateFaq']);
     Route::post('/faqs/{id}/delete', [AdminController::class, 'deleteFaq'])->name('admin.faqs.delete');
 
-    // Inquiries
+    // Inquiries Inbox
+    Route::get('/inquiries', [AdminController::class, 'inquiries'])->name('admin.inquiries');
     Route::post('/inquiries/{id}/status', [AdminController::class, 'updateInquiryStatus'])->name('admin.inquiries.status');
+    Route::post('/inquiries/{id}/delete', [AdminController::class, 'deleteInquiry'])->name('admin.inquiries.delete');
+
+    // Password Management
+    Route::get('/password', [AdminController::class, 'showPassword'])->name('admin.password');
+    Route::post('/password', [AdminController::class, 'updatePassword'])->name('admin.password.update');
+
+    // Sakana AI Management
+    Route::get('/ai', [AdminController::class, 'ai'])->name('admin.ai');
+    Route::post('/api/sakana/config', [SakanaController::class, 'updateConfig'])->name('admin.sakana.config');
+    Route::post('/api/sakana/test', [SakanaController::class, 'testConnection'])->name('admin.sakana.test');
 
     // Image Upload
     Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.uploadImage');
-
-    // Sakana AI Management
-    Route::post('/api/sakana/config', [SakanaController::class, 'updateConfig'])->name('admin.sakana.config');
-    Route::post('/api/sakana/test', [SakanaController::class, 'testConnection'])->name('admin.sakana.test');
 });
 
 // Image Upload API (Accessible via /api/admin/upload-image directly)

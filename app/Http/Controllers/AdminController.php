@@ -66,12 +66,49 @@ class AdminController extends Controller
     }
 
     /**
-     * Admin Dashboard with tabs for Company Info, Services, About, Stories, FAQs, Inquiries, AI
+     * Switch admin language (ja/en)
+     */
+    public function setLang($lang, Request $request)
+    {
+        $lang = in_array(strtolower($lang), ['en', 'ja']) ? strtolower($lang) : 'ja';
+        session(['admin_lang' => $lang]);
+        
+        $referer = $request->header('referer');
+        if ($referer && !str_contains($referer, '/admin/lang') && !str_contains($referer, '/admin/language')) {
+            $clean = preg_replace('/([?&])lang=[^&]+(&|$)/', '$1', $referer);
+            $clean = rtrim($clean, '?&');
+            $joiner = str_contains($clean, '?') ? '&' : '?';
+            return redirect($clean . $joiner . 'lang=' . $lang)->withCookie(cookie('admin_lang', $lang, 60 * 24 * 365, '/', null, false, false));
+        }
+        
+        return redirect('/admin?lang=' . $lang)->withCookie(cookie('admin_lang', $lang, 60 * 24 * 365, '/', null, false, false));
+    }
+
+    /**
+     * Admin Dashboard Overview (AdminLTE 3)
      */
     public function dashboard(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('admin.login');
+        }
+
+        // Backward compatibility: redirect tab query parameter to dedicated route
+        if ($request->has('tab')) {
+            $tab = $request->query('tab');
+            $tabMap = [
+                'company' => 'admin.company',
+                'about' => 'admin.about',
+                'services' => 'admin.services',
+                'stories' => 'admin.stories',
+                'faqs' => 'admin.faqs',
+                'inquiries' => 'admin.inquiries',
+                'ai' => 'admin.ai',
+                'password' => 'admin.password',
+            ];
+            if (isset($tabMap[$tab])) {
+                return redirect()->route($tabMap[$tab]);
+            }
         }
 
         $company = CompanyInfo::first() ?? new CompanyInfo();
@@ -80,9 +117,124 @@ class AdminController extends Controller
         $stories = Story::orderBy('sort_order', 'asc')->get();
         $faqs = Faq::orderBy('sort_order', 'asc')->get();
         $inquiries = Inquiry::orderBy('created_at', 'desc')->get();
-        $activeTab = $request->query('tab', 'company');
+        $unreadCount = Inquiry::where('status', 'unread')->count();
 
-        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'activeTab'));
+        return view('admin.dashboard', compact('company', 'about', 'services', 'stories', 'faqs', 'inquiries', 'unreadCount'));
+    }
+
+    /**
+     * Company Info & Media Settings View
+     */
+    public function company()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $company = CompanyInfo::first() ?? new CompanyInfo();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.company', compact('company', 'unreadCount'));
+    }
+
+    /**
+     * About & Philosophy View
+     */
+    public function about()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $about = About::first() ?? new About();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.about', compact('about', 'unreadCount'));
+    }
+
+    /**
+     * Services Management View
+     */
+    public function services()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $services = Service::orderBy('sort_order', 'asc')->get();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.services', compact('services', 'unreadCount'));
+    }
+
+    /**
+     * Stories & Case Studies View
+     */
+    public function stories()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $stories = Story::orderBy('sort_order', 'asc')->get();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.stories', compact('stories', 'unreadCount'));
+    }
+
+    /**
+     * FAQs Management View
+     */
+    public function faqs()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $faqs = Faq::orderBy('sort_order', 'asc')->get();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.faqs', compact('faqs', 'unreadCount'));
+    }
+
+    /**
+     * Inquiries Inbox View
+     */
+    public function inquiries(Request $request)
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $inquiries = Inquiry::orderBy('created_at', 'desc')->get();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.inquiries', compact('inquiries', 'unreadCount'));
+    }
+
+    /**
+     * Change Password View
+     */
+    public function showPassword()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.password', compact('unreadCount'));
+    }
+
+    /**
+     * Change Password Action
+     */
+    public function updatePassword(Request $request)
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ], [
+            'current_password.required' => '現在のパスワードを入力してください。',
+            'new_password.required' => '新しいパスワードを入力してください。',
+            'new_password.min' => '新しいパスワードは最低6文字以上で指定してください。',
+            'new_password.confirmed' => '新しいパスワードと確認入力が一致しません。',
+        ]);
+
+        $user = Auth::user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', '現在のパスワードが正しくありません。正しいパスワードを入力してください。');
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->route('admin.password')->with('success', '管理者パスワードを正常に変更しました。');
+    }
+
+    /**
+     * Sakana AI View
+     */
+    public function ai()
+    {
+        if (!Auth::check()) return redirect()->route('admin.login');
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+        return view('admin.ai', compact('unreadCount'));
     }
 
     /**
@@ -140,7 +292,7 @@ class AdminController extends Controller
         $company->fill($inputData);
         $company->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'company'])->with('success', 'Company Information & Media updated successfully!');
+        return redirect()->route('admin.company')->with('success', '会社情報およびメディア設定を正常に更新しました。');
     }
 
     /**
@@ -160,7 +312,7 @@ class AdminController extends Controller
         $about->fill($request->all());
         $about->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'about'])->with('success', 'About Section updated successfully!');
+        return redirect()->route('admin.about')->with('success', '企業理念・メッセージ情報を正常に更新しました。');
     }
 
     /**
@@ -203,7 +355,7 @@ class AdminController extends Controller
         $service->sort_order = (int) ($request->sort_order ?? 0);
         $service->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'services'])->with('success', 'New service published successfully!');
+        return redirect()->route('admin.services')->with('success', '新規サービスを正常に登録・公開しました。');
     }
 
     /**
@@ -241,7 +393,7 @@ class AdminController extends Controller
         $service->sort_order = (int) ($request->sort_order ?? 0);
         $service->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'services'])->with('success', 'Service #' . $service->number_label . ' updated successfully!');
+        return redirect()->route('admin.services')->with('success', 'サービス #' . $service->number_label . ' の内容を更新しました。');
     }
 
     /**
@@ -256,7 +408,7 @@ class AdminController extends Controller
         $service = Service::findOrFail($id);
         $service->delete();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'services'])->with('success', 'Service deleted successfully.');
+        return redirect()->route('admin.services')->with('success', 'サービスを削除しました。');
     }
 
     /**
@@ -291,7 +443,7 @@ class AdminController extends Controller
         $story->sort_order = (int) ($request->sort_order ?? 0);
         $story->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'stories'])->with('success', 'New Story / Case Study created successfully!');
+        return redirect()->route('admin.stories')->with('success', '新規事例・ストーリーを登録しました。');
     }
 
     /**
@@ -319,7 +471,7 @@ class AdminController extends Controller
         $story->sort_order = (int) ($request->sort_order ?? 0);
         $story->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'stories'])->with('success', 'Story updated successfully!');
+        return redirect()->route('admin.stories')->with('success', '事例・ストーリーを更新しました。');
     }
 
     /**
@@ -334,7 +486,7 @@ class AdminController extends Controller
         $story = Story::findOrFail($id);
         $story->delete();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'stories'])->with('success', 'Story deleted successfully.');
+        return redirect()->route('admin.stories')->with('success', '事例・ストーリーを削除しました。');
     }
 
     /**
@@ -361,7 +513,7 @@ class AdminController extends Controller
         $faq->sort_order = (int) ($request->sort_order ?? 0);
         $faq->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ question created successfully!');
+        return redirect()->route('admin.faqs')->with('success', 'よくある質問 (FAQ) を追加しました。');
     }
 
     /**
@@ -383,7 +535,7 @@ class AdminController extends Controller
         $faq->sort_order = (int) ($request->sort_order ?? 0);
         $faq->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ updated successfully!');
+        return redirect()->route('admin.faqs')->with('success', 'よくある質問 (FAQ) を更新しました。');
     }
 
     /**
@@ -398,11 +550,11 @@ class AdminController extends Controller
         $faq = Faq::findOrFail($id);
         $faq->delete();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'faqs'])->with('success', 'FAQ deleted successfully.');
+        return redirect()->route('admin.faqs')->with('success', 'よくある質問 (FAQ) を削除しました。');
     }
 
     /**
-     * Update Inquiry Status (read/replied)
+     * Update Inquiry Status (read/replied/in_progress)
      */
     public function updateInquiryStatus(Request $request, $id)
     {
@@ -414,7 +566,22 @@ class AdminController extends Controller
         $inquiry->status = $request->status ?? 'read';
         $inquiry->save();
 
-        return redirect()->route('admin.dashboard', ['tab' => 'inquiries'])->with('success', 'Inquiry marked as ' . $inquiry->status);
+        return redirect()->route('admin.inquiries')->with('success', 'お問い合わせステータスを更新しました。');
+    }
+
+    /**
+     * Delete Inquiry
+     */
+    public function deleteInquiry($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $inquiry = Inquiry::findOrFail($id);
+        $inquiry->delete();
+
+        return redirect()->route('admin.inquiries')->with('success', 'お問い合わせを削除しました。');
     }
 
     /**
