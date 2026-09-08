@@ -114,7 +114,7 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
 
       <form action="/admin/login${lang === 'en' ? '?lang=en' : ''}" method="post">
         <div class="input-group mb-3">
-          <input type="text" name="email" class="form-control" placeholder="${t.login.emailPlaceholder}" value="admin@miransh.jp" required autofocus>
+          <input type="text" name="email" class="form-control" placeholder="${t.login.emailPlaceholder}" value="" required autofocus>
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>
@@ -130,11 +130,14 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
           </div>
         </div>
         
+        <!-- Default credentials hidden per user preference -->
+        <!--
         <div class="callout callout-info py-2 px-3 mb-3 bg-light text-xs text-muted">
           <div class="font-weight-bold text-dark mb-1"><i class="fas fa-info-circle mr-1 text-info"></i>${t.login.demoNoticeTitle}</div>
           <div>${t.login.demoNoticeId}</div>
           <div>${t.login.demoNoticePw}</div>
         </div>
+        -->
 
         <div class="row">
           <div class="col-12">

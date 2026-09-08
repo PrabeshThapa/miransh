@@ -1759,10 +1759,7 @@ export function renderPasswordContent(user: any, lang: AdminLang = 'ja'): { body
           <form action="/admin/password" method="POST" id="form-change-password">
             <div class="card-body">
               <div class="callout callout-info py-2 px-3 mb-4 text-xs">
-                <div class="font-weight-bold text-dark mb-1"><i class="fas fa-shield-alt text-info mr-1"></i>${t.password.accountInfoTitle}:</div>
-                <div>${t.password.accountName}: <strong>${escapeHtml(user?.name || 'admin')}</strong></div>
-                <div>${t.password.accountEmail}: <strong>${escapeHtml(user?.email || 'admin@miransh.jp')}</strong></div>
-                <div class="text-muted mt-1">※${t.password.infoBanner}</div>
+                <i class="fas fa-shield-alt text-info mr-1"></i> ${t.password.infoBanner}
               </div>
 
               <div class="form-group">

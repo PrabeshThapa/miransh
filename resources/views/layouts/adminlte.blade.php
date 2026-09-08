@@ -1,9 +1,14 @@
+@php
+    $currLang = strtolower(request()->query('lang', request()->cookie('admin_lang', session('admin_lang', 'ja'))));
+    if (!in_array($currLang, ['ja', 'en'])) $currLang = 'ja';
+    $isEn = ($currLang === 'en');
+@endphp
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ $currLang }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MIRANSH LLC | @yield('title', '管理ポータル') - AdminLTE 3</title>
+    <title>MIRANSH LLC | @yield('title', $isEn ? 'Admin Portal' : '管理ポータル') - AdminLTE 3</title>
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
     
     <!-- Google Font: Source Sans Pro -->
@@ -103,16 +108,16 @@
         <!-- Left navbar links -->
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="メニュー開閉">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="{{ $isEn ? 'Toggle Menu' : 'メニュー開閉' }}">
                     <i class="fas fa-bars"></i>
                 </a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link font-weight-bold">管理ホーム</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link font-weight-bold">{{ $isEn ? 'Admin Home' : '管理ホーム' }}</a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="/" target="_blank" class="nav-link text-primary" title="別タブで公開サイトを開く">
-                    <i class="fas fa-external-link-alt mr-1"></i>公開サイト表示
+                <a href="/" target="_blank" class="nav-link text-primary" title="{{ $isEn ? 'Open Public Site in New Tab' : '別タブで公開サイトを開く' }}">
+                    <i class="fas fa-external-link-alt mr-1"></i>{{ $isEn ? 'View Public Site' : '公開サイト表示' }}
                 </a>
             </li>
         </ul>
@@ -120,10 +125,6 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto align-items-center">
             <!-- Language Switcher Component (Bilingual Enterprise Switcher) -->
-            @php
-                $currLang = strtolower(request()->query('lang', request()->cookie('admin_lang', session('admin_lang', 'ja'))));
-                if (!in_array($currLang, ['ja', 'en'])) $currLang = 'ja';
-            @endphp
             <li class="nav-item d-flex align-items-center mr-3" id="admin-lang-switcher-component">
                 <!-- 1-Click Segmented Toggle Pill (Desktop & Tablet) -->
                 <div class="admin-lang-switcher d-none d-sm-inline-flex border rounded-pill overflow-hidden bg-light shadow-xs p-1" role="group" aria-label="Bilingual Language Switcher">
@@ -155,8 +156,8 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow border-0 p-2" style="min-width: 230px; border-radius: 10px;">
                         <div class="dropdown-header text-xs text-uppercase font-weight-bold text-muted px-2 py-1 d-flex align-items-center justify-content-between">
-                            <span><i class="fas fa-language mr-1 text-primary"></i>{{ $currLang === 'en' ? 'Language Switcher' : '言語切り替え' }}</span>
-                            <span class="badge badge-light border">{{ $currLang === 'en' ? 'Live Context' : '状態保持' }}</span>
+                            <span><i class="fas fa-language mr-1 text-primary"></i>{{ $isEn ? 'Language Selection' : '言語切り替え' }}</span>
+                            <span class="badge badge-light border">{{ $isEn ? 'Live Context' : '状態保持' }}</span>
                         </div>
                         <div class="dropdown-divider my-1"></div>
                         <a href="/admin/lang/ja"
@@ -186,7 +187,7 @@
                         <div class="dropdown-divider my-2"></div>
                         <div class="px-2 py-1 text-xs text-muted d-flex align-items-center">
                             <i class="fas fa-shield-alt text-success mr-2"></i>
-                            <span>{{ $currLang === 'en' ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持' }}</span>
+                            <span>{{ $isEn ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持' }}</span>
                         </div>
                     </div>
                 </div>
@@ -194,20 +195,20 @@
 
             <!-- Inquiries Notifications Dropdown -->
             <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
+                <a class="nav-link" data-toggle="dropdown" href="#" title="{{ $isEn ? 'Inquiry Notifications' : '通知' }}">
                     <i class="far fa-bell"></i>
                     @if(($unreadCount ?? 0) > 0)
                         <span class="badge badge-danger navbar-badge font-weight-bold">{{ $unreadCount }}</span>
                     @endif
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                    <span class="dropdown-header font-weight-bold">{{ $unreadCount ?? 0 }} 件の未対応お問い合わせ</span>
+                    <span class="dropdown-header font-weight-bold">{{ $isEn ? ($unreadCount ?? 0) . ' Pending Inquiries' : ($unreadCount ?? 0) . ' 件の未対応お問い合わせ' }}</span>
                     <div class="dropdown-divider"></div>
                     <a href="{{ route('admin.inquiries') }}" class="dropdown-item">
-                        <i class="fas fa-envelope mr-2 text-primary"></i> お問い合わせ一覧へ
+                        <i class="fas fa-envelope mr-2 text-primary"></i> {{ $isEn ? 'View All Inquiries' : 'お問い合わせ一覧へ' }}
                     </a>
                     <div class="dropdown-divider"></div>
-                    <a href="{{ route('admin.inquiries', ['status' => 'unread']) }}" class="dropdown-item dropdown-footer">未読のお問い合わせを表示</a>
+                    <a href="{{ route('admin.inquiries', ['status' => 'unread']) }}" class="dropdown-item dropdown-footer">{{ $isEn ? 'View Unread Only' : '未読のお問い合わせを表示' }}</a>
                 </div>
             </li>
 
@@ -217,23 +218,23 @@
                     <i class="fas fa-user-circle fa-lg text-secondary"></i>
                     <span class="ml-1 d-none d-md-inline font-weight-bold">{{ Auth::user()->name ?? 'Administrator' }}</span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                <div class="dropdown-menu dropdown-menu-md dropdown-menu-right shadow border-0">
                     <div class="dropdown-item bg-light text-center py-2">
-                        <div class="font-weight-bold text-dark">{{ Auth::user()->name ?? 'Administrator' }}</div>
-                        <small class="text-muted">{{ Auth::user()->email ?? 'admin@miransh.jp' }}</small>
+                        <div class="font-weight-bold text-dark">{{ Auth::user()->name ?? ($isEn ? 'Administrator' : '管理者') }}</div>
+                        <small class="text-muted"><i class="fas fa-shield-alt text-success mr-1"></i>{{ $isEn ? 'Super Admin' : '特権管理者' }}</small>
                     </div>
                     <div class="dropdown-divider"></div>
                     <a href="{{ route('admin.password') }}" class="dropdown-item">
-                        <i class="fas fa-key mr-2 text-warning"></i> パスワード変更
+                        <i class="fas fa-key mr-2 text-warning"></i> {{ $isEn ? 'Change Password' : 'パスワード変更' }}
                     </a>
                     <a href="{{ route('admin.company') }}" class="dropdown-item">
-                        <i class="fas fa-cog mr-2 text-secondary"></i> 会社設定
+                        <i class="fas fa-cog mr-2 text-secondary"></i> {{ $isEn ? 'Company Settings' : '会社設定' }}
                     </a>
                     <div class="dropdown-divider"></div>
                     <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">
                         @csrf
                         <button type="submit" class="dropdown-item text-danger font-weight-bold">
-                            <i class="fas fa-sign-out-alt mr-2"></i> ログアウト
+                            <i class="fas fa-sign-out-alt mr-2"></i> {{ $isEn ? 'Log Out' : 'ログアウト' }}
                         </button>
                     </form>
                 </div>
@@ -263,7 +264,7 @@
                     <a href="{{ route('admin.password') }}" class="d-block font-weight-bold text-light">
                         {{ Auth::user()->name ?? 'Administrator' }}
                     </a>
-                    <span class="badge badge-success text-xs py-0 px-1 font-weight-normal">ログイン中</span>
+                    <span class="badge badge-success text-xs py-0 px-1 font-weight-normal">{{ $isEn ? 'Online' : 'ログイン中' }}</span>
                 </div>
             </div>
 
@@ -273,48 +274,48 @@
                     <li class="nav-item">
                         <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>ダッシュボード概要</p>
+                            <p>{{ $isEn ? 'Dashboard Overview' : 'ダッシュボード概要' }}</p>
                         </a>
                     </li>
 
-                    <li class="nav-header">コンテンツ・広報管理</li>
+                    <li class="nav-header">{{ $isEn ? 'CONTENT & PR MANAGEMENT' : 'コンテンツ・広報管理' }}</li>
                     <li class="nav-item">
                         <a href="{{ route('admin.company') }}" class="nav-link {{ request()->routeIs('admin.company') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-building"></i>
-                            <p>会社情報・画像設定</p>
+                            <p>{{ $isEn ? 'Company & Images' : '会社情報・画像設定' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.about') }}" class="nav-link {{ request()->routeIs('admin.about') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-handshake"></i>
-                            <p>企業理念・メッセージ</p>
+                            <p>{{ $isEn ? 'Corporate Philosophy' : '企業理念・メッセージ' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.services') }}" class="nav-link {{ request()->routeIs('admin.services') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-briefcase"></i>
-                            <p>提供サービス管理</p>
+                            <p>{{ $isEn ? 'Services Management' : '提供サービス管理' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.stories') }}" class="nav-link {{ request()->routeIs('admin.stories') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-newspaper"></i>
-                            <p>採用事例・実績管理</p>
+                            <p>{{ $isEn ? 'Stories & Case Studies' : '採用事例・実績管理' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.faqs') }}" class="nav-link {{ request()->routeIs('admin.faqs') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-question-circle"></i>
-                            <p>よくある質問管理</p>
+                            <p>{{ $isEn ? 'FAQ Management' : 'よくある質問管理' }}</p>
                         </a>
                     </li>
 
-                    <li class="nav-header">コミュニケーション</li>
+                    <li class="nav-header">{{ $isEn ? 'COMMUNICATION' : 'コミュニケーション' }}</li>
                     <li class="nav-item">
                         <a href="{{ route('admin.inquiries') }}" class="nav-link {{ request()->routeIs('admin.inquiries') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>
-                                お問い合わせ管理
+                                {{ $isEn ? 'Inquiry Inbox' : 'お問い合わせ管理' }}
                                 @if(($unreadCount ?? 0) > 0)
                                     <span class="badge badge-danger right">{{ $unreadCount }}</span>
                                 @endif
@@ -322,17 +323,17 @@
                         </a>
                     </li>
 
-                    <li class="nav-header">システム & セキュリティ</li>
+                    <li class="nav-header">{{ $isEn ? 'SYSTEM & SECURITY' : 'システム & セキュリティ' }}</li>
                     <li class="nav-item">
                         <a href="{{ route('admin.password') }}" class="nav-link {{ request()->routeIs('admin.password') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-key"></i>
-                            <p>管理者パスワード変更</p>
+                            <p>{{ $isEn ? 'Change Password' : '管理者パスワード変更' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.ai') }}" class="nav-link {{ request()->routeIs('admin.ai') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-robot"></i>
-                            <p>Sakana AI 設定・診断</p>
+                            <p>{{ $isEn ? 'Sakana AI Diagnostics' : 'Sakana AI 設定・診断' }}</p>
                         </a>
                     </li>
                     <li class="nav-item mt-3">
@@ -340,7 +341,7 @@
                             @csrf
                             <button type="submit" class="nav-link btn btn-block btn-outline-danger text-left border-0" style="background: rgba(220, 53, 69, 0.15); color: #ff8b94 !important;">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
-                                <p>ログアウト</p>
+                                <p>{{ $isEn ? 'Log Out' : 'ログアウト' }}</p>
                             </button>
                         </form>
                     </li>
@@ -359,12 +360,12 @@
                 <div class="row mb-2 align-items-center">
                     <div class="col-sm-6">
                         <h4 class="m-0 font-weight-bold text-dark">
-                            @yield('page_title', 'ダッシュボード')
+                            @yield('page_title', $isEn ? 'Dashboard' : 'ダッシュボード')
                         </h4>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right mb-0 text-xs">
-                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">管理ホーム</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ $isEn ? 'Admin Home' : '管理ホーム' }}</a></li>
                             @yield('breadcrumb')
                         </ol>
                     </div>
@@ -400,7 +401,7 @@
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <strong>入力内容をご確認ください：</strong>
+                        <strong>{{ $isEn ? 'Please review the following errors:' : '入力内容をご確認ください：' }}</strong>
                         <ul class="mb-0 mt-1 pl-3 text-sm">
                             @foreach($errors->all() as $err)
                                 <li>{{ $err }}</li>
