@@ -359,7 +359,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
                   id="btn-lang-ja"
                   class="btn btn-xs font-weight-bold ${lang === 'ja' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
                   onclick="switchAdminLanguage('ja', event)"
-                  title="日本語に切り替え (Japanese)"
+                  title="${lang === 'en' ? 'Switch to Japanese (日本語)' : '日本語に切り替え'}"
                   aria-pressed="${lang === 'ja'}">
             <span class="mr-1">🇯🇵</span><span>日本語</span>
           </button>
@@ -367,7 +367,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
                   id="btn-lang-en"
                   class="btn btn-xs font-weight-bold ${lang === 'en' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
                   onclick="switchAdminLanguage('en', event)"
-                  title="Switch to English (英語)"
+                  title="${lang === 'en' ? 'English (Active)' : '英語に切り替え (English)'}"
                   aria-pressed="${lang === 'en'}">
             <span class="mr-1">🇬🇧</span><span>English</span>
           </button>
@@ -377,7 +377,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
         <div class="dropdown ml-1">
           <a class="nav-link dropdown-toggle btn btn-xs btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark rounded-pill border shadow-xs"
              data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
-             title="Language Switcher Menu / 言語切り替えメニュー (${lang === 'en' ? 'English' : '日本語'})">
+             title="${lang === 'en' ? 'Language Switcher Menu (English)' : '言語切り替えメニュー (日本語)'}">
             <i class="fas fa-globe text-primary mr-1"></i>
             <span class="badge badge-pill ${lang === 'en' ? 'badge-primary' : 'badge-dark'} text-xs font-weight-bold px-1 py-0">${lang.toUpperCase()}</span>
           </a>
@@ -397,7 +397,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
                   <small class="${lang === 'ja' ? 'text-white-50' : 'text-muted'}">Japanese (JA)</small>
                 </div>
               </div>
-              ${lang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">切替</span>'}
+              ${lang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : `<span class="badge badge-light border text-xs">${lang === 'en' ? 'Switch' : '切替'}</span>`}
             </a>
             <a href="/admin/lang/en"
                class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 mt-1 ${lang === 'en' ? 'active font-weight-bold' : ''}"
@@ -406,7 +406,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
                 <span class="mr-2" style="font-size: 1.2rem;">🇬🇧</span>
                 <div>
                   <div class="font-weight-bold">English</div>
-                  <small class="${lang === 'en' ? 'text-white-50' : 'text-muted'}">英語 (EN)</small>
+                  <small class="${lang === 'en' ? 'text-white-50' : 'text-muted'}">${lang === 'en' ? 'English (EN)' : '英語 (EN)'}</small>
                 </div>
               </div>
               ${lang === 'en' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">Switch</span>'}

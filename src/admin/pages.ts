@@ -145,10 +145,10 @@ export function renderDashboardContent(
             <table class="table table-hover text-sm mb-0">
               <thead class="thead-light">
                 <tr>
-                  <th style="width: 70px;">${lang === 'en' ? 'Photo' : '写真'}</th>
-                  <th>${lang === 'en' ? 'Story Title (JA / EN)' : 'タイトル (日/英)'}</th>
-                  <th>${lang === 'en' ? 'Category' : '分野'}</th>
-                  <th>${lang === 'en' ? 'Date' : '公開日'}</th>
+                  <th style="width: 70px;">${t.dashboard.tablePhoto}</th>
+                  <th>${t.dashboard.tableStoryTitle}</th>
+                  <th>${t.dashboard.tableCategory}</th>
+                  <th>${t.dashboard.tableDate}</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,15 +203,15 @@ export function renderDashboardContent(
         <div class="card card-outline card-info shadow-sm mb-3">
           <div class="card-header bg-light">
             <h3 class="card-title font-weight-bold text-dark mb-0">
-              <i class="fas fa-info-circle text-info mr-2"></i>${lang === 'en' ? 'Company Snapshot' : '企業基本情報'}
+              <i class="fas fa-info-circle text-info mr-2"></i>${t.dashboard.companySnapshot}
             </h3>
           </div>
           <div class="card-body text-xs">
-            <div class="mb-2"><strong>${lang === 'en' ? 'Name:' : '社名:'}</strong> ${escapeHtml(company.name_ja)} (${escapeHtml(company.name_en || '')})</div>
-            <div class="mb-2"><strong>${lang === 'en' ? 'License:' : '許可番号:'}</strong> ${escapeHtml(company.license || '13-ユ-319558')}</div>
-            <div class="mb-2"><strong>${lang === 'en' ? 'CEO:' : '代表者:'}</strong> ${escapeHtml(lang === 'en' ? (company.ceo_name_en || company.ceo_name_ja) : company.ceo_name_ja)}</div>
-            <div class="mb-2"><strong>${lang === 'en' ? 'Address:' : '所在地:'}</strong> ${escapeHtml(lang === 'en' ? (company.address_en || company.address_ja) : company.address_ja)}</div>
-            <div class="mb-0"><strong>${lang === 'en' ? 'Phone:' : '電話:'}</strong> ${escapeHtml(company.phone)}</div>
+            <div class="mb-2"><strong>${t.dashboard.tableName}</strong> ${escapeHtml(company.name_ja)} (${escapeHtml(company.name_en || '')})</div>
+            <div class="mb-2"><strong>${t.dashboard.tableLicense}</strong> ${escapeHtml(company.license || '13-ユ-319558')}</div>
+            <div class="mb-2"><strong>${t.dashboard.tableCeo}</strong> ${escapeHtml(lang === 'en' ? (company.ceo_name_en || company.ceo_name_ja) : company.ceo_name_ja)}</div>
+            <div class="mb-2"><strong>${t.dashboard.tableAddress}</strong> ${escapeHtml(lang === 'en' ? (company.address_en || company.address_ja) : company.address_ja)}</div>
+            <div class="mb-0"><strong>${t.dashboard.tablePhone}</strong> ${escapeHtml(company.phone)}</div>
           </div>
         </div>
 
@@ -223,19 +223,19 @@ export function renderDashboardContent(
           </div>
           <div class="card-body text-xs">
             <div class="d-flex justify-content-between mb-1">
-              <span>${lang === 'en' ? 'Database:' : 'データベース:'}</span>
+              <span>${t.dashboard.tableDatabase}</span>
               <span class="text-success font-weight-bold"><i class="fas fa-check-circle mr-1"></i>SQLite (Durable)</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
-              <span>${lang === 'en' ? 'Port:' : 'ポート番号:'}</span>
+              <span>${t.dashboard.tablePort}</span>
               <span class="font-weight-bold">3000 (Production Ready)</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
-              <span>${lang === 'en' ? 'Framework:' : 'UIフレームワーク:'}</span>
+              <span>${t.dashboard.tableFramework}</span>
               <span class="text-primary font-weight-bold">AdminLTE 3.2.0</span>
             </div>
             <div class="d-flex justify-content-between">
-              <span>${lang === 'en' ? 'Language:' : '表示言語:'}</span>
+              <span>${t.dashboard.tableLanguage}</span>
               <span class="badge badge-primary font-weight-bold">${t.langName} (Active)</span>
             </div>
           </div>
@@ -416,7 +416,7 @@ export function renderCompanyContent(company: any, lang: AdminLang = 'ja'): { bo
 
           <div class="row">
             <div class="col-md-6 form-group">
-              <label>${lang === 'en' ? 'Corporate Number' : '法人番号 (Corporate Number)'}</label>
+              <label>${lang === 'en' ? 'Corporate Number' : '法人番号'}</label>
               <input type="text" name="corporate_number" class="form-control" value="${escapeHtml(company.corporate_number || '')}">
             </div>
             <div class="col-md-6 form-group">
@@ -438,11 +438,11 @@ export function renderCompanyContent(company: any, lang: AdminLang = 'ja'): { bo
 
           <div class="row">
             <div class="col-md-6 form-group">
-              <label>${lang === 'en' ? 'Representative Title (JA)' : '役職名 (日本語)'}</label>
+              <label>${lang === 'en' ? 'Representative Title (Japanese)' : '役職名 (日本語)'}</label>
               <input type="text" name="ceo_role_ja" class="form-control" value="${escapeHtml(company.ceo_role_ja || '')}">
             </div>
             <div class="col-md-6 form-group">
-              <label>${lang === 'en' ? 'Representative Title (EN)' : 'Role (English)'}</label>
+              <label>${lang === 'en' ? 'Representative Title (English)' : '役職名 (英語)'}</label>
               <input type="text" name="ceo_role_en" class="form-control" value="${escapeHtml(company.ceo_role_en || '')}">
             </div>
           </div>
@@ -453,7 +453,7 @@ export function renderCompanyContent(company: any, lang: AdminLang = 'ja'): { bo
           </div>
 
           <div class="form-group">
-            <label class="font-weight-bold">${lang === 'en' ? 'CEO Message (English)' : 'CEO Message (English)'}</label>
+            <label class="font-weight-bold">${lang === 'en' ? 'CEO Message (English)' : '代表メッセージ (英語)'}</label>
             <textarea name="ceo_message_en" class="form-control" rows="4">${escapeHtml(company.ceo_message_en || '')}</textarea>
           </div>
 
@@ -557,7 +557,7 @@ export function renderCompanyContent(company: any, lang: AdminLang = 'ja'): { bo
             }
           } catch (err) {
             statusEl.className = 'text-xs text-danger font-weight-bold';
-            statusEl.textContent = '✗ アップロード失敗: ' + err.message;
+            statusEl.textContent = '✗ ' + (${lang === 'en' ? `'Upload failed: '` : `'アップロード失敗: '`}) + err.message;
           }
         };
         reader.readAsDataURL(file);
@@ -955,7 +955,7 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
         <table class="table table-striped table-hover text-sm mb-0">
           <thead class="thead-light">
             <tr>
-              <th style="width: 70px;">${t.stories.tableImage}</th>
+              <th style="width: 75px;">${t.stories.tableImage}</th>
               <th>${t.stories.tableTitle}</th>
               <th>${t.stories.tableCategory}</th>
               <th>${t.stories.tableDate}</th>
@@ -967,11 +967,11 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
             ${stories.map(st => `
               <tr>
                 <td>
-                  <img src="${escapeHtml(st.image || '/images/story1.jpg')}" class="img-thumbnail" style="width: 55px; height: 38px; object-fit: cover;">
+                  <img src="${escapeHtml(st.image || '/images/story1.jpg')}" class="img-thumbnail rounded shadow-xs" style="width: 60px; height: 42px; object-fit: cover;" alt="Story Thumbnail">
                 </td>
                 <td>
-                  <div class="font-weight-bold text-dark">${escapeHtml(st.title_ja)}</div>
-                  <small class="text-muted">${escapeHtml(st.title_en || '')}</small>
+                  <div class="font-weight-bold text-dark">${escapeHtml(lang === 'en' ? (st.title_en || st.title_ja) : st.title_ja)}</div>
+                  <small class="text-muted">${escapeHtml(lang === 'en' ? (st.title_ja || '') : (st.title_en || ''))}</small>
                 </td>
                 <td>
                   <span class="badge badge-secondary px-2 py-1">${escapeHtml(lang === 'en' ? (st.category_en || st.category_ja) : st.category_ja)}</span>
@@ -992,7 +992,7 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
                 </td>
               </tr>
             `).join('')}
-            ${stories.length === 0 ? `<tr><td colspan="6" class="text-center py-4 text-muted">${lang === 'en' ? 'No stories found.' : '登録されている事例はありません。'}</td></tr>` : ''}
+            ${stories.length === 0 ? `<tr><td colspan="6" class="text-center py-4 text-muted">${t.stories.noStories}</td></tr>` : ''}
           </tbody>
         </table>
       </div>
@@ -1010,47 +1010,90 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form action="/admin/stories" method="POST">
+          <form action="/admin/stories" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="lang" value="${lang}">
             <div class="modal-body">
               <div class="row">
                 <div class="col-md-6 form-group">
-                  <label>${t.stories.titleJa} *</label>
+                  <label class="font-weight-bold">${t.stories.titleJa} *</label>
                   <input type="text" name="title_ja" class="form-control" required placeholder="${lang === 'en' ? 'Story Title (Japanese)' : '例: 介護施設様へのネパール特定技能人材マッチング'}">
                 </div>
                 <div class="col-md-6 form-group">
-                  <label>${t.stories.titleEn} *</label>
-                  <input type="text" name="title_en" class="form-control" required placeholder="e.g., SSW Caregiver Placement Story">
+                  <label class="font-weight-bold">${t.stories.titleEn} *</label>
+                  <input type="text" name="title_en" class="form-control" required placeholder="${lang === 'en' ? 'Story Title (English)' : 'e.g., SSW Caregiver Placement Story'}">
                 </div>
               </div>
               <div class="row">
                 <div class="col-md-6 form-group">
                   <label>${t.stories.categoryJa} *</label>
-                  <input type="text" name="category_ja" class="form-control" required value="特定技能 / 介護分野">
+                  <input type="text" name="category_ja" class="form-control" required value="${lang === 'en' ? '特定技能 / 介護分野' : '特定技能 / 介護分野'}">
                 </div>
                 <div class="col-md-6 form-group">
                   <label>${t.stories.categoryEn} *</label>
                   <input type="text" name="category_en" class="form-control" required value="Nursing Care / SSW">
                 </div>
               </div>
-              <div class="form-group">
-                <label>${t.stories.imageUrl}</label>
-                <input type="text" name="image" class="form-control" value="/images/story1.jpg">
+
+              <!-- Story Image Upload & Preview Card -->
+              <div class="card card-outline card-info bg-light mb-3">
+                <div class="card-header py-2 bg-white">
+                  <label class="font-weight-bold text-dark mb-0">
+                    <i class="fas fa-image text-primary mr-2"></i>${t.stories.uploadImage}
+                  </label>
+                </div>
+                <div class="card-body py-3">
+                  <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                      <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden border bg-white" style="width: 150px; height: 100px;">
+                        <img id="create_story_image_preview" src="/images/story1.jpg" class="w-100 h-100" style="object-fit: cover;" alt="Story Image Preview">
+                      </div>
+                      <div class="text-xs text-muted mt-1 font-weight-bold">${t.stories.previewImage}</div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="drop-zone p-3 text-center bg-white rounded border" id="create_story_drop_zone"
+                           ondragover="handleStoryDragOver(event, this)"
+                           ondragleave="handleStoryDragLeave(event, this)"
+                           ondrop="handleStoryDrop(event, 'create')">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                        <div class="text-sm font-weight-bold text-dark mb-1">${t.stories.dropPrompt}</div>
+                        <div class="text-xs text-muted mb-2">${lang === 'en' ? 'Supports JPG, PNG, WebP (up to 10MB)' : 'JPG, PNG, WebP形式に対応 (最大10MB)'}</div>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                          <label class="btn btn-sm btn-primary font-weight-bold mb-0 shadow-xs mr-2 cursor-pointer">
+                            <i class="fas fa-folder-open mr-1"></i> ${t.actions.upload}
+                            <input type="file" name="story_image_file" accept="image/*" class="d-none" onchange="uploadStoryImageFile(this, 'create')">
+                          </label>
+                          <button type="button" class="btn btn-xs btn-outline-secondary" onclick="resetStoryImage('create')">
+                            <i class="fas fa-undo mr-1"></i> ${t.stories.resetImage}
+                          </button>
+                        </div>
+                      </div>
+                      <div id="create_story_upload_status" class="mt-2 text-xs font-weight-bold"></div>
+                      <div class="input-group input-group-sm mt-2">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text text-xs bg-white font-weight-bold">URL</span>
+                        </div>
+                        <input type="text" name="image" id="create_story_image_input" class="form-control" value="/images/story1.jpg" oninput="updateStoryPreviewFromInput('create')">
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div class="form-group">
                 <label>${t.stories.summaryJa}</label>
-                <textarea name="summary_ja" class="form-control" rows="2"></textarea>
+                <textarea name="summary_ja" class="form-control" rows="2" placeholder="${lang === 'en' ? 'Summary in Japanese' : '事例の要約・ハイライト (日本語)'}"></textarea>
               </div>
               <div class="form-group">
                 <label>${t.stories.summaryEn}</label>
-                <textarea name="summary_en" class="form-control" rows="2"></textarea>
+                <textarea name="summary_en" class="form-control" rows="2" placeholder="${lang === 'en' ? 'Summary in English' : 'Summary in English'}"></textarea>
               </div>
               <div class="form-group">
                 <label>${t.stories.contentJa}</label>
-                <textarea name="content_ja" class="form-control" rows="4"></textarea>
+                <textarea name="content_ja" class="form-control" rows="4" placeholder="${lang === 'en' ? 'Full story details in Japanese' : 'インタビューや詳細な採用背景・成果 (日本語)'}"></textarea>
               </div>
               <div class="form-group">
                 <label>${t.stories.contentEn}</label>
-                <textarea name="content_en" class="form-control" rows="4"></textarea>
+                <textarea name="content_en" class="form-control" rows="4" placeholder="${lang === 'en' ? 'Full story details in English' : 'Full case study description in English'}"></textarea>
               </div>
               <div class="row">
                 <div class="col-md-6 form-group">
@@ -1059,12 +1102,12 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
                 </div>
                 <div class="col-md-6 form-group">
                   <label>${t.stories.author}</label>
-                  <input type="text" name="author" class="form-control" value="MIRANSH Editorial">
+                  <input type="text" name="author" class="form-control" value="${t.stories.authorDefault}">
                 </div>
               </div>
               <div class="form-check">
                 <input type="checkbox" name="featured" value="1" class="form-check-input" id="create_featured_check" checked>
-                <label class="form-check-label font-weight-bold" for="create_featured_check">${t.stories.isFeatured}</label>
+                <label class="form-check-label font-weight-bold text-dark" for="create_featured_check">${t.stories.isFeatured}</label>
               </div>
             </div>
             <div class="modal-footer bg-light py-2">
@@ -1086,15 +1129,16 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form id="form-edit-story" action="" method="POST">
+          <form id="form-edit-story" action="" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="lang" value="${lang}">
             <div class="modal-body">
               <div class="row">
                 <div class="col-md-6 form-group">
-                  <label>${t.stories.titleJa} *</label>
+                  <label class="font-weight-bold">${t.stories.titleJa} *</label>
                   <input type="text" name="title_ja" id="edit_st_title_ja" class="form-control" required>
                 </div>
                 <div class="col-md-6 form-group">
-                  <label>${t.stories.titleEn} *</label>
+                  <label class="font-weight-bold">${t.stories.titleEn} *</label>
                   <input type="text" name="title_en" id="edit_st_title_en" class="form-control" required>
                 </div>
               </div>
@@ -1108,10 +1152,52 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
                   <input type="text" name="category_en" id="edit_st_cat_en" class="form-control" required>
                 </div>
               </div>
-              <div class="form-group">
-                <label>${t.stories.imageUrl}</label>
-                <input type="text" name="image" id="edit_st_image" class="form-control">
+
+              <!-- Story Image Upload & Preview Card -->
+              <div class="card card-outline card-info bg-light mb-3">
+                <div class="card-header py-2 bg-white">
+                  <label class="font-weight-bold text-dark mb-0">
+                    <i class="fas fa-image text-primary mr-2"></i>${t.stories.uploadImage}
+                  </label>
+                </div>
+                <div class="card-body py-3">
+                  <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                      <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden border bg-white" style="width: 150px; height: 100px;">
+                        <img id="edit_story_image_preview" src="/images/story1.jpg" class="w-100 h-100" style="object-fit: cover;" alt="Current Story Image">
+                      </div>
+                      <div class="text-xs text-muted mt-1 font-weight-bold">${t.stories.currentImage}</div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="drop-zone p-3 text-center bg-white rounded border" id="edit_story_drop_zone"
+                           ondragover="handleStoryDragOver(event, this)"
+                           ondragleave="handleStoryDragLeave(event, this)"
+                           ondrop="handleStoryDrop(event, 'edit')">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                        <div class="text-sm font-weight-bold text-dark mb-1">${t.stories.dropPrompt}</div>
+                        <div class="text-xs text-muted mb-2">${lang === 'en' ? 'Supports JPG, PNG, WebP (up to 10MB)' : 'JPG, PNG, WebP形式に対応 (最大10MB)'}</div>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                          <label class="btn btn-sm btn-primary font-weight-bold mb-0 shadow-xs mr-2 cursor-pointer">
+                            <i class="fas fa-folder-open mr-1"></i> ${t.actions.upload}
+                            <input type="file" name="story_image_file" accept="image/*" class="d-none" onchange="uploadStoryImageFile(this, 'edit')">
+                          </label>
+                          <button type="button" class="btn btn-xs btn-outline-secondary" onclick="resetStoryImage('edit')">
+                            <i class="fas fa-undo mr-1"></i> ${t.stories.resetImage}
+                          </button>
+                        </div>
+                      </div>
+                      <div id="edit_story_upload_status" class="mt-2 text-xs font-weight-bold"></div>
+                      <div class="input-group input-group-sm mt-2">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text text-xs bg-white font-weight-bold">URL</span>
+                        </div>
+                        <input type="text" name="image" id="edit_st_image" class="form-control" oninput="updateStoryPreviewFromInput('edit')">
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div class="form-group">
                 <label>${t.stories.summaryJa}</label>
                 <textarea name="summary_ja" id="edit_st_summary_ja" class="form-control" rows="2"></textarea>
@@ -1140,7 +1226,7 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
               </div>
               <div class="form-check">
                 <input type="checkbox" name="featured" value="1" class="form-check-input" id="edit_featured_check">
-                <label class="form-check-label font-weight-bold" for="edit_featured_check">${t.stories.isFeatured}</label>
+                <label class="form-check-label font-weight-bold text-dark" for="edit_featured_check">${t.stories.isFeatured}</label>
               </div>
             </div>
             <div class="modal-footer bg-light py-2">
@@ -1155,13 +1241,18 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
 
   const scripts = `
     <script>
+      let currentEditingStoryId = null;
+
       function openEditStoryModal(st) {
+        currentEditingStoryId = st.id;
         document.getElementById('form-edit-story').action = '/admin/stories/' + st.id + '/update';
         document.getElementById('edit_st_title_ja').value = st.title_ja || '';
         document.getElementById('edit_st_title_en').value = st.title_en || '';
         document.getElementById('edit_st_cat_ja').value = st.category_ja || '';
         document.getElementById('edit_st_cat_en').value = st.category_en || '';
-        document.getElementById('edit_st_image').value = st.image || '';
+        document.getElementById('edit_st_image').value = st.image || '/images/story1.jpg';
+        document.getElementById('edit_story_image_preview').src = st.image || '/images/story1.jpg';
+        document.getElementById('edit_story_upload_status').textContent = '';
         document.getElementById('edit_st_summary_ja').value = st.summary_ja || '';
         document.getElementById('edit_st_summary_en').value = st.summary_en || '';
         document.getElementById('edit_st_content_ja').value = st.content_ja || '';
@@ -1179,6 +1270,122 @@ export function renderStoriesContent(stories: any[], lang: AdminLang = 'ja'): { 
         form.action = '/admin/stories/' + id + '/delete';
         document.body.appendChild(form);
         form.submit();
+      }
+
+      function handleStoryDragOver(e, el) {
+        e.preventDefault();
+        e.stopPropagation();
+        el.classList.add('dragover');
+      }
+
+      function handleStoryDragLeave(e, el) {
+        e.preventDefault();
+        e.stopPropagation();
+        el.classList.remove('dragover');
+      }
+
+      function handleStoryDrop(e, mode) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropZone = document.getElementById(mode === 'create' ? 'create_story_drop_zone' : 'edit_story_drop_zone');
+        if (dropZone) dropZone.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          uploadStoryFileObject(files[0], mode);
+        }
+      }
+
+      function uploadStoryImageFile(input, mode) {
+        if (input.files && input.files[0]) {
+          uploadStoryFileObject(input.files[0], mode);
+        }
+      }
+
+      function updateStoryPreviewFromInput(mode) {
+        const inputId = mode === 'create' ? 'create_story_image_input' : 'edit_st_image';
+        const previewId = mode === 'create' ? 'create_story_image_preview' : 'edit_story_image_preview';
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (input && preview && input.value) {
+          preview.src = input.value;
+        }
+      }
+
+      function resetStoryImage(mode) {
+        const defaultImage = '/images/story1.jpg';
+        const inputId = mode === 'create' ? 'create_story_image_input' : 'edit_st_image';
+        const previewId = mode === 'create' ? 'create_story_image_preview' : 'edit_story_image_preview';
+        const statusId = mode === 'create' ? 'create_story_upload_status' : 'edit_story_upload_status';
+        
+        document.getElementById(inputId).value = defaultImage;
+        document.getElementById(previewId).src = defaultImage;
+        const statusEl = document.getElementById(statusId);
+        if (statusEl) {
+          statusEl.className = 'mt-2 text-xs text-info font-weight-bold';
+          statusEl.textContent = '✓ ${t.stories.resetImage}';
+        }
+      }
+
+      async function uploadStoryFileObject(file, mode) {
+        const statusId = mode === 'create' ? 'create_story_upload_status' : 'edit_story_upload_status';
+        const previewId = mode === 'create' ? 'create_story_image_preview' : 'edit_story_image_preview';
+        const inputId = mode === 'create' ? 'create_story_image_input' : 'edit_st_image';
+        const statusEl = document.getElementById(statusId);
+        const previewEl = document.getElementById(previewId);
+        const inputEl = document.getElementById(inputId);
+
+        statusEl.className = 'mt-2 text-xs text-primary font-weight-bold';
+        statusEl.textContent = '⏳ ${t.stories.uploading}';
+
+        // Show local preview immediately
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          if (previewEl) previewEl.src = e.target.result;
+
+          try {
+            const formData = new FormData();
+            formData.append('image', file);
+            const targetField = (mode === 'edit' && currentEditingStoryId) ? ('story_' + currentEditingStoryId) : 'story_new';
+            formData.append('target_field', targetField);
+
+            let res = await fetch('/api/admin/upload-image', {
+              method: 'POST',
+              body: formData
+            });
+
+            let data = await res.json();
+            if (data && data.success && data.url) {
+              previewEl.src = data.url;
+              inputEl.value = data.url;
+              statusEl.className = 'mt-2 text-xs text-success font-weight-bold';
+              statusEl.textContent = '✓ ${t.stories.uploadSuccess}';
+            } else {
+              // Fallback to base64 JSON payload
+              const base64Res = await fetch('/api/admin/upload-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  data: e.target.result,
+                  target_field: targetField
+                })
+              });
+              const b64Data = await base64Res.json();
+              if (b64Data && b64Data.success && b64Data.url) {
+                previewEl.src = b64Data.url;
+                inputEl.value = b64Data.url;
+                statusEl.className = 'mt-2 text-xs text-success font-weight-bold';
+                statusEl.textContent = '✓ ${t.stories.uploadSuccess}';
+              } else {
+                throw new Error((b64Data && b64Data.error) || 'Upload failed');
+              }
+            }
+          } catch (err) {
+            statusEl.className = 'mt-2 text-xs text-danger font-weight-bold';
+            statusEl.textContent = '✗ ${t.stories.uploadFailed}: ' + (err.message || '');
+          }
+        };
+        reader.readAsDataURL(file);
       }
     </script>
   `;
@@ -1220,8 +1427,8 @@ export function renderFaqsContent(faqs: any[], lang: AdminLang = 'ja'): { body: 
               <tr>
                 <td><span class="badge badge-info px-2 py-1">${escapeHtml(lang === 'en' ? (f.category_en || f.category_ja) : (f.category_ja || '特定技能'))}</span></td>
                 <td>
-                  <div class="font-weight-bold text-dark">${escapeHtml(f.question_ja)}</div>
-                  <small class="text-muted">${escapeHtml(f.question_en || '')}</small>
+                  <div class="font-weight-bold text-dark">${escapeHtml(lang === 'en' ? (f.question_en || f.question_ja) : f.question_ja)}</div>
+                  <small class="text-muted">${escapeHtml(lang === 'en' ? (f.question_ja || '') : (f.question_en || ''))}</small>
                 </td>
                 <td style="max-width: 280px;" class="text-truncate text-secondary">
                   ${escapeHtml(lang === 'en' ? (f.answer_en || f.answer_ja) : f.answer_ja)}
@@ -1237,7 +1444,7 @@ export function renderFaqsContent(faqs: any[], lang: AdminLang = 'ja'): { body: 
                 </td>
               </tr>
             `).join('')}
-            ${faqs.length === 0 ? `<tr><td colspan="5" class="text-center py-4 text-muted">${lang === 'en' ? 'No FAQs found.' : '登録されているFAQはありません。'}</td></tr>` : ''}
+            ${faqs.length === 0 ? `<tr><td colspan="5" class="text-center py-4 text-muted">${t.faqs.noFaqs}</td></tr>` : ''}
           </tbody>
         </table>
       </div>
@@ -1454,7 +1661,7 @@ export function renderInquiriesContent(inquiries: any[], filter: string = 'all',
                     <i class="fas fa-eye mr-1"></i>${t.actions.view}
                   </button>
                   <a href="mailto:${escapeHtml(inq.email)}?subject=${encodeURIComponent(lang === 'en' ? 'Inquiry from MIRANSH LLC' : '【MIRANSH合同会社】お問い合わせへの返信')}" class="btn btn-xs btn-outline-success">
-                    <i class="fas fa-reply mr-1"></i>${lang === 'en' ? 'Reply' : '返信'}
+                    <i class="fas fa-reply mr-1"></i>${t.inquiries.replyBtn}
                   </a>
                 </td>
               </tr>

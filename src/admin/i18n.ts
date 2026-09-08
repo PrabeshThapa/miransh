@@ -109,6 +109,20 @@ export const i18n = {
       sysDatabase: 'データベース: SQLite 3 (Durable)',
       sysAiModel: 'Sakana AI: 連携準備完了',
       sysPublicUrl: '公開URL: 日本語 / 英語 / ネパール語 対応',
+      companySnapshot: '企業基本情報',
+      tableName: '社名:',
+      tableLicense: '許可番号:',
+      tableCeo: '代表者:',
+      tableAddress: '所在地:',
+      tablePhone: '電話:',
+      tableDatabase: 'データベース:',
+      tablePort: 'ポート番号:',
+      tableFramework: 'UIフレームワーク:',
+      tableLanguage: '表示言語:',
+      tablePhoto: '写真',
+      tableStoryTitle: 'タイトル (日/英)',
+      tableCategory: '分野',
+      tableDate: '公開日',
     },
 
     // Company Page
@@ -213,6 +227,19 @@ export const i18n = {
       publishedDate: '公開年月日 (YYYY.MM.DD)',
       isFeatured: '注目のストーリーとしてトップに強調表示する',
       sortOrder: '並び順',
+      uploadImage: '画像を選択 / アップロード',
+      dropPrompt: 'ここに画像をドラッグ＆ドロップ、またはクリックして選択',
+      dragActivePrompt: '画像をドロップしてアップロード',
+      uploadSuccess: '画像をアップロードしました！',
+      uploadFailed: '画像のアップロードに失敗しました',
+      uploading: 'アップロード中...',
+      currentImage: '現在のサムネイル画像',
+      previewImage: 'プレビュー',
+      changeImage: '画像を変更',
+      resetImage: 'デフォルト画像に戻す',
+      categoryPlaceholder: '特定技能 / 介護分野',
+      authorDefault: 'MIRANSH 編集部',
+      noStories: '登録されている事例はありません。',
     },
 
     // FAQs Page
@@ -234,6 +261,7 @@ export const i18n = {
       answerJa: '回答本文 (日本語)',
       answerEn: 'Answer Body (English)',
       sortOrder: '表示順序',
+      noFaqs: '登録されているFAQはありません。',
     },
 
     // Inquiries Page
@@ -287,6 +315,9 @@ export const i18n = {
       accountEmail: '登録メールアドレス',
       accountRole: 'アクセス権限',
       accountCreated: 'アカウント作成日',
+      passwordsMatch: 'パスワードが一致しています',
+      passwordsMismatch: 'パスワードが一致していません',
+      backToDashboard: 'ダッシュボードに戻る',
     },
 
     // Sakana AI Page
@@ -428,6 +459,20 @@ export const i18n = {
       sysDatabase: 'Database: SQLite 3 (Durable Cloud Storage)',
       sysAiModel: 'Sakana AI: Connected & Operational',
       sysPublicUrl: 'Public Portal: Japanese / English / Nepali Ready',
+      companySnapshot: 'Company Snapshot',
+      tableName: 'Name:',
+      tableLicense: 'License:',
+      tableCeo: 'CEO:',
+      tableAddress: 'Address:',
+      tablePhone: 'Phone:',
+      tableDatabase: 'Database:',
+      tablePort: 'Port:',
+      tableFramework: 'UI Framework:',
+      tableLanguage: 'Language:',
+      tablePhoto: 'Photo',
+      tableStoryTitle: 'Story Title (JA / EN)',
+      tableCategory: 'Category',
+      tableDate: 'Date',
     },
 
     // Company Page
@@ -532,6 +577,19 @@ export const i18n = {
       publishedDate: 'Publication Date (YYYY.MM.DD)',
       isFeatured: 'Feature this story prominently on the public homepage',
       sortOrder: 'Display Priority',
+      uploadImage: 'Select / Upload Image',
+      dropPrompt: 'Drag & drop story image here, or click to browse files',
+      dragActivePrompt: 'Drop image here to upload',
+      uploadSuccess: 'Story image uploaded successfully!',
+      uploadFailed: 'Image upload failed',
+      uploading: 'Uploading...',
+      currentImage: 'Current Story Image',
+      previewImage: 'Image Preview',
+      changeImage: 'Change Image',
+      resetImage: 'Reset to Default Image',
+      categoryPlaceholder: 'Specified Skilled Worker / Caregiving',
+      authorDefault: 'MIRANSH Editorial Team',
+      noStories: 'No case studies or stories found.',
     },
 
     // FAQs Page
@@ -553,6 +611,7 @@ export const i18n = {
       answerJa: 'Answer Body (Japanese)',
       answerEn: 'Answer Body (English)',
       sortOrder: 'Sort Order',
+      noFaqs: 'No FAQs found.',
     },
 
     // Inquiries Page
@@ -606,6 +665,9 @@ export const i18n = {
       accountEmail: 'Registered Email',
       accountRole: 'Access Privilege',
       accountCreated: 'Creation Date',
+      passwordsMatch: 'Passwords match',
+      passwordsMismatch: 'Passwords do not match',
+      backToDashboard: 'Back to Dashboard',
     },
 
     // Sakana AI Page

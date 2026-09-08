@@ -2482,6 +2482,12 @@ app.post(['/api/admin/upload-image', '/admin/upload-image', '/upload-image', '/a
             db.prepare('UPDATE company_info SET ceo_image = ? WHERE id = 1').run(relativePath);
           } else if (targetField === 'hero_image') {
             db.prepare('UPDATE company_info SET hero_image = ? WHERE id = 1').run(relativePath);
+          } else if (targetField && typeof targetField === 'string' && targetField.startsWith('story_')) {
+            const parts = targetField.split('_');
+            const storyId = parseInt(parts[1], 10);
+            if (!isNaN(storyId)) {
+              db.prepare('UPDATE stories SET image = ? WHERE id = ?').run(relativePath, storyId);
+            }
           }
           return res.json({
             success: true,
@@ -2527,11 +2533,19 @@ app.post(['/api/admin/upload-image', '/admin/upload-image', '/upload-image', '/a
 });
 
 // Story CRUD Handlers
-app.post(['/admin/stories', '/admin/stories/create'], (req: Request, res: Response) => {
+app.post(['/admin/stories', '/admin/stories/create'], upload.any(), (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
-  const { title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, image, published_date, author, featured, sort_order } = req.body;
+  const { title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, published_date, author, featured, sort_order } = req.body;
   const isFeatured = (featured === '1' || featured === 'on' || featured === true) ? 1 : 0;
   const sort = parseInt(sort_order, 10) || 0;
+
+  let storyImage = req.body.image || '/images/story1.jpg';
+  const files = req.files as Express.Multer.File[];
+  if (files && files.length > 0) {
+    const f = files[0];
+    syncUploadedFileToAllDirs(f.filename, f.path);
+    storyImage = `/uploads/${f.filename}`;
+  }
 
   db.prepare(`
     INSERT INTO stories (title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, image, published_date, author, featured, sort_order)
@@ -2545,22 +2559,36 @@ app.post(['/admin/stories', '/admin/stories/create'], (req: Request, res: Respon
     summary_en || '',
     content_ja || summary_ja || '',
     content_en || summary_en || '',
-    image || '/images/story1.jpg',
+    storyImage,
     published_date || new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
     author || 'MIRANSH 編集部',
     isFeatured,
     sort
   );
 
-  res.redirect('/admin/stories?saved=true');
+  const langQuery = (req.body?.lang === 'en' || (req.session as any)?.adminLang === 'en') ? '&lang=en' : '';
+  res.redirect('/admin/stories?saved=true' + langQuery);
 });
 
-app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/update/:id'], (req: Request, res: Response) => {
+app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/update/:id'], upload.any(), (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
-  const { title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, image, published_date, author, featured, sort_order } = req.body;
+  const { title_ja, title_en, category_ja, category_en, summary_ja, summary_en, content_ja, content_en, published_date, author, featured, sort_order } = req.body;
   const isFeatured = (featured === '1' || featured === 'on' || featured === true) ? 1 : 0;
   const sort = parseInt(sort_order, 10) || 0;
+
+  let storyImage = req.body.image;
+  const files = req.files as Express.Multer.File[];
+  if (files && files.length > 0) {
+    const f = files[0];
+    syncUploadedFileToAllDirs(f.filename, f.path);
+    storyImage = `/uploads/${f.filename}`;
+  }
+
+  if (!storyImage) {
+    const existing = db.prepare('SELECT image FROM stories WHERE id = ?').get(id) as any;
+    storyImage = existing?.image || '/images/story1.jpg';
+  }
 
   db.prepare(`
     UPDATE stories SET
@@ -2571,11 +2599,12 @@ app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/upd
   `).run(
     title_ja, title_en, category_ja, category_en,
     summary_ja, summary_en, content_ja, content_en,
-    image || '/images/story1.jpg', published_date, author, isFeatured, sort,
+    storyImage, published_date, author, isFeatured, sort,
     id
   );
 
-  res.redirect('/admin/stories?saved=true');
+  const langQuery = (req.body?.lang === 'en' || (req.session as any)?.adminLang === 'en') ? '&lang=en' : '';
+  res.redirect('/admin/stories?saved=true' + langQuery);
 });
 
 app.post(['/admin/stories/:id/delete', '/admin/stories/delete/:id'], (req: Request, res: Response) => {
