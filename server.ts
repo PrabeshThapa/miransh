@@ -7,6 +7,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
+import nodemailer from 'nodemailer';
 import { renderAdminLTELogin, renderAdminLTELayout } from './src/adminlte.ts';
 import {
   renderDashboardContent,
@@ -1664,10 +1665,138 @@ app.get('/stories/:id', (req: Request, res: Response) => {
 });
 
 // ----------------------------------------------------
+// Email Dispatcher (SMTP via Onamae / .env)
+// ----------------------------------------------------
+function getMailTransporter() {
+  const host = process.env.MAIL_HOST || process.env.SMTP_HOST || 'mail1017.onamae.ne.jp';
+  const port = parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || '465', 10);
+  const encryption = (process.env.MAIL_ENCRYPTION || '').toLowerCase();
+  const secure = encryption === 'ssl' || port === 465;
+  const user = process.env.MAIL_USERNAME || process.env.SMTP_USER || 'info@miransh.co.jp';
+  const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS || '';
+
+  if (!pass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+}
+
+async function sendInquiryEmails(inquiry: {
+  name: string;
+  company_name?: string;
+  email: string;
+  phone?: string;
+  service_interest?: string;
+  message: string;
+}) {
+  const adminTo = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
+  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
+  const fromName = process.env.MAIL_FROM_NAME || 'MIRANSH LLC';
+
+  const transporter = getMailTransporter();
+  if (!transporter) {
+    console.log(`[Mail Notice] Inquiry received from ${inquiry.name} (${inquiry.email}). Live SMTP email delivery to ${adminTo} will activate when MAIL_PASSWORD is set in .env.`);
+    return false;
+  }
+
+  try {
+    const adminSubject = `【MIRANSH】新規お問い合わせ: ${inquiry.name} 様 (${inquiry.service_interest || '一般相談'})`;
+    const adminBody = `========================================
+【MIRANSH LLC】ウェブサイト新規お問い合わせ
+========================================
+
+■ 受信日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+■ お名前: ${inquiry.name}
+■ 貴社名・組織名: ${inquiry.company_name || '（個人・指定なし）'}
+■ 返信先メールアドレス: ${inquiry.email}
+■ お電話番号: ${inquiry.phone || '（未入力）'}
+■ ご相談分野: ${inquiry.service_interest || '一般相談'}
+
+----------------------------------------
+【お問い合わせ本文】
+${inquiry.message}
+----------------------------------------
+
+※ このメールに直接「全員に返信」または「返信」すると送信者（${inquiry.email}）へ返信が届きます。
+管理画面: /admin/inquiries
+`;
+
+    // 1. Send immediate notification to info@miransh.co.jp
+    await transporter.sendMail({
+      from: `"${fromName}" <${fromAddress}>`,
+      to: adminTo,
+      replyTo: `"${inquiry.name}" <${inquiry.email}>`,
+      subject: adminSubject,
+      text: adminBody,
+    });
+    console.log(`[Mail] Inbound inquiry alert successfully sent to ${adminTo} for ${inquiry.email}`);
+
+    // 2. Also send an automatic receipt confirmation to the customer
+    try {
+      const userSubject = '【MIRANSH合同会社】お問い合わせを受け付けました / Inquiry Received';
+      const userBody = `${inquiry.name} 様
+
+この度はMIRANSH合同会社（ミランス）にお問い合わせいただき、誠にありがとうございます。
+以下の内容でお問い合わせを正常に受け付けいたしました。
+
+担当者より内容を確認のうえ、通常1〜2営業日以内に折り返しご連絡申し上げます。
+今しばらくお待ちくださいますようお願い申し上げます。
+
+--------------------------------------------------
+【受付内容】
+・お名前: ${inquiry.name}
+・貴社名: ${inquiry.company_name || '（個人・指定なし）'}
+・メールアドレス: ${inquiry.email}
+${inquiry.phone ? `・お電話番号: ${inquiry.phone}\n` : ''}・ご相談分野: ${inquiry.service_interest || '一般相談'}
+・お問い合わせ内容:
+${inquiry.message}
+--------------------------------------------------
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MIRANSH合同会社 (MIRANSH LLC)
+有料職業紹介事業許可番号: 13-ユ-319558
+〒184-0011 東京都小金井市東町4丁目8番14号 アクトレジデンス新小金井201号室
+TEL: 042-409-8256
+E-mail: info@miransh.co.jp
+URL: https://miransh.co.jp
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;
+
+      await transporter.sendMail({
+        from: `"${fromName}" <${fromAddress}>`,
+        to: inquiry.email,
+        subject: userSubject,
+        text: userBody,
+      });
+      console.log(`[Mail] Customer auto-receipt confirmation successfully sent to ${inquiry.email}`);
+    } catch (customerMailErr) {
+      console.warn('[Mail] Customer confirmation email warning:', customerMailErr);
+    }
+
+    return true;
+  } catch (err: any) {
+    console.error('[Mail] Failed to send email via SMTP:', err?.message || err);
+    return false;
+  }
+}
+
+// ----------------------------------------------------
 // Public Contact Submission API & Form Handler
 // ----------------------------------------------------
-app.post('/contact', (req: Request, res: Response) => {
-  const { name, email, phone, service_interest, inquiry_type, message, website_url, captcha_ans } = req.body;
+app.post('/contact', async (req: Request, res: Response) => {
+  const { name, company_name, email, phone, service_interest, inquiry_type, message, website_url, captcha_ans } = req.body;
 
   // Anti-Spam Check 1: Honeypot field must remain empty
   if (website_url) {
@@ -1692,15 +1821,30 @@ app.post('/contact', (req: Request, res: Response) => {
 
   try {
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const chosenType = service_interest || inquiry_type || 'General';
+    const chosenType = service_interest || inquiry_type || 'General Consultation';
+    const compName = company_name || '';
+
+    // 1. Store to database as previous
     const stmt = db.prepare(`
-      INSERT INTO inquiries (name, email, phone, inquiry_type, message, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 'unread', ?, ?)
+      INSERT INTO inquiries (name, company_name, email, phone, service_interest, inquiry_type, message, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'unread', ?, ?)
     `);
-    stmt.run(name, email, phone || '', chosenType, message, now, now);
+    stmt.run(name, compName, email, phone || '', chosenType, chosenType, message, now, now);
+
+    // 2. Also send email to info@miransh.co.jp (and confirmation to customer)
+    sendInquiryEmails({
+      name,
+      company_name: compName,
+      email,
+      phone: phone || '',
+      service_interest: chosenType,
+      message,
+    }).catch(err => {
+      console.error('[Mail Background Error]', err);
+    });
 
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.json({ success: true, message: 'Inquiry saved successfully' });
+      return res.json({ success: true, message: 'Inquiry saved successfully and notification dispatched.' });
     }
     return res.redirect('/?submitted=true#contact');
   } catch (err: any) {
@@ -2854,6 +2998,35 @@ app.post('/admin/api/sakana/config', (req: Request, res: Response) => {
   if (apiKey) currentSakanaKey = apiKey.trim();
   if (model) currentSakanaModel = model.trim();
   res.redirect('/admin/ai?saved=true');
+});
+
+app.post('/admin/api/test-email', async (req: Request, res: Response) => {
+  if (!(req.session as any).user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  const transporter = getMailTransporter();
+  const adminTo = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
+  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
+  const fromName = process.env.MAIL_FROM_NAME || 'MIRANSH LLC';
+
+  if (!transporter) {
+    return res.json({
+      success: false,
+      configured: false,
+      error: 'MAIL_PASSWORD is not set in .env. Please set MAIL_PASSWORD in your environment with your Onamae mail password to enable outbound email delivery.'
+    });
+  }
+
+  try {
+    await transporter.verify();
+    await transporter.sendMail({
+      from: `"${fromName}" <${fromAddress}>`,
+      to: adminTo,
+      subject: '【MIRANSH】SMTP 送信テスト成功 / SMTP Test Successful',
+      text: `これはMIRANSH管理システムからのSMTP接続テストメールです。\n\n正常にメール送信機能が稼働しています。\n送信日時: ${new Date().toISOString()}\n宛先: ${adminTo}\nサーバー: ${process.env.MAIL_HOST || 'mail1017.onamae.ne.jp'}`,
+    });
+    return res.json({ success: true, message: `Test email successfully dispatched to ${adminTo}` });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message || 'Failed to send test email' });
+  }
 });
 
 // Start Server on Port 3000

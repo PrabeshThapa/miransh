@@ -9,6 +9,8 @@ use App\Models\Service;
 use App\Models\Story;
 use App\Models\Faq;
 use App\Models\Inquiry;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -124,7 +126,7 @@ class HomeController extends Controller
             'message' => 'required|string',
         ]);
 
-        Inquiry::create([
+        $inquiry = Inquiry::create([
             'name' => $request->name,
             'company_name' => $request->company_name,
             'email' => $request->email,
@@ -133,6 +135,35 @@ class HomeController extends Controller
             'message' => $request->message,
             'status' => 'unread',
         ]);
+
+        try {
+            $toEmail = config('mail.admin_notification_email', env('ADMIN_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', 'info@miransh.co.jp')));
+            $fromAddress = config('mail.from.address', env('MAIL_FROM_ADDRESS', 'info@miransh.co.jp'));
+            $fromName = config('mail.from.name', env('MAIL_FROM_NAME', 'MIRANSH LLC'));
+
+            $content = "========================================\n";
+            $content .= "【MIRANSH LLC】ウェブサイト新規お問い合わせ\n";
+            $content .= "========================================\n\n";
+            $content .= "■ お名前: " . $request->name . "\n";
+            $content .= "■ 貴社名: " . ($request->company_name ?: '（個人・未記入）') . "\n";
+            $content .= "■ 返信先メールアドレス: " . $request->email . "\n";
+            $content .= "■ お電話番号: " . ($request->phone ?: '（未入力）') . "\n";
+            $content .= "■ ご相談分野: " . ($request->service_interest ?: '一般相談') . "\n\n";
+            $content .= "----------------------------------------\n";
+            $content .= "【お問い合わせ本文】\n";
+            $content .= $request->message . "\n";
+            $content .= "----------------------------------------\n\n";
+            $content .= "※ このメールに直接返信すると送信者（" . $request->email . "）へ届きます。\n";
+
+            Mail::raw($content, function ($message) use ($toEmail, $request, $fromAddress, $fromName) {
+                $message->to($toEmail)
+                        ->from($fromAddress, $fromName)
+                        ->replyTo($request->email, $request->name)
+                        ->subject('【MIRANSH】新規お問い合わせ: ' . $request->name . ' 様 (' . ($request->service_interest ?: '一般相談') . ')');
+            });
+        } catch (\Exception $e) {
+            Log::error('Inquiry mail notification failed: ' . $e->getMessage());
+        }
 
         return redirect('/?submitted=true#contact')->with('success', 'お問い合わせありがとうございます。担当者より近日中にご連絡申し上げます。');
     }
