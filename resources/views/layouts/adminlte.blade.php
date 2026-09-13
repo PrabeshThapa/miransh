@@ -97,6 +97,37 @@
             border-radius: 6px;
             border: 1px solid #e2e8f0;
         }
+        .lang-toggle-group {
+            display: inline-flex;
+            align-items: center;
+            background: #F1F5F9;
+            border: 1px solid #CBD5E1;
+            border-radius: 9999px;
+            padding: 2px;
+            flex-shrink: 0;
+        }
+        .lang-btn {
+            border: none;
+            background: transparent;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748B;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            line-height: 1.4;
+            text-decoration: none !important;
+        }
+        .lang-btn:hover {
+            color: #0F2C59;
+        }
+        .lang-btn.active {
+            background: #0d6efd;
+            color: #FFFFFF !important;
+            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+        }
     </style>
     @stack('styles')
 </head>
@@ -113,7 +144,7 @@
                 </a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link font-weight-bold">{{ $isEn ? 'Admin Home' : '管理ホーム' }}</a>
+                <a href="{{ route('admin.dashboard', ['lang' => $currLang]) }}" class="nav-link font-weight-bold">{{ $isEn ? 'Admin Home' : '管理ホーム' }}</a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="/" target="_blank" class="nav-link text-primary" title="{{ $isEn ? 'Open Public Site in New Tab' : '別タブで公開サイトを開く' }}">
@@ -124,72 +155,25 @@
 
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto align-items-center">
-            <!-- Language Switcher Component (Bilingual Enterprise Switcher) -->
+            <!-- Language Switcher Component (Frontend Exact Matching Toggle) -->
             <li class="nav-item d-flex align-items-center mr-3" id="admin-lang-switcher-component">
-                <!-- 1-Click Segmented Toggle Pill (Desktop & Tablet) -->
-                <div class="admin-lang-switcher d-none d-sm-inline-flex border rounded-pill overflow-hidden bg-light shadow-xs p-1" role="group" aria-label="Bilingual Language Switcher">
+                <div class="lang-toggle-group" id="admin-lang-toggle" role="group" aria-label="Language Switcher">
                     <button type="button"
                             id="btn-lang-ja"
-                            class="btn btn-xs font-weight-bold px-2 py-1 rounded-pill {{ $currLang === 'ja' ? 'btn-primary active text-white shadow-xs' : 'btn-light text-muted' }}"
+                            class="lang-btn {{ $currLang === 'ja' ? 'active' : '' }}"
                             onclick="switchAdminLanguage('ja', event)"
-                            title="日本語に切り替え (Japanese)"
+                            title="日本語 (Japanese / NP)"
                             aria-pressed="{{ $currLang === 'ja' ? 'true' : 'false' }}">
-                        <span class="mr-1">🇯🇵</span><span>日本語</span>
+                        日本語
                     </button>
                     <button type="button"
                             id="btn-lang-en"
-                            class="btn btn-xs font-weight-bold px-2 py-1 rounded-pill {{ $currLang === 'en' ? 'btn-primary active text-white shadow-xs' : 'btn-light text-muted' }}"
+                            class="lang-btn {{ $currLang === 'en' ? 'active' : '' }}"
                             onclick="switchAdminLanguage('en', event)"
-                            title="Switch to English (英語)"
+                            title="English (EN)"
                             aria-pressed="{{ $currLang === 'en' ? 'true' : 'false' }}">
-                        <span class="mr-1">🇬🇧</span><span>English</span>
+                        EN
                     </button>
-                </div>
-
-                <!-- Dropdown Details Switcher (For mobile & dropdown context) -->
-                <div class="dropdown ml-1">
-                    <a class="nav-link dropdown-toggle btn btn-xs btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark rounded-pill border shadow-xs"
-                       data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
-                       title="Language Switcher Menu / 言語切り替えメニュー ({{ $currLang === 'en' ? 'English' : '日本語' }})">
-                        <i class="fas fa-globe text-primary mr-1"></i>
-                        <span class="badge badge-pill {{ $currLang === 'en' ? 'badge-primary' : 'badge-dark' }} text-xs font-weight-bold px-1 py-0">{{ strtoupper($currLang) }}</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 p-2" style="min-width: 230px; border-radius: 10px;">
-                        <div class="dropdown-header text-xs text-uppercase font-weight-bold text-muted px-2 py-1 d-flex align-items-center justify-content-between">
-                            <span><i class="fas fa-language mr-1 text-primary"></i>{{ $isEn ? 'Language Selection' : '言語切り替え' }}</span>
-                            <span class="badge badge-light border">{{ $isEn ? 'Live Context' : '状態保持' }}</span>
-                        </div>
-                        <div class="dropdown-divider my-1"></div>
-                        <a href="/admin/lang/ja"
-                           class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 {{ $currLang === 'ja' ? 'active font-weight-bold' : '' }}"
-                           onclick="switchAdminLanguage('ja', event)">
-                            <div class="d-flex align-items-center">
-                                <span class="mr-2" style="font-size: 1.2rem;">🇯🇵</span>
-                                <div>
-                                    <div class="font-weight-bold">日本語</div>
-                                    <small class="{{ $currLang === 'ja' ? 'text-white-50' : 'text-muted' }}">Japanese (JA)</small>
-                                </div>
-                            </div>
-                            {!! $currLang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">切替</span>' !!}
-                        </a>
-                        <a href="/admin/lang/en"
-                           class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 mt-1 {{ $currLang === 'en' ? 'active font-weight-bold' : '' }}"
-                           onclick="switchAdminLanguage('en', event)">
-                            <div class="d-flex align-items-center">
-                                <span class="mr-2" style="font-size: 1.2rem;">🇬🇧</span>
-                                <div>
-                                    <div class="font-weight-bold">English</div>
-                                    <small class="{{ $currLang === 'en' ? 'text-white-50' : 'text-muted' }}">英語 (EN)</small>
-                                </div>
-                            </div>
-                            {!! $currLang === 'en' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">Switch</span>' !!}
-                        </a>
-                        <div class="dropdown-divider my-2"></div>
-                        <div class="px-2 py-1 text-xs text-muted d-flex align-items-center">
-                            <i class="fas fa-shield-alt text-success mr-2"></i>
-                            <span>{{ $isEn ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持' }}</span>
-                        </div>
-                    </div>
                 </div>
             </li>
 
@@ -272,7 +256,7 @@
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                        <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('admin.dashboard', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>{{ $isEn ? 'Dashboard Overview' : 'ダッシュボード概要' }}</p>
                         </a>
@@ -280,31 +264,31 @@
 
                     <li class="nav-header">{{ $isEn ? 'CONTENT & PR MANAGEMENT' : 'コンテンツ・広報管理' }}</li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.company') }}" class="nav-link {{ request()->routeIs('admin.company') ? 'active' : '' }}">
+                        <a href="{{ route('admin.company', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.company') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-building"></i>
                             <p>{{ $isEn ? 'Company & Images' : '会社情報・画像設定' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.about') }}" class="nav-link {{ request()->routeIs('admin.about') ? 'active' : '' }}">
+                        <a href="{{ route('admin.about', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.about') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-handshake"></i>
                             <p>{{ $isEn ? 'Corporate Philosophy' : '企業理念・メッセージ' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.services') }}" class="nav-link {{ request()->routeIs('admin.services') ? 'active' : '' }}">
+                        <a href="{{ route('admin.services', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.services') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-briefcase"></i>
                             <p>{{ $isEn ? 'Services Management' : '提供サービス管理' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.stories') }}" class="nav-link {{ request()->routeIs('admin.stories') ? 'active' : '' }}">
+                        <a href="{{ route('admin.stories', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.stories') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-newspaper"></i>
                             <p>{{ $isEn ? 'Stories & Case Studies' : '採用事例・実績管理' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.faqs') }}" class="nav-link {{ request()->routeIs('admin.faqs') ? 'active' : '' }}">
+                        <a href="{{ route('admin.faqs', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.faqs') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-question-circle"></i>
                             <p>{{ $isEn ? 'FAQ Management' : 'よくある質問管理' }}</p>
                         </a>
@@ -312,7 +296,7 @@
 
                     <li class="nav-header">{{ $isEn ? 'COMMUNICATION' : 'コミュニケーション' }}</li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.inquiries') }}" class="nav-link {{ request()->routeIs('admin.inquiries') ? 'active' : '' }}">
+                        <a href="{{ route('admin.inquiries', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.inquiries') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>
                                 {{ $isEn ? 'Inquiry Inbox' : 'お問い合わせ管理' }}
@@ -325,13 +309,13 @@
 
                     <li class="nav-header">{{ $isEn ? 'SYSTEM & SECURITY' : 'システム & セキュリティ' }}</li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.password') }}" class="nav-link {{ request()->routeIs('admin.password') ? 'active' : '' }}">
+                        <a href="{{ route('admin.password', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.password') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-key"></i>
                             <p>{{ $isEn ? 'Change Password' : '管理者パスワード変更' }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.ai') }}" class="nav-link {{ request()->routeIs('admin.ai') ? 'active' : '' }}">
+                        <a href="{{ route('admin.ai', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.ai') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-robot"></i>
                             <p>{{ $isEn ? 'Sakana AI Diagnostics' : 'Sakana AI 設定・診断' }}</p>
                         </a>
@@ -450,21 +434,24 @@ function switchAdminLanguage(newLang, e) {
     var btnEn = document.getElementById('btn-lang-en');
     if (btnJa && btnEn) {
         if (newLang === 'ja') {
-            btnJa.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-primary active text-white shadow-xs';
-            btnEn.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-light text-muted';
+            btnJa.className = 'lang-btn active';
+            btnEn.className = 'lang-btn';
             btnJa.setAttribute('aria-pressed', 'true');
             btnEn.setAttribute('aria-pressed', 'false');
         } else {
-            btnEn.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-primary active text-white shadow-xs';
-            btnJa.className = 'btn btn-xs font-weight-bold px-2 py-1 rounded-pill btn-light text-muted';
+            btnEn.className = 'lang-btn active';
+            btnJa.className = 'lang-btn';
             btnEn.setAttribute('aria-pressed', 'true');
             btnJa.setAttribute('aria-pressed', 'false');
         }
     }
 
     try {
-        document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
         localStorage.setItem('admin_lang', newLang);
+        localStorage.setItem('miransh_language', newLang);
+        sessionStorage.setItem('admin_lang', newLang);
+        document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=None; Secure';
+        document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
     } catch(err) {}
 
     var currentUrl = new URL(window.location.href);
@@ -478,20 +465,28 @@ function switchAdminLanguage(newLang, e) {
         path = '/admin/' + newLang + '/' + path.substring(10);
     } else if (path === '/admin/ja') {
         path = '/admin/' + newLang;
+    } else if (path.indexOf('/en/admin') === 0) {
+        path = '/' + newLang + path.substring(3);
+    } else if (path.indexOf('/ja/admin') === 0) {
+        path = '/' + newLang + path.substring(3);
     }
 
     currentUrl.pathname = path;
     currentUrl.searchParams.set('lang', newLang);
     var targetHref = currentUrl.toString();
 
+    try {
+        window.dispatchEvent(new CustomEvent('adminLanguageChanged', { detail: { lang: newLang } }));
+    } catch(err) {}
+
     fetch('/admin/api/set-lang?lang=' + newLang, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lang: newLang }),
-        credentials: 'same-origin'
+        credentials: 'include'
     })
     .catch(function() {
-        return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+        return fetch('/admin/lang/' + newLang, { credentials: 'include' });
     })
     .catch(function() {})
     .finally(function() {
@@ -499,6 +494,63 @@ function switchAdminLanguage(newLang, e) {
     });
 }
 window.setAdminLang = switchAdminLanguage;
+
+// Sticky auto-propagator across admin panel tabs and links
+(function() {
+    var currentLang = '{{ $currLang }}';
+
+    try {
+        var stored = localStorage.getItem('admin_lang') || localStorage.getItem('miransh_language');
+        if (stored && (stored === 'en' || stored === 'ja')) {
+            var u = new URL(window.location.href);
+            if (!u.searchParams.has('lang') && stored !== currentLang) {
+                u.searchParams.set('lang', stored);
+                window.location.replace(u.toString());
+                return;
+            }
+        }
+    } catch(e) {}
+
+    document.addEventListener('click', function(evt) {
+        var a = evt.target && evt.target.closest ? evt.target.closest('a') : null;
+        if (!a || !a.href) return;
+        try {
+            var targetUrl = new URL(a.href, window.location.origin);
+            if (targetUrl.origin === window.location.origin && 
+                targetUrl.pathname.indexOf('/admin') === 0 && 
+                !targetUrl.pathname.includes('/logout') && 
+                !targetUrl.pathname.includes('/api/')) {
+                if (!targetUrl.searchParams.has('lang')) {
+                    targetUrl.searchParams.set('lang', currentLang);
+                    a.href = targetUrl.toString();
+                }
+            }
+        } catch(err) {}
+    }, true);
+
+    document.addEventListener('submit', function(evt) {
+        var form = evt.target;
+        if (!form || !form.action) return;
+        try {
+            var targetUrl = new URL(form.action, window.location.origin);
+            if (targetUrl.origin === window.location.origin && 
+                targetUrl.pathname.indexOf('/admin') === 0 && 
+                !targetUrl.pathname.includes('/logout')) {
+                if (!targetUrl.searchParams.has('lang')) {
+                    targetUrl.searchParams.set('lang', currentLang);
+                    form.action = targetUrl.toString();
+                }
+                if (!form.querySelector('input[name="lang"]') && !form.querySelector('input[name="admin_lang"]')) {
+                    var hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'lang';
+                    hiddenInput.value = currentLang;
+                    form.appendChild(hiddenInput);
+                }
+            }
+        } catch(err) {}
+    }, true);
+})();
 </script>
 
 @stack('scripts')

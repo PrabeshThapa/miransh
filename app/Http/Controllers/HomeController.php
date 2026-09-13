@@ -137,7 +137,11 @@ class HomeController extends Controller
         ]);
 
         try {
-            $toEmail = config('mail.admin_notification_email', env('ADMIN_NOTIFICATION_EMAIL', env('MAIL_FROM_ADDRESS', 'info@miransh.co.jp')));
+            $toEmailSetting = config('mail.admin_notification_email', env('ADMIN_NOTIFICATION_EMAIL', 'prabesht002@gmail.com, info@miransh.co.jp'));
+            $toEmails = array_filter(array_map('trim', explode(',', $toEmailSetting)));
+            if (empty($toEmails)) {
+                $toEmails = ['prabesht002@gmail.com', 'info@miransh.co.jp'];
+            }
             $fromAddress = config('mail.from.address', env('MAIL_FROM_ADDRESS', 'info@miransh.co.jp'));
             $fromName = config('mail.from.name', env('MAIL_FROM_NAME', 'MIRANSH LLC'));
 
@@ -155,8 +159,8 @@ class HomeController extends Controller
             $content .= "----------------------------------------\n\n";
             $content .= "※ このメールに直接返信すると送信者（" . $request->email . "）へ届きます。\n";
 
-            Mail::raw($content, function ($message) use ($toEmail, $request, $fromAddress, $fromName) {
-                $message->to($toEmail)
+            Mail::raw($content, function ($message) use ($toEmails, $request, $fromAddress, $fromName) {
+                $message->to($toEmails)
                         ->from($fromAddress, $fromName)
                         ->replyTo($request->email, $request->name)
                         ->subject('【MIRANSH】新規お問い合わせ: ' . $request->name . ' 様 (' . ($request->service_interest ?: '一般相談') . ')');

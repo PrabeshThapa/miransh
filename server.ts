@@ -100,17 +100,21 @@ app.set('trust proxy', 1);
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(cookieParser());
-app.use(session({
-  secret: 'miransh-secret-key-2026',
-  resave: true,
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: 'auto',
-    httpOnly: false
-  }
-}));
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  // Dynamically configure session cookie parameters per request
+  (session({
+    secret: 'miransh-secret-key-2026',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
+      httpOnly: false
+    }
+  }))(req, res, next);
+});
 
 // Security Headers Middleware (Permit AI Studio iframe embedding)
 app.use((req: Request, res: Response, next) => {
@@ -1667,25 +1671,69 @@ app.get('/stories/:id', (req: Request, res: Response) => {
 // ----------------------------------------------------
 // Email Dispatcher (SMTP via Onamae / .env)
 // ----------------------------------------------------
-function getMailTransporter() {
-  const host = process.env.MAIL_HOST || process.env.SMTP_HOST || 'mail1017.onamae.ne.jp';
-  const port = parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || '465', 10);
-  const encryption = (process.env.MAIL_ENCRYPTION || '').toLowerCase();
-  const secure = encryption === 'ssl' || port === 465;
-  const user = process.env.MAIL_USERNAME || process.env.SMTP_USER || 'info@miransh.co.jp';
-  const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS || '';
+function getMailConfig() {
+  const envFile = path.join(__dirname, '.env');
+  let fileEnv: Record<string, string> = {};
+  if (fs.existsSync(envFile)) {
+    try {
+      const content = fs.readFileSync(envFile, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx !== -1) {
+          const k = trimmed.substring(0, eqIdx).trim();
+          let v = trimmed.substring(eqIdx + 1).trim();
+          if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+            v = v.substring(1, v.length - 1);
+          }
+          if (v && v !== 'null' && v !== 'undefined') fileEnv[k] = v;
+        }
+      }
+    } catch (e) {}
+  }
 
-  if (!pass) {
+  const getVal = (key: string, fallback: string): string => {
+    if (fileEnv[key]) return fileEnv[key];
+    const pVal = process.env[key];
+    if (pVal && pVal !== 'null' && pVal !== 'undefined' && pVal !== '127.0.0.1' && pVal !== 'hello@example.com' && pVal !== '${APP_NAME}') {
+      return pVal.trim();
+    }
+    return fallback;
+  };
+
+  const host = getVal('MAIL_HOST', 'mail1017.onamae.ne.jp');
+  const port = parseInt(getVal('MAIL_PORT', '465'), 10);
+  const encryption = getVal('MAIL_ENCRYPTION', 'ssl').toLowerCase();
+  const secure = encryption === 'ssl' || port === 465;
+  const user = getVal('MAIL_USERNAME', 'info@miransh.co.jp');
+  const pass = getVal('MAIL_PASSWORD', '');
+  
+  // Set default notification recipients to include prabesht002@gmail.com and info@miransh.co.jp
+  const rawAdminTo = getVal('ADMIN_NOTIFICATION_EMAIL', 'prabesht002@gmail.com, info@miransh.co.jp');
+  const adminRecipients = rawAdminTo.split(',').map(s => s.trim()).filter(Boolean);
+  const adminTo = adminRecipients.length > 0 ? adminRecipients : ['prabesht002@gmail.com', 'info@miransh.co.jp'];
+  
+  const fromAddress = getVal('MAIL_FROM_ADDRESS', 'info@miransh.co.jp');
+  const fromName = getVal('MAIL_FROM_NAME', 'MIRANSH LLC');
+
+  return { host, port, encryption, secure, user, pass, adminTo, fromAddress, fromName };
+}
+
+function getMailTransporter() {
+  const cfg = getMailConfig();
+  if (!cfg.pass) {
     return null;
   }
 
   return nodemailer.createTransport({
-    host,
-    port,
-    secure,
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.secure,
     auth: {
-      user,
-      pass,
+      user: cfg.user,
+      pass: cfg.pass,
     },
     tls: {
       rejectUnauthorized: false
@@ -1701,13 +1749,11 @@ async function sendInquiryEmails(inquiry: {
   service_interest?: string;
   message: string;
 }) {
-  const adminTo = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
-  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
-  const fromName = process.env.MAIL_FROM_NAME || 'MIRANSH LLC';
-
+  const cfg = getMailConfig();
   const transporter = getMailTransporter();
+  
   if (!transporter) {
-    console.log(`[Mail Notice] Inquiry received from ${inquiry.name} (${inquiry.email}). Live SMTP email delivery to ${adminTo} will activate when MAIL_PASSWORD is set in .env.`);
+    console.log(`[Mail Notice] Inquiry received from ${inquiry.name} (${inquiry.email}). Contact notification will be dispatched to ${cfg.adminTo.join(', ')} as soon as MAIL_PASSWORD is set in .env.`);
     return false;
   }
 
@@ -1733,15 +1779,15 @@ ${inquiry.message}
 管理画面: /admin/inquiries
 `;
 
-    // 1. Send immediate notification to info@miransh.co.jp
+    // 1. Send immediate notification to prabesht002@gmail.com and info@miransh.co.jp
     await transporter.sendMail({
-      from: `"${fromName}" <${fromAddress}>`,
-      to: adminTo,
+      from: `"${cfg.fromName}" <${cfg.fromAddress}>`,
+      to: cfg.adminTo,
       replyTo: `"${inquiry.name}" <${inquiry.email}>`,
       subject: adminSubject,
       text: adminBody,
     });
-    console.log(`[Mail] Inbound inquiry alert successfully sent to ${adminTo} for ${inquiry.email}`);
+    console.log(`[Mail] Inbound contact inquiry alert sent to ${cfg.adminTo.join(', ')} for ${inquiry.email}`);
 
     // 2. Also send an automatic receipt confirmation to the customer
     try {
@@ -1775,7 +1821,7 @@ URL: https://miransh.co.jp
 `;
 
       await transporter.sendMail({
-        from: `"${fromName}" <${fromAddress}>`,
+        from: `"${cfg.fromName}" <${cfg.fromAddress}>`,
         to: inquiry.email,
         subject: userSubject,
         text: userBody,
@@ -2009,42 +2055,86 @@ app.post('/api/sakana/translate-job', async (req: Request, res: Response) => {
   });
 });
 
-// Helper to get active admin language (from query, path, cookie, or session)
+// Helper to safely set admin language cookie (supports iframe embedding via SameSite=None; Secure)
+function setAdminLangCookie(res: Response, req: Request, lang: AdminLang) {
+  const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  res.cookie('admin_lang', lang, {
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+    path: '/',
+    sameSite: isHttps ? 'none' : 'lax',
+    secure: isHttps,
+    httpOnly: false
+  });
+}
+
+// Helper to get active admin language (from query, form body, path, session, cookie, or referer header)
 function getAdminLang(req: Request, res?: Response): AdminLang {
   // 1. Check explicit query parameter (?lang=en or ?lang=ja) - highest priority
   const qLang = (req.query.lang as string)?.toLowerCase();
   if (qLang === 'en' || qLang === 'ja') {
     if ((req.session as any)) (req.session as any).adminLang = qLang;
-    if (res) res.cookie('admin_lang', qLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    if (res) setAdminLangCookie(res, req, qLang as AdminLang);
     return qLang as AdminLang;
   }
 
-  // 2. Check path prefix/segments (e.g., /admin/en/*, /admin/en, /en/admin/*)
+  // 2. Check explicit body parameter (e.g. from POST forms)
+  const bLang = (req.body?.admin_lang || req.body?.lang as string)?.toLowerCase();
+  if (bLang === 'en' || bLang === 'ja') {
+    if ((req.session as any)) (req.session as any).adminLang = bLang;
+    if (res) setAdminLangCookie(res, req, bLang as AdminLang);
+    return bLang as AdminLang;
+  }
+
+  // 3. Check path prefix/segments (e.g., /admin/en/*, /admin/en, /en/admin/*)
   const pathParts = req.path.toLowerCase().split('/').filter(Boolean);
   if (pathParts.includes('en') || req.params?.lang === 'en') {
     if ((req.session as any)) (req.session as any).adminLang = 'en';
-    if (res) res.cookie('admin_lang', 'en', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    if (res) setAdminLangCookie(res, req, 'en');
     return 'en';
   }
   if (pathParts.includes('ja') || req.params?.lang === 'ja') {
     if ((req.session as any)) (req.session as any).adminLang = 'ja';
-    if (res) res.cookie('admin_lang', 'ja', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+    if (res) setAdminLangCookie(res, req, 'ja');
     return 'ja';
   }
 
-  // 3. Check session
+  // 4. Check session
   const sessionLang = (req.session as any)?.adminLang;
   if (sessionLang === 'en' || sessionLang === 'ja') {
     return sessionLang;
   }
 
-  // 4. Check cookie
+  // 5. Check cookie
   const cookieLang = req.cookies?.admin_lang;
   if (cookieLang === 'en' || cookieLang === 'ja') {
     return cookieLang;
   }
 
+  // 6. Check Referer header (crucial in cross-origin iframe where cookies may be throttled)
+  const referer = req.header('Referer') || req.header('referrer');
+  if (referer) {
+    try {
+      const parsed = new URL(referer, 'http://localhost');
+      const refLang = parsed.searchParams.get('lang')?.toLowerCase();
+      if (refLang === 'en' || refLang === 'ja') {
+        if ((req.session as any)) (req.session as any).adminLang = refLang;
+        return refLang as AdminLang;
+      }
+      if (parsed.pathname.includes('/admin/en') || parsed.pathname.includes('/en/admin')) {
+        return 'en';
+      }
+    } catch (e) {}
+  }
+
   return 'ja';
+}
+
+// Helper to redirect within admin area while strictly preserving the active language
+function adminRedirect(res: Response, req: Request, target: string) {
+  const lang = getAdminLang(req);
+  const cleanTarget = target.replace(/([?&])lang=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+  const joiner = cleanTarget.includes('?') ? '&' : '?';
+  return res.redirect(`${cleanTarget}${joiner}lang=${lang}`);
 }
 
 // ----------------------------------------------------
@@ -2053,11 +2143,11 @@ function getAdminLang(req: Request, res?: Response): AdminLang {
 // Dedicated API endpoint for asynchronous language switching without losing session
 app.all(['/admin/api/set-lang', '/api/admin/set-lang'], (req: Request, res: Response) => {
   const reqLang = (req.body?.lang || req.query?.lang || req.params?.lang || '').toString().toLowerCase();
-  const newLang = reqLang === 'en' ? 'en' : 'ja';
+  const newLang: AdminLang = reqLang === 'en' ? 'en' : 'ja';
   if ((req.session as any)) {
     (req.session as any).adminLang = newLang;
   }
-  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+  setAdminLangCookie(res, req, newLang);
   return res.json({
     success: true,
     lang: newLang,
@@ -2066,9 +2156,9 @@ app.all(['/admin/api/set-lang', '/api/admin/set-lang'], (req: Request, res: Resp
 });
 
 app.get(['/admin/lang/:lang', '/admin/language/:lang', '/admin/switch-lang/:lang'], (req: Request, res: Response) => {
-  const newLang = req.params.lang === 'en' ? 'en' : 'ja';
+  const newLang: AdminLang = req.params.lang === 'en' ? 'en' : 'ja';
   (req.session as any).adminLang = newLang;
-  res.cookie('admin_lang', newLang, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+  setAdminLangCookie(res, req, newLang);
 
   let target = '/admin';
   const referer = req.header('Referer');
@@ -2077,7 +2167,6 @@ app.get(['/admin/lang/:lang', '/admin/language/:lang', '/admin/switch-lang/:lang
       const parsed = new URL(referer, `http://${req.headers.host || 'localhost'}`);
       let p = parsed.pathname;
       if (!p.includes('/admin/lang') && !p.includes('/admin/language') && !p.includes('/admin/switch-lang')) {
-        // Adjust language prefix if path contains /admin/en/ or /admin/ja/
         if (p.startsWith('/admin/en/')) {
           p = '/admin/' + newLang + '/' + p.substring(10);
         } else if (p === '/admin/en') {
@@ -2274,14 +2363,14 @@ app.get(DASHBOARD_ROUTES, requireAdmin, (req: Request, res: Response) => {
   // Backwards compatibility for tab param
   const tab = req.query.tab as string;
   if (tab && tab !== 'dashboard') {
-    if (tab === 'company') return res.redirect('/admin/company');
-    if (tab === 'about') return res.redirect('/admin/about');
-    if (tab === 'services') return res.redirect('/admin/services');
-    if (tab === 'stories') return res.redirect('/admin/stories');
-    if (tab === 'faqs') return res.redirect('/admin/faqs');
-    if (tab === 'inquiries') return res.redirect('/admin/inquiries');
-    if (tab === 'password') return res.redirect('/admin/password');
-    if (tab === 'ai') return res.redirect('/admin/ai');
+    if (tab === 'company') return adminRedirect(res, req, '/admin/company');
+    if (tab === 'about') return adminRedirect(res, req, '/admin/about');
+    if (tab === 'services') return adminRedirect(res, req, '/admin/services');
+    if (tab === 'stories') return adminRedirect(res, req, '/admin/stories');
+    if (tab === 'faqs') return adminRedirect(res, req, '/admin/faqs');
+    if (tab === 'inquiries') return adminRedirect(res, req, '/admin/inquiries');
+    if (tab === 'password') return adminRedirect(res, req, '/admin/password');
+    if (tab === 'ai') return adminRedirect(res, req, '/admin/ai');
   }
 
   const lang = getAdminLang(req, res);
@@ -2517,11 +2606,11 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
   }
 
   if (!new_password || typeof new_password !== 'string' || new_password.trim().length < 6) {
-    return res.redirect('/admin/password?error=password_too_short');
+    return adminRedirect(res, req, '/admin/password?error=password_too_short');
   }
 
   if (new_password !== confirmation) {
-    return res.redirect('/admin/password?error=password_mismatch');
+    return adminRedirect(res, req, '/admin/password?error=password_mismatch');
   }
 
   // Validate current password against user.password hash or fallback defaults
@@ -2537,7 +2626,7 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
   }
 
   if (!isCurrentValid) {
-    return res.redirect('/admin/password?error=invalid_current_password');
+    return adminRedirect(res, req, '/admin/password?error=invalid_current_password');
   }
 
   const hashedPassword = bcrypt.hashSync(new_password.trim(), 10);
@@ -2552,7 +2641,7 @@ app.post('/admin/password', requireAdmin, (req: Request, res: Response) => {
     (req.session as any).user = { id: 1, name: 'admin', email: 'admin@miransh.jp', password: hashedPassword };
   }
 
-  return res.redirect('/admin/password?success=password_updated');
+  return adminRedirect(res, req, '/admin/password?success=password_updated');
 });
 
 // 9. Sakana AI Diagnostics & Configuration Page
@@ -2710,8 +2799,7 @@ app.post(['/admin/stories', '/admin/stories/create'], upload.any(), (req: Reques
     sort
   );
 
-  const langQuery = (req.body?.lang === 'en' || (req.session as any)?.adminLang === 'en') ? '&lang=en' : '';
-  res.redirect('/admin/stories?saved=true' + langQuery);
+  return adminRedirect(res, req, '/admin/stories?saved=true');
 });
 
 app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/update/:id'], upload.any(), (req: Request, res: Response) => {
@@ -2747,15 +2835,14 @@ app.post(['/admin/stories/:id', '/admin/stories/:id/update', '/admin/stories/upd
     id
   );
 
-  const langQuery = (req.body?.lang === 'en' || (req.session as any)?.adminLang === 'en') ? '&lang=en' : '';
-  res.redirect('/admin/stories?saved=true' + langQuery);
+  return adminRedirect(res, req, '/admin/stories?saved=true');
 });
 
 app.post(['/admin/stories/:id/delete', '/admin/stories/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM stories WHERE id = ?').run(id);
-  res.redirect('/admin/stories?deleted=true');
+  return adminRedirect(res, req, '/admin/stories?deleted=true');
 });
 
 // Sakana AI API Test Handler
@@ -2859,7 +2946,7 @@ app.post('/admin/company', upload.any(), (req: Request, res: Response) => {
     phone || current.phone || '', email || current.email || '', address_ja || current.address_ja || '', address_en || current.address_en || ''
   );
 
-  res.redirect('/admin/company?saved=true');
+  return adminRedirect(res, req, '/admin/company?saved=true');
 });
 
 app.post('/admin/about', (req: Request, res: Response) => {
@@ -2892,7 +2979,7 @@ app.post('/admin/about', (req: Request, res: Response) => {
     desc2_ja, desc2_en, 
     quote_ja, quote_en
   );
-  res.redirect('/admin/about?saved=true');
+  return adminRedirect(res, req, '/admin/about?saved=true');
 });
 
 // Services CRUD Handlers
@@ -2917,14 +3004,14 @@ app.post(['/admin/services/:id', '/admin/services/:id/update', '/admin/services/
     parseInt(sort_order, 10) || 0,
     id
   );
-  res.redirect('/admin/services?saved=true');
+  return adminRedirect(res, req, '/admin/services?saved=true');
 });
 
 app.post(['/admin/services/:id/delete', '/admin/services/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM services WHERE id = ?').run(id);
-  res.redirect('/admin/services?deleted=true');
+  return adminRedirect(res, req, '/admin/services?deleted=true');
 });
 
 // FAQs CRUD Handlers
@@ -2944,7 +3031,7 @@ app.post(['/admin/faqs', '/admin/faqs/create'], (req: Request, res: Response) =>
     answer_en || '',
     parseInt(sort_order, 10) || 0
   );
-  res.redirect('/admin/faqs?saved=true');
+  return adminRedirect(res, req, '/admin/faqs?saved=true');
 });
 
 app.post(['/admin/faqs/:id', '/admin/faqs/:id/update', '/admin/faqs/update/:id'], (req: Request, res: Response) => {
@@ -2966,14 +3053,14 @@ app.post(['/admin/faqs/:id', '/admin/faqs/:id/update', '/admin/faqs/update/:id']
     parseInt(sort_order, 10) || 0,
     id
   );
-  res.redirect('/admin/faqs?saved=true');
+  return adminRedirect(res, req, '/admin/faqs?saved=true');
 });
 
 app.post(['/admin/faqs/:id/delete', '/admin/faqs/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM faqs WHERE id = ?').run(id);
-  res.redirect('/admin/faqs?deleted=true');
+  return adminRedirect(res, req, '/admin/faqs?deleted=true');
 });
 
 // Inquiries Handlers
@@ -2982,14 +3069,14 @@ app.post(['/admin/inquiries/:id/status', '/admin/inquiries/status/:id', '/admin/
   const id = parseInt(req.params.id, 10);
   const { status } = req.body;
   db.prepare('UPDATE inquiries SET status = ? WHERE id = ?').run(status, id);
-  res.redirect('/admin/inquiries?updated=true');
+  return adminRedirect(res, req, '/admin/inquiries?updated=true');
 });
 
 app.post(['/admin/inquiries/:id/delete', '/admin/inquiries/delete/:id'], (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.redirect('/admin/login');
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM inquiries WHERE id = ?').run(id);
-  res.redirect('/admin/inquiries?deleted=true');
+  return adminRedirect(res, req, '/admin/inquiries?deleted=true');
 });
 
 app.post('/admin/api/sakana/config', (req: Request, res: Response) => {
@@ -2997,33 +3084,32 @@ app.post('/admin/api/sakana/config', (req: Request, res: Response) => {
   const { apiKey, model } = req.body;
   if (apiKey) currentSakanaKey = apiKey.trim();
   if (model) currentSakanaModel = model.trim();
-  res.redirect('/admin/ai?saved=true');
+  return adminRedirect(res, req, '/admin/ai?saved=true');
 });
 
 app.post('/admin/api/test-email', async (req: Request, res: Response) => {
   if (!(req.session as any).user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  const cfg = getMailConfig();
   const transporter = getMailTransporter();
-  const adminTo = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
-  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'info@miransh.co.jp';
-  const fromName = process.env.MAIL_FROM_NAME || 'MIRANSH LLC';
+  const targetEmail = (req.body && req.body.target_email) ? req.body.target_email.trim() : 'prabesht002@gmail.com';
 
   if (!transporter) {
     return res.json({
       success: false,
       configured: false,
-      error: 'MAIL_PASSWORD is not set in .env. Please set MAIL_PASSWORD in your environment with your Onamae mail password to enable outbound email delivery.'
+      error: `MAIL_PASSWORD is not set in .env. Please configure MAIL_PASSWORD in .env to deliver live emails to ${targetEmail}.`
     });
   }
 
   try {
     await transporter.verify();
     await transporter.sendMail({
-      from: `"${fromName}" <${fromAddress}>`,
-      to: adminTo,
-      subject: '【MIRANSH】SMTP 送信テスト成功 / SMTP Test Successful',
-      text: `これはMIRANSH管理システムからのSMTP接続テストメールです。\n\n正常にメール送信機能が稼働しています。\n送信日時: ${new Date().toISOString()}\n宛先: ${adminTo}\nサーバー: ${process.env.MAIL_HOST || 'mail1017.onamae.ne.jp'}`,
+      from: `"${cfg.fromName}" <${cfg.fromAddress}>`,
+      to: targetEmail,
+      subject: '【MIRANSH】コンタクトメール送信テスト / Contact Mail Test',
+      text: `これはMIRANSH管理システムからのコンタクトメール送信テストです。\n\n正常にメール送信機能が稼働しています。\n送信日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n送信先: ${targetEmail}\n送信元: ${cfg.fromAddress}\nSMTPサーバー: ${cfg.host}:${cfg.port}`,
     });
-    return res.json({ success: true, message: `Test email successfully dispatched to ${adminTo}` });
+    return res.json({ success: true, message: `Test email successfully dispatched to ${targetEmail}` });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message || 'Failed to send test email' });
   }

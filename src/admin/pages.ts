@@ -1598,6 +1598,18 @@ export function renderInquiriesContent(inquiries: any[], filter: string = 'all',
   });
 
   const body = `
+    <div class="alert bg-white border mb-3 py-2 px-3 d-flex justify-content-between align-items-center flex-wrap shadow-sm" style="border-radius: 6px;">
+      <div class="text-sm py-1">
+        <i class="fas fa-bell text-warning mr-2"></i>
+        <span class="font-weight-bold text-dark">${lang === 'en' ? 'Contact Email Notifications Sent To:' : 'お問い合わせメール通知先:'}</span>
+        <span class="badge badge-primary px-2 py-1 ml-1" style="font-size: 12px;"><i class="fas fa-check-circle mr-1"></i>prabesht002@gmail.com</span>
+        <span class="badge badge-secondary px-2 py-1 ml-1" style="font-size: 12px;">info@miransh.co.jp</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary" onclick="sendTestContactMail('prabesht002@gmail.com', event)">
+        <i class="fas fa-paper-plane mr-1"></i> ${lang === 'en' ? 'Test Send to prabesht002@gmail.com' : 'prabesht002@gmail.com へテスト送信'}
+      </button>
+    </div>
+
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-header bg-light d-flex justify-content-between align-items-center">
         <h3 class="card-title font-weight-bold text-dark mb-0">
@@ -1734,6 +1746,34 @@ export function renderInquiriesContent(inquiries: any[], filter: string = 'all',
         document.getElementById('view_inq_message').textContent = inq.message || '';
         document.getElementById('view_inq_reply_btn').href = 'mailto:' + (inq.email || '') + '?subject=' + encodeURIComponent('${lang === 'en' ? '[MIRANSH LLC] Regarding Your Inquiry' : '【MIRANSH合同会社】お問い合わせありがとうございます'}');
         $('#modal-view-inquiry').modal('show');
+      }
+
+      function sendTestContactMail(targetEmail, evt) {
+        var btn = evt ? evt.currentTarget : event.target;
+        var origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ${lang === 'en' ? 'Sending...' : '送信中...'}';
+
+        fetch('/admin/api/test-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target_email: targetEmail })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+          if (data.success) {
+            alert('✓ ' + data.message);
+          } else {
+            alert('⚠️ ' + data.error);
+          }
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+          alert('Error: ' + err.message);
+        });
       }
     </script>
   `;

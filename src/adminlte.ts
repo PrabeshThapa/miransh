@@ -50,23 +50,36 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
       gap: 12px;
       margin-bottom: 8px;
     }
-    .admin-lang-switcher {
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 9999px;
-      padding: 2px;
+    .lang-toggle-group {
       display: inline-flex;
       align-items: center;
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 9999px;
+      padding: 2px;
+      flex-shrink: 0;
     }
-    .admin-lang-switcher .btn {
-      border-radius: 9999px !important;
-      font-size: 0.76rem;
-      padding: 0.22rem 0.65rem;
-      transition: all 0.15s ease-in-out;
-      line-height: 1.2;
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748B;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      line-height: 1.4;
+      text-decoration: none !important;
     }
-    .admin-lang-switcher .btn.active {
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    .lang-btn:hover {
+      color: #0F2C59;
+    }
+    .lang-btn.active {
+      background: #0d6efd;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
     }
   </style>
 </head>
@@ -86,12 +99,12 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
     <div class="card-body login-card-body p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="login-box-msg font-weight-bold text-dark m-0 p-0">${t.login.title}</p>
-        <div class="admin-lang-switcher shadow-xs" role="group" aria-label="Language Switcher">
-          <button type="button" class="btn btn-xs ${lang === 'ja' ? 'btn-primary font-weight-bold active text-white' : 'btn-light text-muted'}" onclick="switchAdminLanguage('ja', event)" title="日本語 (Japanese)">
-            <span class="mr-1">🇯🇵</span>JP
+        <div class="lang-toggle-group shadow-xs" role="group" aria-label="Language Switcher">
+          <button type="button" class="lang-btn ${lang === 'ja' ? 'active' : ''}" onclick="switchAdminLanguage('ja', event)" title="日本語 (Japanese / NP)">
+            日本語
           </button>
-          <button type="button" class="btn btn-xs ${lang === 'en' ? 'btn-primary font-weight-bold active text-white' : 'btn-light text-muted'}" onclick="switchAdminLanguage('en', event)" title="English (英語)">
-            <span class="mr-1">🇬🇧</span>EN
+          <button type="button" class="lang-btn ${lang === 'en' ? 'active' : ''}" onclick="switchAdminLanguage('en', event)" title="English (EN)">
+            EN
           </button>
         </div>
       </div>
@@ -164,18 +177,14 @@ export function renderAdminLTELogin(errorMsg?: string, successMsg?: string, lang
 function switchAdminLanguage(newLang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   try {
-    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
     localStorage.setItem('admin_lang', newLang);
+    localStorage.setItem('miransh_language', newLang);
+    sessionStorage.setItem('admin_lang', newLang);
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=None; Secure';
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
   } catch(err) {}
 
   var currentUrl = new URL(window.location.href);
-  var path = currentUrl.pathname;
-  if (path.indexOf('/admin/en') === 0) {
-    path = '/admin/' + newLang + path.substring(9);
-  } else if (path.indexOf('/admin/ja') === 0) {
-    path = '/admin/' + newLang + path.substring(9);
-  }
-  currentUrl.pathname = path;
   currentUrl.searchParams.set('lang', newLang);
   var targetHref = currentUrl.toString();
 
@@ -183,10 +192,10 @@ function switchAdminLanguage(newLang, e) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lang: newLang }),
-    credentials: 'same-origin'
+    credentials: 'include'
   })
   .catch(function() {
-    return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+    return fetch('/admin/lang/' + newLang, { credentials: 'include' });
   })
   .catch(function() {})
   .finally(function() {
@@ -194,6 +203,20 @@ function switchAdminLanguage(newLang, e) {
   });
 }
 window.setAdminLang = switchAdminLanguage;
+
+// Initial check on load for sticky language on login page
+(function() {
+  try {
+    var stored = localStorage.getItem('admin_lang') || localStorage.getItem('miransh_language');
+    if (stored && (stored === 'en' || stored === 'ja')) {
+      var u = new URL(window.location.href);
+      if (!u.searchParams.has('lang') && stored !== '${lang}') {
+        u.searchParams.set('lang', stored);
+        window.location.replace(u.toString());
+      }
+    }
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>`;
@@ -229,7 +252,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
   const t = i18n[lang];
   const ceoImg = company.ceo_image || '/images/ceo_portrait.jpg';
   const userName = user?.name || (lang === 'en' ? (company?.ceo_name_en || 'Admin') : (company?.ceo_name_ja || '管理者'));
-  const langSuffix = lang === 'en' ? '?lang=en' : '';
+  const langSuffix = '?lang=' + lang;
 
   const menuItems = [
     { id: 'dashboard', href: `/admin${langSuffix}`, icon: 'fas fa-tachometer-alt', label: t.nav.dashboard, badge: '' },
@@ -311,24 +334,36 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
       font-size: 0.72rem;
       letter-spacing: 0.05em;
     }
-    .admin-lang-switcher {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 9999px;
-      padding: 2px;
+    .lang-toggle-group {
       display: inline-flex;
       align-items: center;
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 9999px;
+      padding: 2px;
+      flex-shrink: 0;
     }
-    .admin-lang-switcher .btn {
-      border-radius: 9999px !important;
-      font-size: 0.76rem;
-      font-weight: 600;
-      padding: 0.22rem 0.65rem;
-      transition: all 0.15s ease-in-out;
-      line-height: 1.2;
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748B;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      line-height: 1.4;
+      text-decoration: none !important;
     }
-    .admin-lang-switcher .btn.active {
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    .lang-btn:hover {
+      color: #0F2C59;
+    }
+    .lang-btn.active {
+      background: #0d6efd;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
     }
   </style>
 </head>
@@ -347,85 +382,38 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
         </a>
       </li>
       <li class="nav-item d-none d-md-inline-block">
-        <a href="/admin/password" class="btn btn-outline-secondary btn-sm ml-2">
+        <a href="/admin/password${langSuffix}" class="btn btn-outline-secondary btn-sm ml-2">
           <i class="fas fa-key mr-1"></i> ${t.changePassword}
         </a>
       </li>
     </ul>
 
     <ul class="navbar-nav ml-auto align-items-center">
-      <!-- Language Switcher Component (Bilingual Enterprise Switcher) -->
+      <!-- Language Switcher Component (Exact Frontend Design & Function) -->
       <li class="nav-item d-flex align-items-center mr-3" id="admin-lang-switcher-component">
-        <!-- 1-Click Segmented Toggle Pill (Desktop & Tablet) -->
-        <div class="admin-lang-switcher d-none d-sm-inline-flex shadow-xs" role="group" aria-label="Bilingual Language Switcher">
+        <div class="lang-toggle-group" id="admin-lang-toggle" role="group" aria-label="Language Switcher">
           <button type="button"
                   id="btn-lang-ja"
-                  class="btn btn-xs font-weight-bold ${lang === 'ja' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
+                  class="lang-btn ${lang === 'ja' ? 'active' : ''}"
                   onclick="switchAdminLanguage('ja', event)"
-                  title="${lang === 'en' ? 'Switch to Japanese (日本語)' : '日本語に切り替え'}"
+                  title="日本語 (Japanese / NP)"
                   aria-pressed="${lang === 'ja'}">
-            <span class="mr-1">🇯🇵</span><span>日本語</span>
+            日本語
           </button>
           <button type="button"
                   id="btn-lang-en"
-                  class="btn btn-xs font-weight-bold ${lang === 'en' ? 'btn-primary active text-white' : 'btn-light text-muted'}"
+                  class="lang-btn ${lang === 'en' ? 'active' : ''}"
                   onclick="switchAdminLanguage('en', event)"
-                  title="${lang === 'en' ? 'English (Active)' : '英語に切り替え (English)'}"
+                  title="English (EN)"
                   aria-pressed="${lang === 'en'}">
-            <span class="mr-1">🇬🇧</span><span>English</span>
+            EN
           </button>
-        </div>
-
-        <!-- Dropdown Details Switcher (For mobile & full menu options) -->
-        <div class="dropdown ml-1">
-          <a class="nav-link dropdown-toggle btn btn-xs btn-outline-secondary d-flex align-items-center py-1 px-2 font-weight-bold text-dark rounded-pill border shadow-xs"
-             data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
-             title="${lang === 'en' ? 'Language Switcher Menu (English)' : '言語切り替えメニュー (日本語)'}">
-            <i class="fas fa-globe text-primary mr-1"></i>
-            <span class="badge badge-pill ${lang === 'en' ? 'badge-primary' : 'badge-dark'} text-xs font-weight-bold px-1 py-0">${lang.toUpperCase()}</span>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right shadow border-0 p-2" style="min-width: 230px; border-radius: 10px;">
-            <div class="dropdown-header text-xs text-uppercase font-weight-bold text-muted px-2 py-1 d-flex align-items-center justify-content-between">
-              <span><i class="fas fa-language mr-1 text-primary"></i>${lang === 'en' ? 'Language Switcher' : '言語切り替え'}</span>
-              <span class="badge badge-light border">${lang === 'en' ? 'Live Context' : '状態保持'}</span>
-            </div>
-            <div class="dropdown-divider my-1"></div>
-            <a href="/admin/lang/ja"
-               class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 ${lang === 'ja' ? 'active font-weight-bold' : ''}"
-               onclick="switchAdminLanguage('ja', event)">
-              <div class="d-flex align-items-center">
-                <span class="mr-2" style="font-size: 1.2rem;">🇯🇵</span>
-                <div>
-                  <div class="font-weight-bold">日本語</div>
-                  <small class="${lang === 'ja' ? 'text-white-50' : 'text-muted'}">Japanese (JA)</small>
-                </div>
-              </div>
-              ${lang === 'ja' ? '<i class="fas fa-check-circle text-white"></i>' : `<span class="badge badge-light border text-xs">${lang === 'en' ? 'Switch' : '切替'}</span>`}
-            </a>
-            <a href="/admin/lang/en"
-               class="dropdown-item rounded d-flex align-items-center justify-content-between py-2 px-2 mt-1 ${lang === 'en' ? 'active font-weight-bold' : ''}"
-               onclick="switchAdminLanguage('en', event)">
-              <div class="d-flex align-items-center">
-                <span class="mr-2" style="font-size: 1.2rem;">🇬🇧</span>
-                <div>
-                  <div class="font-weight-bold">English</div>
-                  <small class="${lang === 'en' ? 'text-white-50' : 'text-muted'}">${lang === 'en' ? 'English (EN)' : '英語 (EN)'}</small>
-                </div>
-              </div>
-              ${lang === 'en' ? '<i class="fas fa-check-circle text-white"></i>' : '<span class="badge badge-light border text-xs">Switch</span>'}
-            </a>
-            <div class="dropdown-divider my-2"></div>
-            <div class="px-2 py-1 text-xs text-muted d-flex align-items-center">
-              <i class="fas fa-shield-alt text-success mr-2"></i>
-              <span>${lang === 'en' ? 'Current page context & session preserved' : '現在の表示とセッションを安全に保持'}</span>
-            </div>
-          </div>
         </div>
       </li>
 
       <!-- Inquiries Notification Badge -->
       <li class="nav-item">
-        <a class="nav-link" href="/admin/inquiries" title="${t.unreadTooltip}">
+        <a class="nav-link" href="/admin/inquiries${langSuffix}" title="${t.unreadTooltip}">
           <i class="far fa-comments"></i>
           ${unreadCount > 0 ? `<span class="badge badge-danger navbar-badge">${unreadCount}</span>` : ''}
         </a>
@@ -453,7 +441,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
             </p>
           </li>
           <li class="user-footer d-flex justify-content-between">
-            <a href="/admin/password" class="btn btn-default btn-flat text-xs"><i class="fas fa-lock mr-1"></i>${t.changePassword}</a>
+            <a href="/admin/password${langSuffix}" class="btn btn-default btn-flat text-xs"><i class="fas fa-lock mr-1"></i>${t.changePassword}</a>
             <a href="/admin/logout" class="btn btn-outline-danger btn-flat text-xs font-weight-bold"><i class="fas fa-sign-out-alt mr-1"></i>${t.logout}</a>
           </li>
         </ul>
@@ -463,7 +451,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
 
   <!-- Sidebar -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="/admin" class="brand-link bg-primary text-white">
+    <a href="/admin${langSuffix}" class="brand-link bg-primary text-white">
       <img src="/images/logo-icon.png" alt="MIRANSH Logo" class="brand-image img-circle elevation-2" style="background: #fff; padding: 2px;">
       <span class="brand-text font-weight-bold">MIRANSH Admin</span>
     </a>
@@ -474,7 +462,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
           <img src="${escapeHtml(ceoImg)}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="/admin/company" class="d-block font-weight-bold text-white">${escapeHtml(userName)}</a>
+          <a href="/admin/company${langSuffix}" class="d-block font-weight-bold text-white">${escapeHtml(userName)}</a>
           <small class="text-success"><i class="fas fa-circle text-xs mr-1"></i>Online (${t.adminRole})</small>
         </div>
       </div>
@@ -502,7 +490,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right mb-0 text-xs">
-              <li class="breadcrumb-item"><a href="/admin">${t.home}</a></li>
+              <li class="breadcrumb-item"><a href="/admin${langSuffix}">${t.home}</a></li>
               <li class="breadcrumb-item active">${escapeHtml(pageTitle)}</li>
             </ol>
           </div>
@@ -554,22 +542,25 @@ function switchAdminLanguage(newLang, e) {
   var btnEn = document.getElementById('btn-lang-en');
   if (btnJa && btnEn) {
     if (newLang === 'ja') {
-      btnJa.className = 'btn btn-xs font-weight-bold btn-primary active text-white';
-      btnEn.className = 'btn btn-xs font-weight-bold btn-light text-muted';
+      btnJa.className = 'lang-btn active';
+      btnEn.className = 'lang-btn';
       btnJa.setAttribute('aria-pressed', 'true');
       btnEn.setAttribute('aria-pressed', 'false');
     } else {
-      btnEn.className = 'btn btn-xs font-weight-bold btn-primary active text-white';
-      btnJa.className = 'btn btn-xs font-weight-bold btn-light text-muted';
+      btnEn.className = 'lang-btn active';
+      btnJa.className = 'lang-btn';
       btnEn.setAttribute('aria-pressed', 'true');
       btnJa.setAttribute('aria-pressed', 'false');
     }
   }
 
-  // 1. Persist in cookie (1-year lifetime, SameSite=Lax, root path)
+  // 1. Persist in storage and cookies
   try {
-    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
     localStorage.setItem('admin_lang', newLang);
+    localStorage.setItem('miransh_language', newLang);
+    sessionStorage.setItem('admin_lang', newLang);
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=None; Secure';
+    document.cookie = 'admin_lang=' + newLang + '; path=/; max-age=31536000; SameSite=Lax';
   } catch(err) {}
 
   // 2. Compute exact destination URL preserving pathname, query parameters, and hash
@@ -604,10 +595,10 @@ function switchAdminLanguage(newLang, e) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lang: newLang }),
-    credentials: 'same-origin'
+    credentials: 'include'
   })
   .catch(function() {
-    return fetch('/admin/lang/' + newLang, { credentials: 'same-origin' });
+    return fetch('/admin/lang/' + newLang, { credentials: 'include' });
   })
   .catch(function() {})
   .finally(function() {
@@ -615,6 +606,66 @@ function switchAdminLanguage(newLang, e) {
   });
 }
 window.setAdminLang = switchAdminLanguage;
+
+// Sticky auto-propagator across admin panel tabs and links
+(function() {
+  var currentLang = '${lang}';
+
+  // Check on load if local storage has a chosen language and URL has no lang parameter
+  try {
+    var stored = localStorage.getItem('admin_lang') || localStorage.getItem('miransh_language');
+    if (stored && (stored === 'en' || stored === 'ja')) {
+      var u = new URL(window.location.href);
+      if (!u.searchParams.has('lang') && stored !== currentLang) {
+        u.searchParams.set('lang', stored);
+        window.location.replace(u.toString());
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Intercept any clicks on internal admin links to ensure lang param is not lost
+  document.addEventListener('click', function(evt) {
+    var a = evt.target && evt.target.closest ? evt.target.closest('a') : null;
+    if (!a || !a.href) return;
+    try {
+      var targetUrl = new URL(a.href, window.location.origin);
+      if (targetUrl.origin === window.location.origin && 
+          targetUrl.pathname.indexOf('/admin') === 0 && 
+          !targetUrl.pathname.includes('/logout') && 
+          !targetUrl.pathname.includes('/api/')) {
+        if (!targetUrl.searchParams.has('lang')) {
+          targetUrl.searchParams.set('lang', currentLang);
+          a.href = targetUrl.toString();
+        }
+      }
+    } catch(err) {}
+  }, true);
+
+  // Intercept form submissions to ensure lang param and hidden field are preserved
+  document.addEventListener('submit', function(evt) {
+    var form = evt.target;
+    if (!form || !form.action) return;
+    try {
+      var targetUrl = new URL(form.action, window.location.origin);
+      if (targetUrl.origin === window.location.origin && 
+          targetUrl.pathname.indexOf('/admin') === 0 && 
+          !targetUrl.pathname.includes('/logout')) {
+        if (!targetUrl.searchParams.has('lang')) {
+          targetUrl.searchParams.set('lang', currentLang);
+          form.action = targetUrl.toString();
+        }
+        if (!form.querySelector('input[name="lang"]') && !form.querySelector('input[name="admin_lang"]')) {
+          var hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'lang';
+          hiddenInput.value = currentLang;
+          form.appendChild(hiddenInput);
+        }
+      }
+    } catch(err) {}
+  }, true);
+})();
 </script>
 ${extraScripts}
 </body>
