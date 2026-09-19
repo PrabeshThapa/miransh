@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,36 +31,37 @@
 
     <!-- Schema.org JSON-LD Structured Data for Japanese Recruitment Agency -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "EmploymentAgency",
-      "name": "MIRANSH合同会社",
-      "alternateName": "MIRANSH LLC",
-      "url": "https://miransh.co.jp",
-      "logo": "https://miransh.co.jp/images/logo-icon.png",
-      "image": "https://miransh.co.jp/images/hero_banner.jpg",
-      "description": "日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポート。",
-      "telephone": "{{ $company->phone ?? '042-409-8256' }}",
-      "email": "{{ $company->email ?? 'info@miransh.jp' }}",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "東町4丁目8番14号 アクトレジデンス新小金井201号室",
-        "addressLocality": "小金井市",
-        "addressRegion": "東京都",
-        "postalCode": "184-0011",
-        "addressCountry": "JP"
-      },
-      "founder": {
-        "@type": "Person",
-        "name": "Giri Ram Krishna",
-        "jobTitle": "代表社員 (CEO)"
-      }
-    }
+        {
+            "@context": "https://schema.org",
+            "@type": "EmploymentAgency",
+            "name": "MIRANSH合同会社",
+            "alternateName": "MIRANSH LLC",
+            "url": "https://miransh.co.jp",
+            "logo": "https://miransh.co.jp/images/logo-icon.png",
+            "image": "https://miransh.co.jp/images/hero_banner.jpg",
+            "description": "日本企業とネパールをはじめとする海外人材をつなぐ総合人材サービス企業。特定技能外国人材の採用支援、在留資格手続き、生活・就労サポート。",
+            "telephone": "{{ $company->phone ?? '042-409-8256' }}",
+            "email": "{{ $company->email ?? 'info@miransh.jp' }}",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "東町4丁目8番14号 アクトレジデンス新小金井201号室",
+                "addressLocality": "小金井市",
+                "addressRegion": "東京都",
+                "postalCode": "184-0011",
+                "addressCountry": "JP"
+            },
+            "founder": {
+                "@type": "Person",
+                "name": "Giri Ram Krishna",
+                "jobTitle": "代表社員 (CEO)"
+            }
+        }
     </script>
 
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" type="image/png" href="/images/logo-icon.png">
 </head>
+
 <body class="ja">
 
     <!-- HEADER & NAVIGATION -->
@@ -97,12 +99,16 @@
                     <button type="button" class="lang-btn" id="btn-lang-en" onclick="setLanguage('en')">EN</button>
                 </div>
                 <a href="#contact" class="btn-header-cta" style="display: inline-flex;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                     <span class="lang-ja">お問い合わせ</span>
                     <span class="lang-en">Contact</span>
                 </a>
                 <button type="button" class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="ナビゲーションメニューを開く">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -191,7 +197,9 @@
         <div class="container hero-grid">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
                     <span>{{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }}</span>
                 </div>
 
@@ -215,7 +223,9 @@
                     <a href="#contact" class="btn-primary">
                         <span class="lang-ja">無料相談・お問い合わせ</span>
                         <span class="lang-en">Inquire / Free Consultation</span>
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     </a>
                     <a href="#services" class="btn-outline-white">
                         <span class="lang-ja">事業案内を見る</span>
@@ -245,7 +255,9 @@
                 </div>
                 <div class="hero-floating-badge">
                     <div class="badge-icon-box">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
                     </div>
                     <div>
                         <div style="font-size: 11px; color: var(--text-light); font-weight: 600;"><span class="lang-ja">厚生労働大臣許可</span><span class="lang-en">MHLW Certified</span></div>
@@ -291,7 +303,9 @@
                     <!-- 7-Stage Visual Lifecycle Track -->
                     <div class="lifecycle-track">
                         <div class="lifecycle-track-title">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
                             <span class="lang-ja">受入・定着の7段階トータルサポート</span>
                             <span class="lang-en">7-Stage Lifecycle Onboarding & Retention</span>
                         </div>
@@ -348,30 +362,48 @@
 
             <div class="services-grid">
                 @php
-                    $themeClasses = ['theme-blue', 'theme-emerald', 'theme-indigo', 'theme-teal'];
-                    $categoryPillsJa = ['外国人材紹介', '特定技能・受入支援', '生活・定着伴走', 'ネパール現地連携'];
-                    $categoryPillsEn = ['Global Recruitment', 'SSW Onboarding', 'Living & Retention', 'Nepali Network'];
+                $themeClasses = ['theme-blue', 'theme-emerald', 'theme-indigo', 'theme-teal'];
+                $categoryPillsJa = ['外国人材紹介', '特定技能・受入支援', '生活・定着伴走', 'ネパール現地連携'];
+                $categoryPillsEn = ['Global Recruitment', 'SSW Onboarding', 'Living & Retention', 'Nepali Network'];
                 @endphp
                 @foreach($services as $index => $service)
                 @php
-                    $theme = $themeClasses[$index % count($themeClasses)];
-                    $catJa = $categoryPillsJa[$index % count($categoryPillsJa)];
-                    $catEn = $categoryPillsEn[$index % count($categoryPillsEn)];
-                    $numLabel = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                $theme = $themeClasses[$index % count($themeClasses)];
+                $catJa = $categoryPillsJa[$index % count($categoryPillsJa)];
+                $catEn = $categoryPillsEn[$index % count($categoryPillsEn)];
+                $numLabel = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
                 @endphp
                 <div class="service-card" id="service-card-{{ $service->id }}">
                     <div class="service-card-top">
                         <div class="service-icon-wrap {{ $theme }}">
                             @if(strtolower(trim($service->icon ?? '')) === 'users')
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
                             @elseif(strtolower(trim($service->icon ?? '')) === 'award' || strtolower(trim($service->icon ?? '')) === 'shield')
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="6" />
+                                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                            </svg>
                             @elseif(strtolower(trim($service->icon ?? '')) === 'heart-handshake' || strtolower(trim($service->icon ?? '')) === 'heart')
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                <path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" />
+                            </svg>
                             @elseif(strtolower(trim($service->icon ?? '')) === 'globe')
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                                <path d="M2 12h20" />
+                            </svg>
                             @else
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                            </svg>
                             @endif
                         </div>
                         <div class="service-badge-row">
@@ -569,180 +601,180 @@
             </div>
 
             @if(isset($vacancies) && $vacancies->count() > 0)
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; margin-top: 36px;">
-                    @foreach($vacancies as $v)
-                        @php
-                            $empLabelJa = '正社員';
-                            $empLabelEn = 'Full-Time';
-                            if ($v->employment_type === 'contract') {
-                                $empLabelJa = '契約社員';
-                                $empLabelEn = 'Contract';
-                            } else if ($v->employment_type === 'part_time') {
-                                $empLabelJa = 'パート・アルバイト';
-                                $empLabelEn = 'Part-Time';
-                            } else if ($v->employment_type === 'internship') {
-                                $empLabelJa = 'インターン';
-                                $empLabelEn = 'Internship';
-                            }
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; margin-top: 36px;">
+                @foreach($vacancies as $v)
+                @php
+                $empLabelJa = '正社員';
+                $empLabelEn = 'Full-Time';
+                if ($v->employment_type === 'contract') {
+                $empLabelJa = '契約社員';
+                $empLabelEn = 'Contract';
+                } else if ($v->employment_type === 'part_time') {
+                $empLabelJa = 'パート・アルバイト';
+                $empLabelEn = 'Part-Time';
+                } else if ($v->employment_type === 'internship') {
+                $empLabelJa = 'インターン';
+                $empLabelEn = 'Internship';
+                }
 
-                            $salaryText = '';
-                            if ($v->salary_min && $v->salary_max) {
-                                $salaryText = '月給 ' . number_format($v->salary_min) . '円 〜 ' . number_format($v->salary_max) . '円';
-                            } else if ($v->salary_min) {
-                                $salaryText = '月給 ' . number_format($v->salary_min) . '円〜';
-                            } else if (!empty($v->salary_note_ja)) {
-                                $salaryText = $v->salary_note_ja;
-                            }
-                        @endphp
-                        <div class="career-card" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                            <div>
-                                <!-- Job Header Meta -->
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
-                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                                        <span style="font-family: monospace; font-size: 12px; font-weight: 700; background: #0F172A; color: #FFFFFF; padding: 3px 8px; border-radius: 4px;">
-                                            {{ $v->job_code }}
-                                        </span>
-                                        <span style="font-size: 12px; font-weight: 700; background: #0E7490; color: #FFFFFF; padding: 3px 10px; border-radius: 9999px;">
-                                            <span class="lang-ja">{{ $empLabelJa }}</span>
-                                            <span class="lang-en">{{ $empLabelEn }}</span>
-                                        </span>
-                                    </div>
-                                    <span style="font-size: 12px; color: #64748B; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                                        📍 {{ $v->location_ja ?? '東京都小金井市' }}
-                                    </span>
-                                </div>
-
-                                <!-- Job Title -->
-                                <h3 style="font-size: 20px; font-weight: 800; line-height: 1.4; color: #0F172A; margin: 0 0 8px 0;">
-                                    <a href="/careers/{{ $v->job_code }}" style="color: inherit; text-decoration: none;">
-                                        <span class="lang-ja">{{ $v->title_ja }}</span>
-                                        <span class="lang-en">{{ $v->title_en }}</span>
-                                    </a>
-                                </h3>
-
-                                @if(!empty($v->title_en) && $v->title_en !== $v->title_ja)
-                                    <p class="lang-ja" style="font-size: 13px; color: #64748B; margin: 0 0 16px 0; font-weight: 500;">
-                                        {{ $v->title_en }}
-                                    </p>
-                                @endif
-
-                                <!-- Salary & Work Conditions Highlight Box -->
-                                <div style="background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
-                                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
-                                        <span style="font-size: 12px; font-weight: 700; color: #047857; text-transform: uppercase;">
-                                            <span class="lang-ja">想定給与</span>
-                                            <span class="lang-en">Salary</span>
-                                        </span>
-                                        <span style="font-size: 18px; font-weight: 800; color: #0F172A;">
-                                            {{ $salaryText ?: ($v->salary_note_en ?? '経験・能力を考慮の上優遇') }}
-                                        </span>
-                                    </div>
-                                    <div style="font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px;">
-                                        @if(!empty($v->working_hours_ja))
-                                            <div>
-                                                <strong>🕒 <span class="lang-ja">勤務時間:</span><span class="lang-en">Hours:</span></strong>
-                                                <span class="lang-ja">{{ $v->working_hours_ja }}</span>
-                                                <span class="lang-en">{{ $v->working_hours_en ?? $v->working_hours_ja }}</span>
-                                            </div>
-                                        @endif
-                                        @if(!empty($v->holidays_ja))
-                                            <div>
-                                                <strong>🏖️ <span class="lang-ja">休日:</span><span class="lang-en">Holidays:</span></strong>
-                                                <span class="lang-ja">{{ $v->holidays_ja }}</span>
-                                                <span class="lang-en">{{ $v->holidays_en ?? $v->holidays_ja }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <!-- Key Responsibilities Teaser -->
-                                @if($v->responsibilities && $v->responsibilities->count() > 0)
-                                    <div style="margin-bottom: 18px;">
-                                        <div style="font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                            <span>📋</span>
-                                            <span class="lang-ja">主な仕事内容:</span>
-                                            <span class="lang-en">Key Responsibilities:</span>
-                                        </div>
-                                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #334155; line-height: 1.6;">
-                                            @foreach($v->responsibilities->take(3) as $r)
-                                                <li>
-                                                    <strong class="lang-ja">{{ $r->title_ja }}</strong>
-                                                    <strong class="lang-en">{{ $r->title_en ?? $r->title_ja }}</strong>
-                                                    @if(!empty($r->description_ja))
-                                                        <span class="lang-ja" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_ja, 50) }}</span>
-                                                        <span class="lang-en" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_en ?? $r->description_ja, 60) }}</span>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endif
-
-                                <!-- Requirements Badges -->
-                                @if($v->requirements && $v->requirements->count() > 0)
-                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;">
-                                        @foreach($v->requirements->take(3) as $req)
-                                            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: {{ $req->type === 'required' ? '#EFF6FF' : '#F8FAFC' }}; color: {{ $req->type === 'required' ? '#1E40AF' : '#475569' }}; border: 1px solid {{ $req->type === 'required' ? '#BFDBFE' : '#E2E8F0' }}; font-weight: 600;">
-                                                <span class="lang-ja">{{ \Illuminate\Support\Str::limit($req->description_ja, 28) }}</span>
-                                                <span class="lang-en">{{ \Illuminate\Support\Str::limit($req->description_en ?? $req->description_ja, 35) }}</span>
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                @endif
+                $salaryText = '';
+                if ($v->salary_min && $v->salary_max) {
+                $salaryText = '月給 ' . number_format($v->salary_min) . '円 〜 ' . number_format($v->salary_max) . '円';
+                } else if ($v->salary_min) {
+                $salaryText = '月給 ' . number_format($v->salary_min) . '円〜';
+                } else if (!empty($v->salary_note_ja)) {
+                $salaryText = $v->salary_note_ja;
+                }
+                @endphp
+                <div class="career-card" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div>
+                        <!-- Job Header Meta -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                <span style="font-family: monospace; font-size: 12px; font-weight: 700; background: #0F172A; color: #FFFFFF; padding: 3px 8px; border-radius: 4px;">
+                                    {{ $v->job_code }}
+                                </span>
+                                <span style="font-size: 12px; font-weight: 700; background: #0E7490; color: #FFFFFF; padding: 3px 10px; border-radius: 9999px;">
+                                    <span class="lang-ja">{{ $empLabelJa }}</span>
+                                    <span class="lang-en">{{ $empLabelEn }}</span>
+                                </span>
                             </div>
+                            <span style="font-size: 12px; color: #64748B; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                📍 {{ $v->location_ja ?? '東京都小金井市' }}
+                            </span>
+                        </div>
 
-                            <!-- Action Buttons -->
-                            <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
-                                <a href="/careers/{{ $v->job_code }}" class="btn-primary" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; text-decoration: none;">
-                                    <span class="lang-ja">詳細・要件を見る</span>
-                                    <span class="lang-en">View Details</span>
-                                    <span>→</span>
-                                </a>
-                                <button type="button" class="btn-outline" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; font-weight: 700; border-color: #0E7490; color: #0E7490;" onclick="openQuickApplyModal('{{ $v->job_code }}', '{{ addslashes($v->title_ja) }}')">
-                                    <span class="lang-ja">簡単応募</span>
-                                    <span class="lang-en">Apply Now</span>
-                                </button>
+                        <!-- Job Title -->
+                        <h3 style="font-size: 20px; font-weight: 800; line-height: 1.4; color: #0F172A; margin: 0 0 8px 0;">
+                            <a href="/careers/{{ $v->job_code }}" style="color: inherit; text-decoration: none;">
+                                <span class="lang-ja">{{ $v->title_ja }}</span>
+                                <span class="lang-en">{{ $v->title_en }}</span>
+                            </a>
+                        </h3>
+
+                        @if(!empty($v->title_en) && $v->title_en !== $v->title_ja)
+                        <p class="lang-ja" style="font-size: 13px; color: #64748B; margin: 0 0 16px 0; font-weight: 500;">
+                            {{ $v->title_en }}
+                        </p>
+                        @endif
+
+                        <!-- Salary & Work Conditions Highlight Box -->
+                        <div style="background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
+                                <span style="font-size: 12px; font-weight: 700; color: #047857; text-transform: uppercase;">
+                                    <span class="lang-ja">想定給与</span>
+                                    <span class="lang-en">Salary</span>
+                                </span>
+                                <span style="font-size: 18px; font-weight: 800; color: #0F172A;">
+                                    {{ $salaryText ?: ($v->salary_note_en ?? '経験・能力を考慮の上優遇') }}
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px;">
+                                @if(!empty($v->working_hours_ja))
+                                <div>
+                                    <strong>🕒 <span class="lang-ja">勤務時間:</span><span class="lang-en">Hours:</span></strong>
+                                    <span class="lang-ja">{{ $v->working_hours_ja }}</span>
+                                    <span class="lang-en">{{ $v->working_hours_en ?? $v->working_hours_ja }}</span>
+                                </div>
+                                @endif
+                                @if(!empty($v->holidays_ja))
+                                <div>
+                                    <strong>🏖️ <span class="lang-ja">休日:</span><span class="lang-en">Holidays:</span></strong>
+                                    <span class="lang-ja">{{ $v->holidays_ja }}</span>
+                                    <span class="lang-en">{{ $v->holidays_en ?? $v->holidays_ja }}</span>
+                                </div>
+                                @endif
                             </div>
                         </div>
-                    @endforeach
-                </div>
 
-                <!-- Section Footer Banner -->
-                <div style="margin-top: 40px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
-                    <div>
-                        <h4 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0;">
-                            <span class="lang-ja">新卒・中途・多文化共生に関心のある方のご応募をお待ちしております</span>
-                            <span class="lang-en">We Welcome New Graduates, Mid-Career Candidates & Global Mindsets</span>
-                        </h4>
-                        <p style="font-size: 13px; color: #64748B; margin: 0;">
-                            <span class="lang-ja">就労ビザ（技術・人文知識・国際業務）の更新・変更手続き支援、社会保険完備、アットホームな職場環境です。</span>
-                            <span class="lang-en">Visa renewal support, full social insurance coverage, and an inclusive, multicultural office culture.</span>
-                        </p>
+                        <!-- Key Responsibilities Teaser -->
+                        @if($v->responsibilities && $v->responsibilities->count() > 0)
+                        <div style="margin-bottom: 18px;">
+                            <div style="font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                <span>📋</span>
+                                <span class="lang-ja">主な仕事内容:</span>
+                                <span class="lang-en">Key Responsibilities:</span>
+                            </div>
+                            <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #334155; line-height: 1.6;">
+                                @foreach($v->responsibilities->take(3) as $r)
+                                <li>
+                                    <strong class="lang-ja">{{ $r->title_ja }}</strong>
+                                    <strong class="lang-en">{{ $r->title_en ?? $r->title_ja }}</strong>
+                                    @if(!empty($r->description_ja))
+                                    <span class="lang-ja" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_ja, 50) }}</span>
+                                    <span class="lang-en" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_en ?? $r->description_ja, 60) }}</span>
+                                    @endif
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        <!-- Requirements Badges -->
+                        @if($v->requirements && $v->requirements->count() > 0)
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;">
+                            @foreach($v->requirements->take(3) as $req)
+                            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: {{ $req->type === 'required' ? '#EFF6FF' : '#F8FAFC' }}; color: {{ $req->type === 'required' ? '#1E40AF' : '#475569' }}; border: 1px solid {{ $req->type === 'required' ? '#BFDBFE' : '#E2E8F0' }}; font-weight: 600;">
+                                <span class="lang-ja">{{ \Illuminate\Support\Str::limit($req->description_ja, 28) }}</span>
+                                <span class="lang-en">{{ \Illuminate\Support\Str::limit($req->description_en ?? $req->description_ja, 35) }}</span>
+                            </span>
+                            @endforeach
+                        </div>
+                        @endif
                     </div>
-                    <div style="display: flex; gap: 12px;">
-                        <a href="/careers" class="btn-primary" style="text-decoration: none; padding: 10px 20px; font-size: 14px;">
-                            <span class="lang-ja">全求人ポータルを見る</span>
-                            <span class="lang-en">Browse Careers Portal</span>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                        <a href="/careers/{{ $v->job_code }}" class="btn-primary" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; text-decoration: none;">
+                            <span class="lang-ja">詳細・要件を見る</span>
+                            <span class="lang-en">View Details</span>
                             <span>→</span>
                         </a>
+                        <button type="button" class="btn-outline" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; font-weight: 700; border-color: #0E7490; color: #0E7490;" onclick="openQuickApplyModal('{{ $v->job_code }}', '{{ addslashes($v->title_ja) }}')">
+                            <span class="lang-ja">簡単応募</span>
+                            <span class="lang-en">Apply Now</span>
+                        </button>
                     </div>
                 </div>
-            @else
-                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 32px;">
-                    <div style="font-size: 42px; margin-bottom: 12px;">💼</div>
-                    <h3 style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 8px 0;">
-                        <span class="lang-ja">現在、公開中の求人情報は準備中です</span>
-                        <span class="lang-en">No Open Postings at This Moment</span>
-                    </h3>
-                    <p style="font-size: 14px; color: #64748B; max-width: 600px; margin: 0 auto 20px auto;">
-                        <span class="lang-ja">MIRANSHでは、海外人材コーディネーターや語学力を活かした事務職のオープンポジションを随時募集しています。カジュアル面談やお問い合わせもお気軽にどうぞ。</span>
-                        <span class="lang-en">We are always open to hearing from passionate coordinators and multicultural professionals. Feel free to reach out via our contact form.</span>
+                @endforeach
+            </div>
+
+            <!-- Section Footer Banner -->
+            <div style="margin-top: 40px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0;">
+                        <span class="lang-ja">新卒・中途・多文化共生に関心のある方のご応募をお待ちしております</span>
+                        <span class="lang-en">We Welcome New Graduates, Mid-Career Candidates & Global Mindsets</span>
+                    </h4>
+                    <p style="font-size: 13px; color: #64748B; margin: 0;">
+                        <span class="lang-ja">就労ビザ（技術・人文知識・国際業務）の更新・変更手続き支援、社会保険完備、アットホームな職場環境です。</span>
+                        <span class="lang-en">Visa renewal support, full social insurance coverage, and an inclusive, multicultural office culture.</span>
                     </p>
-                    <a href="#contact" class="btn-primary" style="text-decoration: none; display: inline-flex;">
-                        <span class="lang-ja">採用に関するお問い合わせ</span>
-                        <span class="lang-en">Contact Hiring Team</span>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <a href="/careers" class="btn-primary" style="text-decoration: none; padding: 10px 20px; font-size: 14px;">
+                        <span class="lang-ja">全求人ポータルを見る</span>
+                        <span class="lang-en">Browse Careers Portal</span>
+                        <span>→</span>
                     </a>
                 </div>
+            </div>
+            @else
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 32px;">
+                <div style="font-size: 42px; margin-bottom: 12px;">💼</div>
+                <h3 style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 8px 0;">
+                    <span class="lang-ja">現在、公開中の求人情報は準備中です</span>
+                    <span class="lang-en">No Open Postings at This Moment</span>
+                </h3>
+                <p style="font-size: 14px; color: #64748B; max-width: 600px; margin: 0 auto 20px auto;">
+                    <span class="lang-ja">MIRANSHでは、海外人材コーディネーターや語学力を活かした事務職のオープンポジションを随時募集しています。カジュアル面談やお問い合わせもお気軽にどうぞ。</span>
+                    <span class="lang-en">We are always open to hearing from passionate coordinators and multicultural professionals. Feel free to reach out via our contact form.</span>
+                </p>
+                <a href="#contact" class="btn-primary" style="text-decoration: none; display: inline-flex;">
+                    <span class="lang-ja">採用に関するお問い合わせ</span>
+                    <span class="lang-en">Contact Hiring Team</span>
+                </a>
+            </div>
             @endif
         </div>
     </section>
@@ -766,12 +798,12 @@
 
             <!-- FAQ Filter & Search Toolbar -->
             @php
-                $faqCategories = $faqs->map(function($f) {
-                    return [
-                        'ja' => $f->category_ja,
-                        'en' => $f->category_en ?: $f->category_ja
-                    ];
-                })->unique('ja');
+            $faqCategories = $faqs->map(function($f) {
+            return [
+            'ja' => $f->category_ja,
+            'en' => $f->category_en ?: $f->category_ja
+            ];
+            })->unique('ja');
             @endphp
 
             <div style="margin-bottom: 28px;">
@@ -792,13 +824,12 @@
 
                     <!-- Live Keyword Search -->
                     <div style="position: relative; width: 100%; max-width: 280px;">
-                        <input 
-                            type="text" 
-                            id="frontend-faq-search" 
-                            oninput="searchFrontendFaqs()" 
-                            placeholder="FAQを検索..." 
-                            style="width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #CBD5E1; border-radius: 20px; font-size: 13px; outline: none; background: #FFFFFF;"
-                        >
+                        <input
+                            type="text"
+                            id="frontend-faq-search"
+                            oninput="searchFrontendFaqs()"
+                            placeholder="FAQを検索..."
+                            style="width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #CBD5E1; border-radius: 20px; font-size: 13px; outline: none; background: #FFFFFF;">
                         <span style="position: absolute; left: 12px; top: 9px; color: #94A3B8; font-size: 13px;">🔍</span>
                     </div>
                 </div>
@@ -941,10 +972,10 @@
                 <div>
                     <!-- Google Maps Embed for Higashicho, Koganei-shi, Tokyo -->
                     <div class="map-container">
-                        <iframe 
-                            src="https://maps.google.com/maps?q=35.6983,139.5240&hl=ja&z=16&output=embed" 
+                        <iframe
+                            src="https://maps.google.com/maps?q=35.6983,139.5240&hl=ja&z=16&output=embed"
                             title="MIRANSH LLC Headquarters Map"
-                            loading="lazy" 
+                            loading="lazy"
                             allowfullscreen>
                         </iframe>
                     </div>
@@ -1021,7 +1052,9 @@
                     <div class="contact-cards-list">
                         <div class="contact-detail-card">
                             <div class="contact-detail-icon">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
                             </div>
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">お電話でのお問い合わせ</span><span class="lang-en">Telephone Hotline</span></div>
@@ -1031,7 +1064,9 @@
 
                         <div class="contact-detail-card">
                             <div class="contact-detail-icon">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
                             </div>
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">メールでのお問い合わせ</span><span class="lang-en">Email Address</span></div>
@@ -1041,7 +1076,10 @@
 
                         <div class="contact-detail-card">
                             <div class="contact-detail-icon">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
                             </div>
                             <div>
                                 <div class="contact-detail-label"><span class="lang-ja">本店所在地</span><span class="lang-en">Office Location</span></div>
@@ -1150,61 +1188,268 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
     <footer>
         <div class="container">
+
             <div class="footer-grid">
+
+                {{-- Company Information --}}
                 <div>
+
                     <div class="brand-wrapper" style="margin-bottom: 14px;">
-                        <img src="/images/logo-icon.png" alt="MIRANSH" class="brand-logo-img" style="width: 38px; height: 38px;">
+
+                        <img
+                            src="/images/logo-icon.png"
+                            alt="MIRANSH"
+                            class="brand-logo-img"
+                            style="width: 38px; height: 38px;">
+
                         <div class="footer-brand-title">
-                            <span class="lang-ja">{{ $company->name_ja ?? 'MIRANSH合同会社' }}</span>
-                            <span class="lang-en">{{ $company->name_en ?? 'MIRANSH LLC' }}</span>
+
+                            <span class="lang-ja">
+                                {{ $company->name_ja ?? 'MIRANSH合同会社' }}
+                            </span>
+
+                            <span class="lang-en">
+                                {{ $company->name_en ?? 'MIRANSH LLC' }}
+                            </span>
+
                         </div>
+
                     </div>
+
+
                     <p class="footer-desc">
-                        <span class="lang-ja">{{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋。' }}</span>
-                        <span class="lang-en">{{ $company->tagline_en ?? 'Bridging Japanese Enterprises and Global Talent with Trust.' }}</span>
+
+                        <span class="lang-ja">
+                            {{ $company->tagline_ja ?? '日本企業と海外人材をつなぐ、信頼の架け橋。' }}
+                        </span>
+
+                        <span class="lang-en">
+                            {{ $company->tagline_en ?? 'Bridging Japanese Enterprises and Global Talent with Trust.' }}
+                        </span>
+
                     </p>
+
+
                     <div class="footer-licence-badge">
-                        {{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }} | 法人番号: {{ $company->corporate_number ?? '5012403006691' }}
+
+                        {{ $company->license ?? '有料職業紹介事業許可：13-ユ-319558' }}
+
+                        |
+
+                        法人番号:
+                        {{ $company->corporate_number ?? '5012403006691' }}
+
                     </div>
+
                 </div>
 
+
+                {{-- Quick Links --}}
                 <div>
-                    <h4 class="footer-col-title"><span class="lang-ja">クイックリンク</span><span class="lang-en">Quick Links</span></h4>
+
+                    <h4 class="footer-col-title">
+
+                        <span class="lang-ja">
+                            クイックリンク
+                        </span>
+
+                        <span class="lang-en">
+                            Quick Links
+                        </span>
+
+                    </h4>
+
+
                     <ul class="footer-links-list">
-                        <li><a href="#about"><span class="lang-ja">会社紹介</span><span class="lang-en">About MIRANSH</span></a></li>
-                        <li><a href="#services"><span class="lang-ja">事業案内</span><span class="lang-en">Services</span></a></li>
-                        <li><a href="#strengths"><span class="lang-ja">当社の強み</span><span class="lang-en">Our Strengths</span></a></li>
-                        <li><a href="#industries"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
-                        <li><a href="#stories"><span class="lang-ja">採用事例</span><span class="lang-en">Case Studies</span></a></li>
-                        <li><a href="#faq"><span class="lang-ja">FAQ・よくある質問</span><span class="lang-en">FAQ</span></a></li>
-                        <li><a href="#company"><span class="lang-ja">会社概要・アクセス</span><span class="lang-en">Profile & Location</span></a></li>
+
+                        <li>
+                            <a href="#about">
+                                <span class="lang-ja">会社紹介</span>
+                                <span class="lang-en">About MIRANSH</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#services">
+                                <span class="lang-ja">事業案内</span>
+                                <span class="lang-en">Services</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#strengths">
+                                <span class="lang-ja">当社の強み</span>
+                                <span class="lang-en">Our Strengths</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#industries">
+                                <span class="lang-ja">対応分野</span>
+                                <span class="lang-en">Industries</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#stories">
+                                <span class="lang-ja">採用事例</span>
+                                <span class="lang-en">Case Studies</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#faq">
+                                <span class="lang-ja">FAQ・よくある質問</span>
+                                <span class="lang-en">FAQ</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#company">
+                                <span class="lang-ja">会社概要・アクセス</span>
+                                <span class="lang-en">Profile & Location</span>
+                            </a>
+                        </li>
+
                     </ul>
+
                 </div>
 
+
+                {{-- Contact Information --}}
                 <div>
-                    <h4 class="footer-col-title"><span class="lang-ja">お問い合わせ先</span><span class="lang-en">Contact Info</span></h4>
-                    <div style="font-size: 13px; line-height: 1.8; color: #94A3B8;">
-                        <p><strong>TEL:</strong> {{ $company->phone ?? '042-409-8256' }}</p>
-                        <p><strong>Email:</strong> {{ $company->email ?? 'info@miransh.jp' }}</p>
-                        <p style="margin-top: 8px;">
-                            <span class="lang-ja">{{ $company->address_ja }}</span>
-                            <span class="lang-en">{{ $company->address_en }}</span>
+
+                    <h4 class="footer-col-title">
+
+                        <span class="lang-ja">
+                            お問い合わせ先
+                        </span>
+
+                        <span class="lang-en">
+                            Contact Info
+                        </span>
+
+                    </h4>
+
+
+                    <div
+                        style="
+                        font-size: 13px;
+                        line-height: 1.8;
+                        color: #94A3B8;
+                    ">
+
+                        {{-- Telephone --}}
+                        <p>
+
+                            <strong>TEL:</strong>
+
+                            {{ $company->phone ?? '042-409-8256' }}
+
                         </p>
+
+
+                        {{-- Email --}}
+                        <p>
+
+                            <strong>Email:</strong>
+
+                            {{ $company->email ?? 'info@miransh.jp' }}
+
+                        </p>
+
+
+                        {{-- Address --}}
+                        <p style="margin-top: 8px;">
+
+                            <span class="lang-ja">
+
+                                {{ $company->address_ja ?? '東京都小金井市' }}
+
+                            </span>
+
+                            <span class="lang-en">
+
+                                {{ $company->address_en ?? 'Koganei-shi, Tokyo, Japan' }}
+
+                            </span>
+
+                        </p>
+
+
+                        {{-- Company Capital --}}
+                        <div
+                            class="mt-3 p-2 border rounded fw-bold">
+
+                            <div class="lang-ja">
+
+                                <span class="fw-bold">
+                                    資本金：
+                                </span>
+
+                                <span class="fw-bolder fs-6">
+                                    500,000円
+                                </span>
+
+                            </div>
+
+
+                            <div class="lang-en">
+
+                                <span class="fw-bold">
+                                    Capital:
+                                </span>
+
+                                <span class="fw-bolder fs-6">
+                                    ¥500,000
+                                </span>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 </div>
+
             </div>
 
+
+            {{-- Footer Bottom --}}
             <div class="footer-bottom">
+
                 <div>
-                    &copy; {{ date('Y') }} {{ $company->name_ja ?? 'MIRANSH合同会社' }} (MIRANSH LLC). All Rights Reserved.
+
+                    &copy; {{ date('Y') }}
+
+                    {{ $company->name_ja ?? 'MIRANSH合同会社' }}
+
+                    (MIRANSH LLC).
+
+                    All Rights Reserved.
+
                 </div>
+
+
                 <div>
-                    <!-- <a href="{{ route('admin.login') }}" style="color: #64748B; font-size: 11px;">管理者ログイン (Admin Login)</a> -->
+
+                    <!-- Admin Login -->
+
+                    <!--
+                <a
+                    href="{{ route('admin.login') }}"
+                    style="color: #64748B; font-size: 11px;"
+                >
+                    管理者ログイン (Admin Login)
+                </a>
+                -->
+
                 </div>
+
             </div>
+
         </div>
     </footer>
 
@@ -1239,7 +1484,9 @@
                     </div>
                 </div>
                 <button class="sakana-btn-close" onclick="toggleSakanaChat()" aria-label="Close Chat">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
 
@@ -1289,7 +1536,9 @@
             <div class="sakana-chat-input-wrap">
                 <input type="text" id="sakana-user-input" class="sakana-input-field" placeholder="質問を入力してください (例: 介護の採用要件は？)" onkeydown="handleSakanaKey(event)">
                 <button id="sakana-btn-send" class="sakana-btn-send" onclick="sendSakanaMessage()" aria-label="Send">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -1337,7 +1586,7 @@
             }
             try {
                 localStorage.setItem('miransh_lang', lang);
-            } catch(e) {}
+            } catch (e) {}
         }
 
         (function() {
@@ -1346,7 +1595,7 @@
                 if (savedLang === 'en' || savedLang === 'ja') {
                     setLanguage(savedLang);
                 }
-            } catch(e) {}
+            } catch (e) {}
         })();
 
         /* ===================================================
@@ -1402,7 +1651,10 @@
             msgBody.appendChild(userMsgEl);
             msgBody.scrollTop = msgBody.scrollHeight;
 
-            sakanaChatHistory.push({ role: 'user', content: message });
+            sakanaChatHistory.push({
+                role: 'user',
+                content: message
+            });
 
             // Show Typing Indicator
             const typingEl = document.createElement('div');
@@ -1423,7 +1675,7 @@
             try {
                 const response = await fetch('/api/ai/chat', {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
@@ -1439,7 +1691,7 @@
 
                 const botMsgEl = document.createElement('div');
                 botMsgEl.className = 'sakana-msg bot';
-                
+
                 const formattedReply = renderMarkdown(data.reply || 'ご質問ありがとうございます。詳細につきましてはMIRANSH担当者よりご案内いたします。');
                 const providerBadge = 'MIRANSH AI';
 
@@ -1454,7 +1706,10 @@
                 msgBody.scrollTop = msgBody.scrollHeight;
 
                 if (data.reply) {
-                    sakanaChatHistory.push({ role: 'assistant', content: data.reply });
+                    sakanaChatHistory.push({
+                        role: 'assistant',
+                        content: data.reply
+                    });
                 }
             } catch (err) {
                 console.error('Sakana Chat Error:', err);
@@ -1481,7 +1736,9 @@
             toggleSakanaChat();
             const contactSection = document.getElementById('contact');
             if (contactSection) {
-                contactSection.scrollIntoView({ behavior: 'smooth' });
+                contactSection.scrollIntoView({
+                    behavior: 'smooth'
+                });
                 const messageTextarea = document.getElementById('input-message');
                 if (messageTextarea && sakanaChatHistory.length > 0) {
                     const lastUserMsg = sakanaChatHistory.filter(m => m.role === 'user').pop();
@@ -1494,8 +1751,16 @@
         }
 
         function escapeHtml(text) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) {
+                return map[m];
+            });
         }
 
         function renderMarkdown(md) {
@@ -1655,4 +1920,5 @@
         </div>
     </div>
 </body>
+
 </html>
