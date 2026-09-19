@@ -85,6 +85,7 @@
                 <li><a href="#strengths" class="nav-link"><span class="lang-ja">当社の強み</span><span class="lang-en">Strengths</span></a></li>
                 <li><a href="#industries" class="nav-link"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
                 <li><a href="#stories" class="nav-link"><span class="lang-ja">採用事例</span><span class="lang-en">Stories</span></a></li>
+                <li><a href="#careers" class="nav-link"><span class="lang-ja">自社採用</span><span class="lang-en">Careers</span></a></li>
                 <li><a href="#faq" class="nav-link"><span class="lang-ja">FAQ</span><span class="lang-en">FAQ</span></a></li>
                 <li><a href="#company" class="nav-link"><span class="lang-ja">会社概要</span><span class="lang-en">Profile</span></a></li>
                 <li><a href="#vision" class="nav-link"><span class="lang-ja">代表挨拶</span><span class="lang-en">Message</span></a></li>
@@ -145,6 +146,11 @@
                 <a href="#stories" class="mobile-nav-link" onclick="toggleMobileNav()">
                     <span class="lang-ja">📰 採用事例 (Stories)</span>
                     <span class="lang-en">📰 Case Studies</span>
+                    <span>→</span>
+                </a>
+                <a href="#careers" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">💼 自社採用情報 (Careers)</span>
+                    <span class="lang-en">💼 Careers at MIRANSH</span>
                     <span>→</span>
                 </a>
                 <a href="#faq" class="mobile-nav-link" onclick="toggleMobileNav()">
@@ -533,6 +539,211 @@
                 </div>
                 @endforeach
             </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         INTERNAL CAREERS SECTION (自社採用情報・求人一覧)
+         ※ MIRANSH合同会社本社の直接雇用求人
+    =================================================== -->
+    <section id="careers" class="section" style="background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge" style="background: rgba(14, 116, 144, 0.1); color: #0E7490; border: 1px solid rgba(14, 116, 144, 0.25);">
+                    <span class="lang-ja">自社採用情報 (MIRANSH本社)</span>
+                    <span class="lang-en">Careers at MIRANSH HQ</span>
+                </span>
+                <h2 class="section-title">
+                    <span class="lang-ja">MIRANSH 本社 採用情報・募集職種</span>
+                    <span class="lang-en">Internal Career Opportunities at MIRANSH</span>
+                </h2>
+                <p class="section-subtitle">
+                    <span class="lang-ja">日本企業と世界を結ぶ架け橋として、あなたの熱意と語学力をMIRANSHで活かしませんか？当社本社（東京都小金井市）で共に働く正社員メンバーを募集しています。</span>
+                    <span class="lang-en">Join our headquarters team in Koganei, Tokyo. We are hiring talented professionals passionate about connecting global talent and Japanese enterprises with trust and long-term care.</span>
+                </p>
+                <div style="display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 6px 16px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 9999px; font-size: 13px; color: #92400E; font-weight: 600;">
+                    <span>ℹ️</span>
+                    <span class="lang-ja">※ 本求人はMIRANSH合同会社での自社雇用です（クライアント企業への紹介案件ではありません）。</span>
+                    <span class="lang-en">* These openings are direct internal employment at MIRANSH LLC (not client vacancies).</span>
+                </div>
+            </div>
+
+            @if(isset($vacancies) && $vacancies->count() > 0)
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; margin-top: 36px;">
+                    @foreach($vacancies as $v)
+                        @php
+                            $empLabelJa = '正社員';
+                            $empLabelEn = 'Full-Time';
+                            if ($v->employment_type === 'contract') {
+                                $empLabelJa = '契約社員';
+                                $empLabelEn = 'Contract';
+                            } else if ($v->employment_type === 'part_time') {
+                                $empLabelJa = 'パート・アルバイト';
+                                $empLabelEn = 'Part-Time';
+                            } else if ($v->employment_type === 'internship') {
+                                $empLabelJa = 'インターン';
+                                $empLabelEn = 'Internship';
+                            }
+
+                            $salaryText = '';
+                            if ($v->salary_min && $v->salary_max) {
+                                $salaryText = '月給 ' . number_format($v->salary_min) . '円 〜 ' . number_format($v->salary_max) . '円';
+                            } else if ($v->salary_min) {
+                                $salaryText = '月給 ' . number_format($v->salary_min) . '円〜';
+                            } else if (!empty($v->salary_note_ja)) {
+                                $salaryText = $v->salary_note_ja;
+                            }
+                        @endphp
+                        <div class="career-card" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                            <div>
+                                <!-- Job Header Meta -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                        <span style="font-family: monospace; font-size: 12px; font-weight: 700; background: #0F172A; color: #FFFFFF; padding: 3px 8px; border-radius: 4px;">
+                                            {{ $v->job_code }}
+                                        </span>
+                                        <span style="font-size: 12px; font-weight: 700; background: #0E7490; color: #FFFFFF; padding: 3px 10px; border-radius: 9999px;">
+                                            <span class="lang-ja">{{ $empLabelJa }}</span>
+                                            <span class="lang-en">{{ $empLabelEn }}</span>
+                                        </span>
+                                    </div>
+                                    <span style="font-size: 12px; color: #64748B; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                        📍 {{ $v->location_ja ?? '東京都小金井市' }}
+                                    </span>
+                                </div>
+
+                                <!-- Job Title -->
+                                <h3 style="font-size: 20px; font-weight: 800; line-height: 1.4; color: #0F172A; margin: 0 0 8px 0;">
+                                    <a href="/careers/{{ $v->job_code }}" style="color: inherit; text-decoration: none;">
+                                        <span class="lang-ja">{{ $v->title_ja }}</span>
+                                        <span class="lang-en">{{ $v->title_en }}</span>
+                                    </a>
+                                </h3>
+
+                                @if(!empty($v->title_en) && $v->title_en !== $v->title_ja)
+                                    <p class="lang-ja" style="font-size: 13px; color: #64748B; margin: 0 0 16px 0; font-weight: 500;">
+                                        {{ $v->title_en }}
+                                    </p>
+                                @endif
+
+                                <!-- Salary & Work Conditions Highlight Box -->
+                                <div style="background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
+                                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
+                                        <span style="font-size: 12px; font-weight: 700; color: #047857; text-transform: uppercase;">
+                                            <span class="lang-ja">想定給与</span>
+                                            <span class="lang-en">Salary</span>
+                                        </span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #0F172A;">
+                                            {{ $salaryText ?: ($v->salary_note_en ?? '経験・能力を考慮の上優遇') }}
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px;">
+                                        @if(!empty($v->working_hours_ja))
+                                            <div>
+                                                <strong>🕒 <span class="lang-ja">勤務時間:</span><span class="lang-en">Hours:</span></strong>
+                                                <span class="lang-ja">{{ $v->working_hours_ja }}</span>
+                                                <span class="lang-en">{{ $v->working_hours_en ?? $v->working_hours_ja }}</span>
+                                            </div>
+                                        @endif
+                                        @if(!empty($v->holidays_ja))
+                                            <div>
+                                                <strong>🏖️ <span class="lang-ja">休日:</span><span class="lang-en">Holidays:</span></strong>
+                                                <span class="lang-ja">{{ $v->holidays_ja }}</span>
+                                                <span class="lang-en">{{ $v->holidays_en ?? $v->holidays_ja }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Key Responsibilities Teaser -->
+                                @if($v->responsibilities && $v->responsibilities->count() > 0)
+                                    <div style="margin-bottom: 18px;">
+                                        <div style="font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                            <span>📋</span>
+                                            <span class="lang-ja">主な仕事内容:</span>
+                                            <span class="lang-en">Key Responsibilities:</span>
+                                        </div>
+                                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #334155; line-height: 1.6;">
+                                            @foreach($v->responsibilities->take(3) as $r)
+                                                <li>
+                                                    <strong class="lang-ja">{{ $r->title_ja }}</strong>
+                                                    <strong class="lang-en">{{ $r->title_en ?? $r->title_ja }}</strong>
+                                                    @if(!empty($r->description_ja))
+                                                        <span class="lang-ja" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_ja, 50) }}</span>
+                                                        <span class="lang-en" style="color: #64748B;"> - {{ \Illuminate\Support\Str::limit($r->description_en ?? $r->description_ja, 60) }}</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <!-- Requirements Badges -->
+                                @if($v->requirements && $v->requirements->count() > 0)
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;">
+                                        @foreach($v->requirements->take(3) as $req)
+                                            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: {{ $req->type === 'required' ? '#EFF6FF' : '#F8FAFC' }}; color: {{ $req->type === 'required' ? '#1E40AF' : '#475569' }}; border: 1px solid {{ $req->type === 'required' ? '#BFDBFE' : '#E2E8F0' }}; font-weight: 600;">
+                                                <span class="lang-ja">{{ \Illuminate\Support\Str::limit($req->description_ja, 28) }}</span>
+                                                <span class="lang-en">{{ \Illuminate\Support\Str::limit($req->description_en ?? $req->description_ja, 35) }}</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                                <a href="/careers/{{ $v->job_code }}" class="btn-primary" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; text-decoration: none;">
+                                    <span class="lang-ja">詳細・要件を見る</span>
+                                    <span class="lang-en">View Details</span>
+                                    <span>→</span>
+                                </a>
+                                <button type="button" class="btn-outline" style="flex: 1; text-align: center; justify-content: center; font-size: 14px; font-weight: 700; border-color: #0E7490; color: #0E7490;" onclick="openQuickApplyModal('{{ $v->job_code }}', '{{ addslashes($v->title_ja) }}')">
+                                    <span class="lang-ja">簡単応募</span>
+                                    <span class="lang-en">Apply Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Section Footer Banner -->
+                <div style="margin-top: 40px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 12px; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0;">
+                            <span class="lang-ja">新卒・中途・多文化共生に関心のある方のご応募をお待ちしております</span>
+                            <span class="lang-en">We Welcome New Graduates, Mid-Career Candidates & Global Mindsets</span>
+                        </h4>
+                        <p style="font-size: 13px; color: #64748B; margin: 0;">
+                            <span class="lang-ja">就労ビザ（技術・人文知識・国際業務）の更新・変更手続き支援、社会保険完備、アットホームな職場環境です。</span>
+                            <span class="lang-en">Visa renewal support, full social insurance coverage, and an inclusive, multicultural office culture.</span>
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <a href="/careers" class="btn-primary" style="text-decoration: none; padding: 10px 20px; font-size: 14px;">
+                            <span class="lang-ja">全求人ポータルを見る</span>
+                            <span class="lang-en">Browse Careers Portal</span>
+                            <span>→</span>
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 32px;">
+                    <div style="font-size: 42px; margin-bottom: 12px;">💼</div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 8px 0;">
+                        <span class="lang-ja">現在、公開中の求人情報は準備中です</span>
+                        <span class="lang-en">No Open Postings at This Moment</span>
+                    </h3>
+                    <p style="font-size: 14px; color: #64748B; max-width: 600px; margin: 0 auto 20px auto;">
+                        <span class="lang-ja">MIRANSHでは、海外人材コーディネーターや語学力を活かした事務職のオープンポジションを随時募集しています。カジュアル面談やお問い合わせもお気軽にどうぞ。</span>
+                        <span class="lang-en">We are always open to hearing from passionate coordinators and multicultural professionals. Feel free to reach out via our contact form.</span>
+                    </p>
+                    <a href="#contact" class="btn-primary" style="text-decoration: none; display: inline-flex;">
+                        <span class="lang-ja">採用に関するお問い合わせ</span>
+                        <span class="lang-en">Contact Hiring Team</span>
+                    </a>
+                </div>
+            @endif
         </div>
     </section>
 
@@ -1353,6 +1564,95 @@
                 noResults.style.display = (visibleCount === 0 && cards.length > 0) ? 'block' : 'none';
             }
         }
+
+        // --- QUICK APPLY MODAL LOGIC ---
+        function openQuickApplyModal(jobCode, jobTitle) {
+            document.getElementById('modal_apply_job_code').value = jobCode || '';
+            document.getElementById('modal_apply_job_code_badge').innerText = jobCode || '';
+            document.getElementById('modal_apply_job_title').innerText = jobTitle || '';
+            document.getElementById('quick-apply-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeQuickApplyModal() {
+            document.getElementById('quick-apply-modal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
     </script>
+
+    <!-- QUICK APPLY MODAL -->
+    <div id="quick-apply-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: #FFFFFF; width: 100%; max-width: 580px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="background: #0F172A; color: #FFFFFF; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span id="modal_apply_job_code_badge" style="font-family: monospace; font-size: 11px; background: #0E7490; color: #FFFFFF; padding: 2px 8px; border-radius: 4px; font-weight: 700;"></span>
+                    <h3 id="modal_apply_job_title" style="font-size: 17px; font-weight: 800; margin: 6px 0 0 0; color: #FFFFFF; line-height: 1.4;"></h3>
+                </div>
+                <button type="button" onclick="closeQuickApplyModal()" style="background: none; border: none; color: #94A3B8; font-size: 24px; cursor: pointer; padding: 4px; line-height: 1;">✕</button>
+            </div>
+
+            <form action="{{ route('careers.apply') }}" method="POST" style="overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                @csrf
+                <input type="hidden" name="job_code" id="modal_apply_job_code">
+
+                <div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #92400E; line-height: 1.5;">
+                    <strong>ℹ️ 自社求人エントリー:</strong> MIRANSH合同会社 本社（自社）の採用選考エントリーです。
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">お名前 (氏名) <span style="color: #DC2626;">*</span></label>
+                        <input type="text" name="applicant_name" required placeholder="山田 太郎 / RAM GIRI" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">フリガナ</label>
+                        <input type="text" name="name_kana" placeholder="ヤマダ タロウ" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">メールアドレス <span style="color: #DC2626;">*</span></label>
+                        <input type="email" name="email" required placeholder="sample@example.com" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">電話番号</label>
+                        <input type="tel" name="phone" placeholder="090-1234-5678" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">日本語能力 (JLPT)</label>
+                        <select name="japanese_level" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; background: #FFFFFF; box-sizing: border-box;">
+                            <option value="Native / 母国語">Native / 母国語</option>
+                            <option value="N1 合格">N1 合格</option>
+                            <option value="N2 合格" selected>N2 合格</option>
+                            <option value="N3 合格">N3 合格</option>
+                            <option value="N4 / N5 / 勉強中">N4 / N5 / 勉強中</option>
+                            <option value="BJT 400点以上">BJT 400点以上</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">現在の状況 / 在留資格</label>
+                        <input type="text" name="residence_status" placeholder="例: 就労中 (技人国), 留学ビザ 等" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">自己PR・職務経歴・ご質問</label>
+                    <textarea name="cover_letter" rows="3" placeholder="これまでの経験（事務、経理補助、語学力など）や入社希望時期をご自由にご記入ください。" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+                    <button type="button" onclick="closeQuickApplyModal()" style="padding: 10px 20px; border: 1px solid #CBD5E1; background: #FFFFFF; border-radius: 6px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer;">キャンセル</button>
+                    <button type="submit" style="padding: 10px 24px; border: none; background: #0E7490; color: #FFFFFF; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>応募を送信する</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

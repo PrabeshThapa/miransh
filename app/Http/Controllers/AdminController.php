@@ -11,6 +11,10 @@ use App\Models\Story;
 use App\Models\Faq;
 use App\Models\Inquiry;
 use App\Models\User;
+use App\Models\JobVacancy;
+use App\Models\JobResponsibility;
+use App\Models\JobRequirement;
+use App\Models\JobBenefit;
 
 class AdminController extends Controller
 {
@@ -102,6 +106,7 @@ class AdminController extends Controller
                 'services' => 'admin.services',
                 'stories' => 'admin.stories',
                 'faqs' => 'admin.faqs',
+                'vacancies' => 'admin.vacancies',
                 'inquiries' => 'admin.inquiries',
                 'ai' => 'admin.ai',
                 'password' => 'admin.password',
@@ -698,5 +703,330 @@ class AdminController extends Controller
             'size' => $size,
             'auto_saved' => $request->filled('target_field')
         ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+    }
+
+    /**
+     * Job Vacancies List View (MIRANSH Internal Hiring)
+     */
+    public function vacancies(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $query = JobVacancy::with(['responsibilities', 'requirements', 'benefits']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('q')) {
+            $q = '%' . $request->q . '%';
+            $query->where(function ($w) use ($q) {
+                $w->where('job_code', 'like', $q)
+                  ->orWhere('title_ja', 'like', $q)
+                  ->orWhere('title_en', 'like', $q)
+                  ->orWhere('location_ja', 'like', $q);
+            });
+        }
+
+        $vacancies = $query->orderBy('sort_order', 'asc')->orderBy('id', 'desc')->get();
+        $unreadCount = Inquiry::where('status', 'unread')->count();
+
+        // Statistics
+        $totalCount = JobVacancy::count();
+        $publishedCount = JobVacancy::where('status', 'published')->count();
+        $draftCount = JobVacancy::where('status', 'draft')->count();
+        $closedCount = JobVacancy::where('status', 'closed')->count();
+
+        return view('admin.vacancies', compact(
+            'vacancies',
+            'unreadCount',
+            'totalCount',
+            'publishedCount',
+            'draftCount',
+            'closedCount'
+        ));
+    }
+
+    /**
+     * Store new Job Vacancy
+     */
+    public function storeVacancy(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $request->validate([
+            'job_code' => 'required|string|max:50',
+            'title_ja' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'employment_type' => 'required|string|in:full_time,contract,part_time,internship',
+            'location_ja' => 'required|string|max:255',
+            'location_en' => 'required|string|max:255',
+        ]);
+
+        $status = $request->input('status', 'published');
+        $publishedAt = ($status === 'published') ? now() : null;
+
+        $vacancy = new JobVacancy();
+        $vacancy->job_code = trim($request->job_code);
+        $vacancy->title_ja = trim($request->title_ja);
+        $vacancy->title_en = trim($request->title_en);
+        $vacancy->employment_type = $request->employment_type;
+        $vacancy->location_ja = trim($request->location_ja);
+        $vacancy->location_en = trim($request->location_en);
+        $vacancy->salary_min = $request->filled('salary_min') ? (int) $request->salary_min : null;
+        $vacancy->salary_max = $request->filled('salary_max') ? (int) $request->salary_max : null;
+        $vacancy->salary_type = $request->input('salary_type', 'monthly');
+        $vacancy->salary_note_ja = $request->salary_note_ja;
+        $vacancy->salary_note_en = $request->salary_note_en;
+        $vacancy->working_hours_ja = $request->working_hours_ja;
+        $vacancy->working_hours_en = $request->working_hours_en;
+        $vacancy->holidays_ja = $request->holidays_ja;
+        $vacancy->holidays_en = $request->holidays_en;
+        $vacancy->description_ja = $request->description_ja;
+        $vacancy->description_en = $request->description_en;
+        $vacancy->status = $status;
+        $vacancy->sort_order = (int) ($request->sort_order ?? 0);
+        $vacancy->published_at = $publishedAt;
+        $vacancy->save();
+
+        $this->syncVacancyRelations($vacancy, $request);
+
+        return redirect()->route('admin.vacancies')->with('success', '新規自社求人（' . $vacancy->job_code . '）を正常に登録しました。');
+    }
+
+    /**
+     * Update existing Job Vacancy
+     */
+    public function updateVacancy(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $vacancy = JobVacancy::findOrFail($id);
+
+        $request->validate([
+            'job_code' => 'required|string|max:50',
+            'title_ja' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'employment_type' => 'required|string|in:full_time,contract,part_time,internship',
+            'location_ja' => 'required|string|max:255',
+            'location_en' => 'required|string|max:255',
+        ]);
+
+        $status = $request->input('status', $vacancy->status);
+        if ($status === 'published' && !$vacancy->published_at) {
+            $vacancy->published_at = now();
+        } else if ($status === 'closed' && !$vacancy->closed_at) {
+            $vacancy->closed_at = now();
+        }
+
+        $vacancy->job_code = trim($request->job_code);
+        $vacancy->title_ja = trim($request->title_ja);
+        $vacancy->title_en = trim($request->title_en);
+        $vacancy->employment_type = $request->employment_type;
+        $vacancy->location_ja = trim($request->location_ja);
+        $vacancy->location_en = trim($request->location_en);
+        $vacancy->salary_min = $request->filled('salary_min') ? (int) $request->salary_min : null;
+        $vacancy->salary_max = $request->filled('salary_max') ? (int) $request->salary_max : null;
+        $vacancy->salary_type = $request->input('salary_type', $vacancy->salary_type);
+        $vacancy->salary_note_ja = $request->salary_note_ja;
+        $vacancy->salary_note_en = $request->salary_note_en;
+        $vacancy->working_hours_ja = $request->working_hours_ja;
+        $vacancy->working_hours_en = $request->working_hours_en;
+        $vacancy->holidays_ja = $request->holidays_ja;
+        $vacancy->holidays_en = $request->holidays_en;
+        $vacancy->description_ja = $request->description_ja;
+        $vacancy->description_en = $request->description_en;
+        $vacancy->status = $status;
+        $vacancy->sort_order = (int) ($request->sort_order ?? 0);
+        $vacancy->save();
+
+        $this->syncVacancyRelations($vacancy, $request);
+
+        return redirect()->route('admin.vacancies')->with('success', '求人情報（' . $vacancy->job_code . '）を更新しました。');
+    }
+
+    /**
+     * Helper to sync responsibilities, requirements, and benefits
+     */
+    private function syncVacancyRelations(JobVacancy $vacancy, Request $request)
+    {
+        // 1. Responsibilities
+        if ($request->has('responsibilities')) {
+            $vacancy->responsibilities()->delete();
+            $items = $request->input('responsibilities');
+            if (is_array($items)) {
+                $sort = 1;
+                foreach ($items as $item) {
+                    if (is_string($item)) {
+                        $parsed = json_decode($item, true);
+                        if ($parsed) $item = $parsed;
+                    }
+                    if (is_array($item) && (!empty($item['title_ja']) || !empty($item['description_ja']))) {
+                        $vacancy->responsibilities()->create([
+                            'title_ja' => $item['title_ja'] ?? '',
+                            'title_en' => $item['title_en'] ?? ($item['title_ja'] ?? ''),
+                            'description_ja' => $item['description_ja'] ?? '',
+                            'description_en' => $item['description_en'] ?? ($item['description_ja'] ?? ''),
+                            'sort_order' => $sort++,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 2. Requirements
+        if ($request->has('requirements')) {
+            $vacancy->requirements()->delete();
+            $items = $request->input('requirements');
+            if (is_array($items)) {
+                $sort = 1;
+                foreach ($items as $item) {
+                    if (is_string($item)) {
+                        $parsed = json_decode($item, true);
+                        if ($parsed) $item = $parsed;
+                    }
+                    if (is_array($item) && (!empty($item['description_ja']) || !empty($item['description_en']))) {
+                        $vacancy->requirements()->create([
+                            'type' => in_array($item['type'] ?? '', ['required', 'preferred']) ? $item['type'] : 'required',
+                            'description_ja' => $item['description_ja'] ?? '',
+                            'description_en' => $item['description_en'] ?? ($item['description_ja'] ?? ''),
+                            'sort_order' => $sort++,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 3. Benefits
+        if ($request->has('benefits')) {
+            $vacancy->benefits()->delete();
+            $items = $request->input('benefits');
+            if (is_array($items)) {
+                $sort = 1;
+                foreach ($items as $item) {
+                    if (is_string($item)) {
+                        $parsed = json_decode($item, true);
+                        if ($parsed) $item = $parsed;
+                    }
+                    if (is_array($item) && (!empty($item['title_ja']) || !empty($item['description_ja']))) {
+                        $vacancy->benefits()->create([
+                            'title_ja' => $item['title_ja'] ?? '',
+                            'title_en' => $item['title_en'] ?? ($item['title_ja'] ?? ''),
+                            'description_ja' => $item['description_ja'] ?? '',
+                            'description_en' => $item['description_en'] ?? ($item['description_ja'] ?? ''),
+                            'sort_order' => $sort++,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Toggle Vacancy Status (published / draft / closed)
+     */
+    public function toggleVacancyStatus(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $vacancy = JobVacancy::findOrFail($id);
+        $newStatus = $request->input('status');
+
+        if (!in_array($newStatus, ['published', 'draft', 'closed'])) {
+            $newStatus = ($vacancy->status === 'published') ? 'draft' : 'published';
+        }
+
+        $vacancy->status = $newStatus;
+        if ($newStatus === 'published' && !$vacancy->published_at) {
+            $vacancy->published_at = now();
+        } else if ($newStatus === 'closed') {
+            $vacancy->closed_at = now();
+        }
+        $vacancy->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => $vacancy->status,
+                'message' => 'Status updated to ' . $newStatus
+            ]);
+        }
+
+        return back()->with('success', '求人（' . $vacancy->job_code . '）のステータスを「' . $newStatus . '」に変更しました。');
+    }
+
+    /**
+     * Duplicate existing Vacancy
+     */
+    public function duplicateVacancy($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $original = JobVacancy::with(['responsibilities', 'requirements', 'benefits'])->findOrFail($id);
+
+        $copy = $original->replicate([
+            'published_at',
+            'closed_at',
+            'created_at',
+            'updated_at'
+        ]);
+        $copy->job_code = $original->job_code . '-COPY-' . rand(10, 99);
+        $copy->title_ja = $original->title_ja . ' (コピー)';
+        $copy->title_en = $original->title_en . ' (Copy)';
+        $copy->status = 'draft';
+        $copy->sort_order = $original->sort_order + 1;
+        $copy->save();
+
+        // Duplicate relationships
+        foreach ($original->responsibilities as $item) {
+            $newItem = $item->replicate(['job_vacancy_id']);
+            $newItem->job_vacancy_id = $copy->id;
+            $newItem->save();
+        }
+
+        foreach ($original->requirements as $item) {
+            $newItem = $item->replicate(['job_vacancy_id']);
+            $newItem->job_vacancy_id = $copy->id;
+            $newItem->save();
+        }
+
+        foreach ($original->benefits as $item) {
+            $newItem = $item->replicate(['job_vacancy_id']);
+            $newItem->job_vacancy_id = $copy->id;
+            $newItem->save();
+        }
+
+        return redirect()->route('admin.vacancies')->with('success', '求人「' . $original->job_code . '」を複製しました（下書きとして保存）。');
+    }
+
+    /**
+     * Delete Vacancy
+     */
+    public function deleteVacancy($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        $vacancy = JobVacancy::findOrFail($id);
+        $code = $vacancy->job_code;
+
+        // Delete cascade children
+        $vacancy->responsibilities()->delete();
+        $vacancy->requirements()->delete();
+        $vacancy->benefits()->delete();
+        $vacancy->delete();
+
+        return redirect()->route('admin.vacancies')->with('success', '自社求人（' . $code . '）を正常に削除しました。');
     }
 }

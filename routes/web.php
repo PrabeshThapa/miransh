@@ -9,6 +9,13 @@ use App\Http\Controllers\SakanaController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/services/{id}', [HomeController::class, 'serviceDetail'])->name('services.detail');
 Route::get('/stories/{id}', [HomeController::class, 'storyDetail'])->name('stories.detail');
+Route::get('/careers', [HomeController::class, 'careers'])->name('careers.index');
+Route::get('/jobs', [HomeController::class, 'careers']);
+Route::get('/recruitment', [HomeController::class, 'careers']);
+Route::get('/careers/{codeOrId}', [HomeController::class, 'careerDetail'])->name('careers.detail');
+Route::get('/jobs/{codeOrId}', [HomeController::class, 'careerDetail']);
+Route::post('/careers/apply', [HomeController::class, 'applyCareer'])->name('careers.apply');
+Route::post('/api/careers/apply', [HomeController::class, 'applyCareer']);
 Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [HomeController::class, 'robots'])->name('robots');
@@ -82,6 +89,15 @@ Route::prefix('admin')->group(function () {
     Route::get('/inquiries', [AdminController::class, 'inquiries'])->name('admin.inquiries');
     Route::post('/inquiries/{id}/status', [AdminController::class, 'updateInquiryStatus'])->name('admin.inquiries.status');
     Route::post('/inquiries/{id}/delete', [AdminController::class, 'deleteInquiry'])->name('admin.inquiries.delete');
+
+    // Job Vacancies (MIRANSH Internal Hiring)
+    Route::get('/vacancies', [AdminController::class, 'vacancies'])->name('admin.vacancies');
+    Route::post('/vacancies', [AdminController::class, 'storeVacancy'])->name('admin.vacancies.store');
+    Route::post('/vacancies/{id}', [AdminController::class, 'updateVacancy'])->name('admin.vacancies.update');
+    Route::post('/vacancies/{id}/update', [AdminController::class, 'updateVacancy']);
+    Route::post('/vacancies/{id}/status', [AdminController::class, 'toggleVacancyStatus'])->name('admin.vacancies.status');
+    Route::post('/vacancies/{id}/duplicate', [AdminController::class, 'duplicateVacancy'])->name('admin.vacancies.duplicate');
+    Route::post('/vacancies/{id}/delete', [AdminController::class, 'deleteVacancy'])->name('admin.vacancies.delete');
 
     // Password Management
     Route::get('/password', [AdminController::class, 'showPassword'])->name('admin.password');

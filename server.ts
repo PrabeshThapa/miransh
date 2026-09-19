@@ -357,8 +357,8 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                 <li><a href="${prefix}#services" class="nav-link"><span class="lang-ja">事業内容</span><span class="lang-en">Services</span></a></li>
                 <li><a href="${prefix}#strengths" class="nav-link"><span class="lang-ja">当社の強み</span><span class="lang-en">Strengths</span></a></li>
                 <li><a href="${prefix}#industries" class="nav-link"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
-                <li><a href="/careers" class="nav-link ${activePage === 'careers' ? 'active' : ''}"><span class="lang-ja">採用情報</span><span class="lang-en">Careers</span></a></li>
                 <li><a href="${prefix}#stories" class="nav-link"><span class="lang-ja">採用事例</span><span class="lang-en">Stories</span></a></li>
+                <li><a href="${prefix}#careers" class="nav-link ${activePage === 'careers' ? 'active' : ''}"><span class="lang-ja">自社採用</span><span class="lang-en">Careers</span></a></li>
                 <li><a href="${prefix}#faq" class="nav-link"><span class="lang-ja">FAQ</span><span class="lang-en">FAQ</span></a></li>
                 <li><a href="${prefix}#company" class="nav-link"><span class="lang-ja">会社概要</span><span class="lang-en">Profile</span></a></li>
                 <li><a href="${prefix}#vision" class="nav-link"><span class="lang-ja">代表挨拶</span><span class="lang-en">Message</span></a></li>
@@ -416,7 +416,7 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                     <span class="lang-en">🌐 Industries</span>
                     <span>→</span>
                 </a>
-                <a href="/careers" class="mobile-nav-link" onclick="toggleMobileNav()">
+                <a href="${prefix}#careers" class="mobile-nav-link" onclick="toggleMobileNav()">
                     <span class="lang-ja">👥 自社採用情報 (Careers)</span>
                     <span class="lang-en">👥 Careers at MIRANSH</span>
                     <span>→</span>
@@ -625,6 +625,7 @@ app.get('/', (req: Request, res: Response) => {
   const services = getServices();
   const stories = getStories();
   const faqs = getFaqs();
+  const vacancies = getVacancies(false);
 
   // Render Services Cards (Redesigned with SVG icons, pills, highlights, and CTA)
   let servicesHtml = '';
@@ -772,6 +773,148 @@ app.get('/', (req: Request, res: Response) => {
       </div>
     `;
   });
+
+  // Render Vacancies Cards
+  let vacanciesHtml = '';
+  if (vacancies.length === 0) {
+    vacanciesHtml = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: #FFFFFF; border-radius: 16px; border: 1px dashed #CBD5E1;">
+        <div style="font-size: 36px; margin-bottom: 12px;">🏢</div>
+        <h3 style="font-size: 18px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">
+          <span class="lang-ja">現在、募集中の公開求人はございません</span>
+          <span class="lang-en">No open vacancies at this moment</span>
+        </h3>
+        <p style="font-size: 14px; color: #64748B; max-width: 540px; margin: 0 auto 20px;">
+          <span class="lang-ja">MIRANSH合同会社では通年で人材を検討しております。採用についてのご相談はお問い合わせフォームよりお気軽にお送りください。</span>
+          <span class="lang-en">We consider qualified candidates year-round. Feel free to contact us regarding spontaneous applications.</span>
+        </p>
+        <a href="#contact" class="btn-secondary" style="display: inline-flex;">
+          <span class="lang-ja">採用に関するお問い合わせ</span>
+          <span class="lang-en">Contact About Careers</span>
+        </a>
+      </div>
+    `;
+  } else {
+    vacancies.forEach((v: any) => {
+      let respHtml = '';
+      if (v.responsibilities && v.responsibilities.length > 0) {
+        respHtml = '<ul class="service-highlights-list" style="margin-top: 14px;">';
+        v.responsibilities.slice(0, 4).forEach((r: any) => {
+          respHtml += `
+            <li class="service-highlight-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div>
+                <strong style="color: #0F172A; font-size: 13px;" class="lang-ja">${escapeHtml(r.title_ja)}</strong>
+                <strong style="color: #0F172A; font-size: 13px;" class="lang-en">${escapeHtml(r.title_en || r.title_ja)}</strong>
+                ${r.description_ja ? `<span style="display: block; font-size: 12px; color: #64748B;" class="lang-ja">${escapeHtml(r.description_ja)}</span>` : ''}
+                ${r.description_en ? `<span style="display: block; font-size: 12px; color: #64748B;" class="lang-en">${escapeHtml(r.description_en)}</span>` : ''}
+              </div>
+            </li>
+          `;
+        });
+        respHtml += '</ul>';
+      }
+
+      let reqHtml = '';
+      if (v.requirements && v.requirements.length > 0) {
+        reqHtml = '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;">';
+        v.requirements.slice(0, 3).forEach((reqItem: any) => {
+          const isReq = reqItem.type === 'required';
+          reqHtml += `
+            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${isReq ? '#EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;' : '#F8FAFC; color: #475569; border: 1px solid #E2E8F0;'}">
+              <span>${isReq ? '必須' : '歓迎'}</span>
+              <span class="lang-ja">${escapeHtml(reqItem.description_ja)}</span>
+              <span class="lang-en">${escapeHtml(reqItem.description_en || reqItem.description_ja)}</span>
+            </span>
+          `;
+        });
+        reqHtml += '</div>';
+      }
+
+      let salaryTextJa = v.salary_note_ja;
+      let salaryTextEn = v.salary_note_en;
+      if (!salaryTextJa && v.salary_min) {
+        salaryTextJa = `月給 ${v.salary_min.toLocaleString()}円` + (v.salary_max ? ` 〜 ${v.salary_max.toLocaleString()}円` : '〜');
+        salaryTextEn = `Monthly: ¥${v.salary_min.toLocaleString()}` + (v.salary_max ? ` - ¥${v.salary_max.toLocaleString()}` : '+');
+      }
+
+      const empTypeMap: Record<string, { ja: string; en: string }> = {
+        full_time: { ja: '正社員', en: 'Full-time' },
+        contract: { ja: '契約社員', en: 'Contract' },
+        part_time: { ja: 'パート・アルバイト', en: 'Part-time' },
+        internship: { ja: 'インターン', en: 'Internship' }
+      };
+      const empType = empTypeMap[v.employment_type] || { ja: '正社員', en: 'Full-time' };
+
+      vacanciesHtml += `
+        <div class="service-card" id="vacancy-card-${v.id}" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid #0284C7; position: relative; background: #FFFFFF;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span class="badge" style="background: #0284C7; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                            <span class="lang-ja">${escapeHtml(empType.ja)}</span>
+                            <span class="lang-en">${escapeHtml(empType.en)}</span>
+                        </span>
+                        <span style="font-size: 11px; font-family: monospace; font-weight: 700; color: #475569; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">
+                            ${escapeHtml(v.job_code || 'MIR-JOB')}
+                        </span>
+                    </div>
+                    <span style="font-size: 11px; color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                        <span class="lang-ja">募集中</span>
+                        <span class="lang-en">Hiring</span>
+                    </span>
+                </div>
+
+                <h3 class="service-card-title" style="font-size: 18px; line-height: 1.4; margin-bottom: 8px;">
+                    <span class="lang-ja">${escapeHtml(v.title_ja)}</span>
+                    <span class="lang-en">${escapeHtml(v.title_en || v.title_ja)}</span>
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 13px; color: #334155;">
+                    <div style="display: flex; align-items: flex-start; gap: 6px;">
+                        <span style="color: #0284C7;">📍</span>
+                        <div>
+                            <span class="lang-ja">${escapeHtml(v.location_ja)}</span>
+                            <span class="lang-en">${escapeHtml(v.location_en || v.location_ja)}</span>
+                        </div>
+                    </div>
+                    ${salaryTextJa ? `
+                    <div style="display: flex; align-items: flex-start; gap: 6px; font-weight: 700; color: #0F172A;">
+                        <span style="color: #F59E0B;">💴</span>
+                        <div>
+                            <span class="lang-ja">${escapeHtml(salaryTextJa)}</span>
+                            <span class="lang-en">${escapeHtml(salaryTextEn || salaryTextJa)}</span>
+                        </div>
+                    </div>` : ''}
+                </div>
+
+                <p class="service-card-desc" style="font-size: 13px; margin-bottom: 12px; line-height: 1.6; color: #475569;">
+                    <span class="lang-ja">${escapeHtml(v.description_ja?.slice(0, 140))}${v.description_ja?.length > 140 ? '...' : ''}</span>
+                    <span class="lang-en">${escapeHtml(v.description_en?.slice(0, 140) || '')}${v.description_en?.length > 140 ? '...' : ''}</span>
+                </p>
+
+                ${respHtml}
+                ${reqHtml}
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #E2E8F0; display: flex; gap: 10px; align-items: center;">
+                <a href="/careers/${v.job_code || v.id}" class="btn-service-link" style="flex: 1; text-align: center; justify-content: center; background: #0284C7; color: #FFFFFF; border-radius: 8px; padding: 9px 14px; text-decoration: none; font-weight: 700; font-size: 13px;">
+                    <span class="btn-label">
+                        <span class="lang-ja">募集要項・詳細</span>
+                        <span class="lang-en">View Details</span>
+                    </span>
+                    <span class="arrow-icon" style="color: #FFFFFF;">→</span>
+                </a>
+                <button type="button" class="btn-primary" onclick="openQuickApplyModal('${escapeHtml(v.job_code || String(v.id))}', '${escapeHtml(v.title_ja)}')" style="flex: 1; justify-content: center; font-size: 13px; padding: 9px 14px; border-radius: 8px; border: none; cursor: pointer; background: #0F172A; color: #FFFFFF; font-weight: 700;">
+                    <span class="lang-ja">簡単WEB応募</span>
+                    <span class="lang-en">Quick Apply</span>
+                </button>
+            </div>
+        </div>
+      `;
+    });
+  }
 
   const fullHtml = `<!DOCTYPE html>
 <html lang="ja">
@@ -1113,6 +1256,52 @@ app.get('/', (req: Request, res: Response) => {
                 </div>
                 <div class="stories-grid">
                     ${storiesHtml}
+                </div>
+            </div>
+        </section>
+
+        <!-- CAREERS / JOB OPENINGS SECTION (MIRANSH DIRECT EMPLOYMENT) -->
+        <section id="careers" class="section section-bg-white" style="border-top: 1px solid #E2E8F0;">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge" style="background: #E0F2FE; color: #0284C7; border: 1px solid #BAE6FD;">
+                        <span class="lang-ja">自社採用情報 / 求人票</span>
+                        <span class="lang-en">Internal Job Openings</span>
+                    </span>
+                    <h2 class="section-title">
+                        <span class="lang-ja">MIRANSH合同会社 自社採用情報</span>
+                        <span class="lang-en">Careers at MIRANSH LLC (Direct Hire)</span>
+                    </h2>
+                    <div style="max-width: 780px; margin: 14px auto 0; font-size: 14px; line-height: 1.7; color: #334155; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 10px; padding: 14px 20px; text-align: center;">
+                        <strong style="color: #0369A1; display: block; font-size: 14px; margin-bottom: 4px;">
+                            <span class="lang-ja">【重要なお知らせ：当社直接雇用求人】</span>
+                            <span class="lang-en">[Important Notice: Direct Internal Employment]</span>
+                        </strong>
+                        <span class="lang-ja">本セクションに掲載されている求人は、<strong>MIRANSH合同会社本社における直接雇用（正社員等）</strong>の募集です。人材紹介先クライアント企業様での就労ではなく、MIRANSH社内メンバーとしての勤務となります。</span>
+                        <span class="lang-en">The vacancies listed here are for <strong>direct employment at MIRANSH LLC headquarters</strong> as our core team members, NOT job openings at client companies.</span>
+                    </div>
+                </div>
+
+                <div class="services-grid" style="margin-top: 36px;">
+                    ${vacanciesHtml}
+                </div>
+
+                <div style="margin-top: 36px; text-align: center; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 16px;">
+                            <span class="lang-ja">MIRANSH 自社採用情報ポータル</span>
+                            <span class="lang-en">MIRANSH Careers Portal</span>
+                        </div>
+                        <div style="font-size: 13px; color: #64748B;">
+                            <span class="lang-ja">全職種の募集要項、詳細な待遇・選考フロー、会社カルチャーをご覧いただけます。</span>
+                            <span class="lang-en">Explore full position details, compensation packages, and interview processes.</span>
+                        </div>
+                    </div>
+                    <a href="/careers" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <span class="lang-ja">自社採用ポータルを見る</span>
+                        <span class="lang-en">Explore Careers Portal</span>
+                        <span>→</span>
+                    </a>
                 </div>
             </div>
         </section>
@@ -1462,6 +1651,167 @@ app.get('/', (req: Request, res: Response) => {
 
     ${renderFooter(company)}
     ${renderSakanaWidget()}
+
+    <!-- QUICK APPLY MODAL FOR CAREERS -->
+    <div id="quick-apply-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 9999; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);" onclick="if(event.target===this)closeQuickApplyModal()">
+        <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; padding: 28px;">
+            <button type="button" onclick="closeQuickApplyModal()" style="position: absolute; top: 18px; right: 18px; background: none; border: none; font-size: 20px; cursor: pointer; color: #64748B;">✕</button>
+            <div style="margin-bottom: 20px;">
+                <span style="display: inline-block; background: #E0F2FE; color: #0369A1; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 6px;">
+                    <span class="lang-ja">MIRANSH 自社求人 簡単エントリー</span>
+                    <span class="lang-en">Quick Job Application</span>
+                </span>
+                <h3 id="modal-job-title" style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0 0 4px;"></h3>
+                <p id="modal-job-code-display" style="font-size: 12px; color: #64748B; margin: 0; font-family: monospace;"></p>
+            </div>
+
+            <form id="quick-apply-form" action="/careers/apply" method="POST" onsubmit="handleQuickApplySubmit(event)">
+                <input type="hidden" name="job_code" id="modal-job-code" value="">
+                <input type="hidden" name="job_title" id="modal-job-title-hidden" value="">
+                <!-- Honeypot anti-spam -->
+                <input type="text" name="website_url" style="display: none;" tabindex="-1" autocomplete="off">
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                            <span class="lang-ja">お名前 (氏名) <span style="color: #DC2626;">*</span></span>
+                            <span class="lang-en">Full Name <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <input type="text" name="name" required placeholder="山田 太郎 / Ram Sharma" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                                <span class="lang-ja">メールアドレス <span style="color: #DC2626;">*</span></span>
+                                <span class="lang-en">Email <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <input type="email" name="email" required placeholder="applicant@example.com" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                                <span class="lang-ja">電話番号</span>
+                                <span class="lang-en">Phone</span>
+                            </label>
+                            <input type="tel" name="phone" placeholder="090-1234-5678" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                            <span class="lang-ja">在留資格・国籍 / 日本語レベル</span>
+                            <span class="lang-en">Visa Status / JLPT Level</span>
+                        </label>
+                        <input type="text" name="visa_status" placeholder="例: 技術・人文知識・国際業務、JLPT N2、ネパール国籍など" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                            <span class="lang-ja">志望動機・職歴・自己PR <span style="color: #DC2626;">*</span></span>
+                            <span class="lang-en">Cover Letter / Experience <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <textarea name="message" required rows="4" placeholder="ご自身のこれまでの職歴、語学力、MIRANSHで活かせる経験をご記入ください。" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+
+                    <div id="quick-apply-status" style="display: none; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.5;"></div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <button type="button" onclick="closeQuickApplyModal()" style="flex: 1; padding: 11px; border: 1px solid #CBD5E1; background: #F8FAFC; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer;">
+                            <span class="lang-ja">キャンセル</span>
+                            <span class="lang-en">Cancel</span>
+                        </button>
+                        <button type="submit" id="btn-submit-quick-apply" style="flex: 2; padding: 11px; border: none; background: #0284C7; color: #FFFFFF; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                            <span class="lang-ja">応募内容を送信する →</span>
+                            <span class="lang-en">Submit Application →</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function openQuickApplyModal(jobCode, jobTitle) {
+        var codeEl = document.getElementById('modal-job-code');
+        var codeDispEl = document.getElementById('modal-job-code-display');
+        var titleEl = document.getElementById('modal-job-title');
+        var titleHiddenEl = document.getElementById('modal-job-title-hidden');
+        var statusBox = document.getElementById('quick-apply-status');
+        var modal = document.getElementById('quick-apply-modal');
+        if (codeEl) codeEl.value = jobCode;
+        if (codeDispEl) codeDispEl.textContent = 'Job Code: ' + jobCode;
+        if (titleEl) titleEl.textContent = jobTitle;
+        if (titleHiddenEl) titleHiddenEl.value = jobTitle;
+        if (statusBox) statusBox.style.display = 'none';
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeQuickApplyModal() {
+        var modal = document.getElementById('quick-apply-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function handleQuickApplySubmit(e) {
+        e.preventDefault();
+        var form = e.target;
+        var btn = document.getElementById('btn-submit-quick-apply');
+        var statusBox = document.getElementById('quick-apply-status');
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '送信中... / Sending...';
+        }
+        if (statusBox) statusBox.style.display = 'none';
+
+        try {
+            var formData = new FormData(form);
+            var payload = {};
+            formData.forEach(function(val, key) { payload[key] = val; });
+
+            var res = await fetch('/careers/apply', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            var data = await res.json();
+            if (data && data.success) {
+                if (statusBox) {
+                    statusBox.style.display = 'block';
+                    statusBox.style.background = '#ECFDF5';
+                    statusBox.style.color = '#065F46';
+                    statusBox.style.border = '1px solid #A7F3D0';
+                    statusBox.innerHTML = '<strong>✓ ご応募ありがとうございます！</strong><br>応募情報を受理いたしました。MIRANSH採用担当より折り返しご連絡いたします。';
+                }
+                form.reset();
+                setTimeout(function() {
+                    closeQuickApplyModal();
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<span class="lang-ja">応募内容を送信する →</span><span class="lang-en">Submit Application →</span>';
+                    }
+                }, 2800);
+            } else {
+                throw new Error(data && data.error ? data.error : '送信に失敗しました');
+            }
+        } catch (err) {
+            if (statusBox) {
+                statusBox.style.display = 'block';
+                statusBox.style.background = '#FEF2F2';
+                statusBox.style.color = '#991B1B';
+                statusBox.style.border = '1px solid #FECACA';
+                statusBox.textContent = err.message || '送信エラーが発生しました。お手数ですが直接お問い合わせください。';
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="lang-ja">応募内容を送信する →</span><span class="lang-en">Submit Application →</span>';
+            }
+        }
+    }
+    </script>
 
     <script src="/js/app.js"></script>
 </body>
@@ -2016,7 +2366,15 @@ app.get(['/careers/:codeOrId', '/jobs/:codeOrId', '/recruitment/:codeOrId'], (re
 
 // Career Application Submission API & Form Handler
 app.post(['/careers/apply', '/api/careers/apply'], async (req: Request, res: Response) => {
-  const { job_code, job_title, name, email, phone, visa_status, message, website_url } = req.body;
+  const rawBody = req.body || {};
+  const job_code = rawBody.job_code || '';
+  const job_title = rawBody.job_title || '';
+  const name = (rawBody.name || rawBody.applicant_name || '').trim();
+  const email = (rawBody.email || '').trim();
+  const phone = (rawBody.phone || '').trim();
+  const visa_status = (rawBody.visa_status || rawBody.residence_status || rawBody.japanese_level || '').trim();
+  const message = (rawBody.message || rawBody.cover_letter || '（自己PR・メッセージなし）').trim();
+  const website_url = rawBody.website_url;
 
   // Anti-Spam Check: Honeypot field must be empty
   if (website_url) {
@@ -2027,9 +2385,9 @@ app.post(['/careers/apply', '/api/careers/apply'], async (req: Request, res: Res
     return res.redirect('/careers');
   }
 
-  if (!name || !email || !message) {
+  if (!name || !email) {
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.status(400).json({ success: false, error: 'Name, email, and message/cover letter are required.' });
+      return res.status(400).json({ success: false, error: 'Name and email are required.' });
     }
     return res.redirect('/careers?error=missing_fields');
   }

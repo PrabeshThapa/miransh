@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\Story;
 use App\Models\Faq;
 use App\Models\Inquiry;
+use App\Models\JobVacancy;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -81,8 +82,122 @@ class HomeController extends Controller
         $services = Service::orderBy('sort_order', 'asc')->get();
         $stories = Story::orderBy('sort_order', 'asc')->get();
         $faqs = Faq::orderBy('sort_order', 'asc')->get();
+        $vacancies = JobVacancy::with(['responsibilities', 'requirements', 'benefits'])
+            ->where('status', 'published')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('id', 'desc')
+            ->get();
 
-        return view('home', compact('company', 'about', 'services', 'stories', 'faqs'));
+        return view('home', compact('company', 'about', 'services', 'stories', 'faqs', 'vacancies'));
+    }
+
+    /**
+     * Display dedicated careers / job openings portal page.
+     */
+    public function careers(Request $request)
+    {
+        $company = CompanyInfo::first() ?? new CompanyInfo();
+        $query = JobVacancy::with(['responsibilities', 'requirements', 'benefits']);
+
+        // In public careers page, by default only show published vacancies unless previewing
+        if (!$request->has('preview')) {
+            $query->where('status', 'published');
+        }
+
+        if ($request->filled('type') && in_array($request->type, ['full_time', 'contract', 'part_time', 'internship'])) {
+            $query->where('employment_type', $request->type);
+        }
+
+        if ($request->filled('q')) {
+            $q = '%' . $request->q . '%';
+            $query->where(function ($w) use ($q) {
+                $w->where('job_code', 'like', $q)
+                  ->orWhere('title_ja', 'like', $q)
+                  ->orWhere('title_en', 'like', $q)
+                  ->orWhere('description_ja', 'like', $q)
+                  ->orWhere('description_en', 'like', $q);
+            });
+        }
+
+        $vacancies = $query->orderBy('sort_order', 'asc')->orderBy('id', 'desc')->get();
+
+        return view('careers', compact('company', 'vacancies'));
+    }
+
+    /**
+     * Display detailed job vacancy page.
+     */
+    public function careerDetail($codeOrId)
+    {
+        $company = CompanyInfo::first() ?? new CompanyInfo();
+        $vacancy = JobVacancy::with(['responsibilities', 'requirements', 'benefits'])
+            ->where(function ($w) use ($codeOrId) {
+                $w->where('job_code', $codeOrId)
+                  ->orWhere('id', is_numeric($codeOrId) ? (int) $codeOrId : 0);
+            })
+            ->first();
+
+        if (!$vacancy) {
+            return redirect()->route('careers.index')->with('error', '指定された求人情報は見つかりませんでした。');
+        }
+
+        $otherVacancies = JobVacancy::where('id', '!=', $vacancy->id)
+            ->where('status', 'published')
+            ->orderBy('sort_order', 'asc')
+            ->take(3)
+            ->get();
+
+        return view('career-detail', compact('vacancy', 'company', 'otherVacancies'));
+    }
+
+    /**
+     * Submit job vacancy application.
+     */
+    public function applyCareer(Request $request)
+    {
+        $request->validate([
+            'applicant_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'job_code' => 'required|string|max:50',
+        ]);
+
+        $jobCode = $request->job_code;
+        $vacancy = JobVacancy::where('job_code', $jobCode)->orWhere('id', is_numeric($jobCode) ? (int) $jobCode : 0)->first();
+        $jobTitle = $vacancy ? $vacancy->title_ja : $jobCode;
+
+        $messageContent = "【自社求人応募エントリー】\n";
+        $messageContent .= "求人番号: " . $jobCode . "\n";
+        $messageContent .= "求人職種: " . $jobTitle . "\n";
+        $messageContent .= "応募者氏名: " . $request->applicant_name . "\n";
+        $messageContent .= "フリガナ: " . ($request->name_kana ?? '未記入') . "\n";
+        $messageContent .= "メールアドレス: " . $request->email . "\n";
+        $messageContent .= "電話番号: " . ($request->phone ?? '未記入') . "\n";
+        $messageContent .= "国籍 / 在留資格: " . ($request->residence_status ?? '未記入') . "\n";
+        $messageContent .= "日本語能力レベル: " . ($request->japanese_level ?? '未記入') . "\n";
+        $messageContent .= "現在の状況: " . ($request->current_status ?? '未記入') . "\n";
+        $messageContent .= "\n--- 志望動機・自己PR ---\n";
+        $messageContent .= ($request->cover_letter ?? $request->message ?? '特になし');
+
+        $inquiry = Inquiry::create([
+            'name' => $request->applicant_name,
+            'company_name' => '【自社求人応募】' . $jobCode,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'service_interest' => '自社求人応募 (' . $jobCode . ')',
+            'message' => $messageContent,
+            'status' => 'unread',
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'ご応募ありがとうございます。MIRANSH採用担当より近日中に書類選考のご案内をお送りいたします。',
+                'inquiry_id' => $inquiry->id
+            ]);
+        }
+
+        return back()->with('success', '【応募完了】自社求人「' . $jobTitle . '」へのご応募を承りました。採用担当者より折り返しご連絡いたします。');
     }
 
     /**
