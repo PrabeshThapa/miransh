@@ -425,5 +425,8 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // 7. Seed Job Vacancies for Careers Best Matching
+        $this->call(JobVacancySeeder::class);
     }
 }
