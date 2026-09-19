@@ -2090,3 +2090,775 @@ export function renderAiContent(
 
   return { body, modals: '', scripts };
 }
+
+// ----------------------------------------------------
+// 10. Job Vacancies Management Page (Internal MIRANSH)
+// ----------------------------------------------------
+export function renderVacanciesContent(vacancies: any[], lang: AdminLang = 'ja'): { body: string; modals: string; scripts: string } {
+  const t = i18n[lang];
+
+  const totalCount = vacancies.length;
+  const publishedCount = vacancies.filter(v => v.status === 'published').length;
+  const draftCount = vacancies.filter(v => v.status === 'draft').length;
+  const closedCount = vacancies.filter(v => v.status === 'closed').length;
+
+  const body = `
+    <!-- Top Stats Overview -->
+    <div class="row mb-3">
+      <div class="col-lg-3 col-6">
+        <div class="info-box shadow-sm mb-2">
+          <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-user-tie"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text text-muted">${lang === 'en' ? 'Total Vacancies' : '求人票総数'}</span>
+            <span class="info-box-number font-weight-bold text-dark text-lg">${totalCount}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="info-box shadow-sm mb-2">
+          <span class="info-box-icon bg-success elevation-1"><i class="fas fa-check-circle"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text text-muted">${t.vacancies.statusPublished}</span>
+            <span class="info-box-number font-weight-bold text-success text-lg">${publishedCount}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="info-box shadow-sm mb-2">
+          <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-pencil-alt text-white"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text text-muted">${t.vacancies.statusDraft}</span>
+            <span class="info-box-number font-weight-bold text-warning text-lg">${draftCount}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="info-box shadow-sm mb-2">
+          <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-ban"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text text-muted">${t.vacancies.statusClosed}</span>
+            <span class="info-box-number font-weight-bold text-secondary text-lg">${closedCount}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vacancies List Card -->
+    <div class="card card-outline card-primary shadow-sm">
+      <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center">
+        <div class="d-flex align-items-center my-1">
+          <h3 class="card-title font-weight-bold text-dark mr-3 mb-0">
+            <i class="fas fa-briefcase text-primary mr-2"></i>${t.vacancies.cardTitle} (${totalCount})
+          </h3>
+          <!-- Filter Buttons -->
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-default active vacancy-filter-btn" data-filter="all" onclick="filterVacancyList('all', this)">${t.vacancies.filterAll}</button>
+            <button type="button" class="btn btn-default vacancy-filter-btn" data-filter="published" onclick="filterVacancyList('published', this)">${t.vacancies.filterPublished} (${publishedCount})</button>
+            <button type="button" class="btn btn-default vacancy-filter-btn" data-filter="draft" onclick="filterVacancyList('draft', this)">${t.vacancies.filterDraft} (${draftCount})</button>
+            <button type="button" class="btn btn-default vacancy-filter-btn" data-filter="closed" onclick="filterVacancyList('closed', this)">${t.vacancies.filterClosed} (${closedCount})</button>
+          </div>
+        </div>
+        <div class="card-tools my-1">
+          <a href="/careers" target="_blank" class="btn btn-outline-secondary btn-sm mr-2 font-weight-bold">
+            <i class="fas fa-external-link-alt mr-1"></i>${t.vacancies.previewPublic}
+          </a>
+          <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" onclick="openCreateVacancyModal()">
+            <i class="fas fa-plus-circle mr-1"></i> ${t.vacancies.addNew}
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-0 table-responsive">
+        <table class="table table-hover text-sm mb-0" id="vacancies_table">
+          <thead class="thead-light">
+            <tr>
+              <th style="width: 120px;">${t.vacancies.tableCode}</th>
+              <th>${t.vacancies.tableTitle}</th>
+              <th style="width: 110px;">${t.vacancies.tableType}</th>
+              <th>${t.vacancies.tableLocation}</th>
+              <th>${t.vacancies.tableSalary}</th>
+              <th style="width: 110px;" class="text-center">${t.vacancies.tableStatus}</th>
+              <th class="text-right" style="width: 220px;">${t.vacancies.tableActions}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${vacancies.map(v => {
+              const empTypeLabel = v.employment_type === 'full_time' ? t.vacancies.typeFullTime :
+                v.employment_type === 'contract' ? t.vacancies.typeContract :
+                v.employment_type === 'part_time' ? t.vacancies.typePartTime :
+                v.employment_type === 'internship' ? t.vacancies.typeInternship : t.vacancies.typeOther;
+
+              const statusBadge = v.status === 'published' ?
+                `<span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i>${t.vacancies.statusPublished}</span>` :
+                v.status === 'draft' ?
+                `<span class="badge badge-warning text-dark px-2 py-1"><i class="fas fa-pencil-alt mr-1"></i>${t.vacancies.statusDraft}</span>` :
+                `<span class="badge badge-secondary px-2 py-1"><i class="fas fa-ban mr-1"></i>${t.vacancies.statusClosed}</span>`;
+
+              const salaryText = v.salary_min && v.salary_max ?
+                `${Number(v.salary_min).toLocaleString()}円 〜 ${Number(v.salary_max).toLocaleString()}円` :
+                (v.salary_note_ja || v.salary_note_en || (lang === 'en' ? 'Competitive' : '応相談'));
+
+              return `
+                <tr class="vacancy-row" data-status="${escapeHtml(v.status || 'draft')}">
+                  <td class="align-middle">
+                    <span class="badge badge-light border text-dark font-weight-bold px-2 py-1">${escapeHtml(v.job_code || '')}</span>
+                  </td>
+                  <td class="align-middle">
+                    <div class="font-weight-bold text-dark text-base">${escapeHtml(v.title_ja || '')}</div>
+                    <small class="text-muted d-block">${escapeHtml(v.title_en || '')}</small>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge badge-primary px-2 py-1">${empTypeLabel}</span>
+                  </td>
+                  <td class="align-middle text-secondary" style="max-width: 180px;">
+                    <div class="text-truncate" title="${escapeHtml(lang === 'en' ? (v.location_en || v.location_ja) : v.location_ja)}">
+                      <i class="fas fa-map-marker-alt text-danger mr-1"></i>${escapeHtml(lang === 'en' ? (v.location_en || v.location_ja) : v.location_ja)}
+                    </div>
+                  </td>
+                  <td class="align-middle text-secondary font-weight-bold">
+                    ${escapeHtml(salaryText)}
+                  </td>
+                  <td class="align-middle text-center">
+                    <div class="dropdown d-inline-block">
+                      <button class="btn btn-xs dropdown-toggle p-0 border-0" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        ${statusBadge}
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-right shadow-sm text-xs">
+                        <a class="dropdown-item ${v.status === 'published' ? 'active' : ''}" href="#" onclick="quickSetVacancyStatus(${v.id}, 'published', event)">
+                          <i class="fas fa-check-circle text-success mr-2"></i>${t.vacancies.publishPrompt}
+                        </a>
+                        <a class="dropdown-item ${v.status === 'draft' ? 'active' : ''}" href="#" onclick="quickSetVacancyStatus(${v.id}, 'draft', event)">
+                          <i class="fas fa-pencil-alt text-warning mr-2"></i>${t.vacancies.unpublishPrompt}
+                        </a>
+                        <a class="dropdown-item ${v.status === 'closed' ? 'active' : ''}" href="#" onclick="quickSetVacancyStatus(${v.id}, 'closed', event)">
+                          <i class="fas fa-ban text-secondary mr-2"></i>${t.vacancies.closePrompt}
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="align-middle text-right text-nowrap">
+                    <a href="/careers/${encodeURIComponent(v.job_code || v.id)}" target="_blank" class="btn btn-xs btn-outline-info mr-1" title="${t.vacancies.previewPublic}">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <button type="button" class="btn btn-xs btn-outline-secondary mr-1" onclick="duplicateVacancyItem(${v.id})" title="${t.vacancies.btnDuplicate}">
+                      <i class="fas fa-copy mr-1"></i>${t.vacancies.btnDuplicate}
+                    </button>
+                    <button type="button" class="btn btn-xs btn-outline-primary mr-1" onclick='openEditVacancyModal(${JSON.stringify(v).replace(/'/g, "&#39;")})'>
+                      <i class="fas fa-edit mr-1"></i>${t.actions.edit}
+                    </button>
+                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="deleteVacancyItem(${v.id})">
+                      <i class="fas fa-trash-alt mr-1"></i>${t.actions.delete}
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+            ${vacancies.length === 0 ? `
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <i class="fas fa-briefcase fa-3x text-secondary mb-3 d-block"></i>
+                  ${t.vacancies.noVacancies}
+                </td>
+              </tr>
+            ` : ''}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const modals = `
+    <!-- Modal: Create / Edit Vacancy -->
+    <div class="modal fade" id="modal-vacancy-editor" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title font-weight-bold" id="vacancy_modal_title">
+              <i class="fas fa-briefcase mr-2"></i>${t.vacancies.modalCreateTitle}
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="vacancy_form" action="/admin/vacancies" method="POST" onsubmit="prepareVacancyFormSubmit(event)">
+            <input type="hidden" name="id" id="vacancy_form_id" value="">
+            <input type="hidden" name="responsibilities_json" id="vacancy_responsibilities_json" value="">
+            <input type="hidden" name="requirements_json" id="vacancy_requirements_json" value="">
+            <input type="hidden" name="benefits_json" id="vacancy_benefits_json" value="">
+
+            <div class="modal-body p-0">
+              <!-- Custom Tabs for Vacancy Form -->
+              <div class="card card-primary card-tabs border-0 shadow-none mb-0">
+                <div class="card-header p-0 pt-1 bg-light border-bottom">
+                  <ul class="nav nav-tabs" id="vacancyTabs" role="tablist">
+                    <li class="nav-item">
+                      <a class="nav-link active font-weight-bold" id="tab-basic-link" data-toggle="pill" href="#tab-basic" role="tab">
+                        <i class="fas fa-info-circle mr-1"></i>${t.vacancies.tabBasic}
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link font-weight-bold" id="tab-desc-link" data-toggle="pill" href="#tab-desc" role="tab">
+                        <i class="fas fa-align-left mr-1"></i>${t.vacancies.tabDescription}
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link font-weight-bold" id="tab-resp-link" data-toggle="pill" href="#tab-resp" role="tab">
+                        <i class="fas fa-tasks mr-1"></i>${t.vacancies.tabResponsibilities} <span class="badge badge-secondary badge-pill" id="badge-resp-count">0</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link font-weight-bold" id="tab-req-link" data-toggle="pill" href="#tab-req" role="tab">
+                        <i class="fas fa-clipboard-check mr-1"></i>${t.vacancies.tabRequirements} <span class="badge badge-secondary badge-pill" id="badge-req-count">0</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link font-weight-bold" id="tab-ben-link" data-toggle="pill" href="#tab-ben" role="tab">
+                        <i class="fas fa-gift mr-1"></i>${t.vacancies.tabBenefits} <span class="badge badge-secondary badge-pill" id="badge-ben-count">0</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link font-weight-bold" id="tab-pub-link" data-toggle="pill" href="#tab-pub" role="tab">
+                        <i class="fas fa-globe mr-1"></i>${t.vacancies.tabPublish}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="card-body p-4">
+                  <div class="tab-content" id="vacancyTabsContent">
+                    <!-- 1. Basic Information -->
+                    <div class="tab-pane fade show active" id="tab-basic" role="tabpanel">
+                      <div class="row">
+                        <div class="col-md-4 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.jobCode} <span class="text-danger">*</span></label>
+                          <input type="text" name="job_code" id="input_job_code" class="form-control" required placeholder="MIR-2026-001">
+                        </div>
+                        <div class="col-md-4 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.employmentType} <span class="text-danger">*</span></label>
+                          <select name="employment_type" id="input_employment_type" class="form-control font-weight-bold" required>
+                            <option value="full_time">${t.vacancies.typeFullTime}</option>
+                            <option value="contract">${t.vacancies.typeContract}</option>
+                            <option value="part_time">${t.vacancies.typePartTime}</option>
+                            <option value="internship">${t.vacancies.typeInternship}</option>
+                            <option value="other">${t.vacancies.typeOther}</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.sortOrderLabel}</label>
+                          <input type="number" name="sort_order" id="input_sort_order" class="form-control" value="0">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.titleJa} <span class="text-danger">*</span></label>
+                          <input type="text" name="title_ja" id="input_title_ja" class="form-control" required placeholder="総合職（海外人材コーディネーター 兼 一般事務・経理補助）">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.titleEn} <span class="text-danger">*</span></label>
+                          <input type="text" name="title_en" id="input_title_en" class="form-control" required placeholder="Global Talent Coordinator, General Affairs & Accounting Assistant">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.locationJa} <span class="text-danger">*</span></label>
+                          <input type="text" name="location_ja" id="input_location_ja" class="form-control" required placeholder="東京都小金井市（JR東小金井駅 徒歩5分）">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.locationEn} <span class="text-danger">*</span></label>
+                          <input type="text" name="location_en" id="input_location_en" class="form-control" required placeholder="Koganei-shi, Tokyo, Japan">
+                        </div>
+                      </div>
+
+                      <hr class="my-3">
+
+                      <div class="row">
+                        <div class="col-md-3 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.salaryType}</label>
+                          <select name="salary_type" id="input_salary_type" class="form-control">
+                            <option value="monthly">${t.vacancies.salaryTypeMonthly}</option>
+                            <option value="hourly">${t.vacancies.salaryTypeHourly}</option>
+                            <option value="annual">${t.vacancies.salaryTypeAnnual}</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.salaryMin}</label>
+                          <input type="number" name="salary_min" id="input_salary_min" class="form-control" placeholder="220000" step="1000">
+                        </div>
+                        <div class="col-md-5 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.salaryMax}</label>
+                          <input type="number" name="salary_max" id="input_salary_max" class="form-control" placeholder="250000" step="1000">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.salaryNoteJa}</label>
+                          <input type="text" name="salary_note_ja" id="input_salary_note_ja" class="form-control" placeholder="月給 220,000円 ～ 250,000円（経験・能力考慮、昇給年1回、賞与年2回）">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.salaryNoteEn}</label>
+                          <input type="text" name="salary_note_en" id="input_salary_note_en" class="form-control" placeholder="Monthly JPY 220,000 - 250,000 (Based on experience, annual review, bonus)">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.workingHoursJa}</label>
+                          <input type="text" name="working_hours_ja" id="input_working_hours_ja" class="form-control" placeholder="9:00 〜 18:00（実働8時間、休憩60分）">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.workingHoursEn}</label>
+                          <input type="text" name="working_hours_en" id="input_working_hours_en" class="form-control" placeholder="9:00 - 18:00 (8 hours work, 60-min lunch break)">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.holidaysJa}</label>
+                          <input type="text" name="holidays_ja" id="input_holidays_ja" class="form-control" placeholder="完全週休2日制（土日）、祝日、年末年始休暇、夏季休暇、有給休暇">
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.holidaysEn}</label>
+                          <input type="text" name="holidays_en" id="input_holidays_en" class="form-control" placeholder="5-day work week (Sat, Sun, Public Holidays), Year-end & Summer break">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 2. Description -->
+                    <div class="tab-pane fade" id="tab-desc" role="tabpanel">
+                      <div class="callout callout-info py-2 mb-3">
+                        <small class="text-muted">
+                          <i class="fas fa-info-circle mr-1"></i>${lang === 'en' ? 'Provide an overview of the position, background of the recruitment, and team mission.' : '募集の背景やMIRANSH合同会社での役割、求める人物像、社内の雰囲気などを詳しく記入してください。'}
+                        </small>
+                      </div>
+                      <div class="form-group">
+                        <label class="font-weight-bold text-dark">${t.vacancies.descriptionJa} <span class="text-danger">*</span></label>
+                        <textarea name="description_ja" id="input_description_ja" class="form-control" rows="6" required placeholder="MIRANSH合同会社の自社海外人材紹介・特定技能支援事業を支える総合職を募集します..."></textarea>
+                      </div>
+                      <div class="form-group">
+                        <label class="font-weight-bold text-dark">${t.vacancies.descriptionEn} <span class="text-danger">*</span></label>
+                        <textarea name="description_en" id="input_description_en" class="form-control" rows="6" required placeholder="MIRANSH LLC is seeking an enthusiastic Global Talent Coordinator to join our internal team..."></textarea>
+                      </div>
+                    </div>
+
+                    <!-- 3. Responsibilities Repeater -->
+                    <div class="tab-pane fade" id="tab-resp" role="tabpanel">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="font-weight-bold text-dark mb-0">
+                          <i class="fas fa-tasks text-primary mr-1"></i>${t.vacancies.tabResponsibilities}
+                        </h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm font-weight-bold" onclick="addResponsibilityRow()">
+                          <i class="fas fa-plus mr-1"></i>${t.vacancies.addRespBtn}
+                        </button>
+                      </div>
+                      <div id="responsibilities_container">
+                        <!-- Dynamic items will be added here -->
+                      </div>
+                    </div>
+
+                    <!-- 4. Requirements Repeater -->
+                    <div class="tab-pane fade" id="tab-req" role="tabpanel">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="font-weight-bold text-dark mb-0">
+                          <i class="fas fa-clipboard-check text-primary mr-1"></i>${t.vacancies.tabRequirements}
+                        </h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm font-weight-bold" onclick="addRequirementRow()">
+                          <i class="fas fa-plus mr-1"></i>${t.vacancies.addReqBtn}
+                        </button>
+                      </div>
+                      <div id="requirements_container">
+                        <!-- Dynamic items will be added here -->
+                      </div>
+                    </div>
+
+                    <!-- 5. Benefits Repeater -->
+                    <div class="tab-pane fade" id="tab-ben" role="tabpanel">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="font-weight-bold text-dark mb-0">
+                          <i class="fas fa-gift text-primary mr-1"></i>${t.vacancies.tabBenefits}
+                        </h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm font-weight-bold" onclick="addBenefitRow()">
+                          <i class="fas fa-plus mr-1"></i>${t.vacancies.addBenBtn}
+                        </button>
+                      </div>
+                      <div id="benefits_container">
+                        <!-- Dynamic items will be added here -->
+                      </div>
+                    </div>
+
+                    <!-- 6. Publication Status & Schedule -->
+                    <div class="tab-pane fade" id="tab-pub" role="tabpanel">
+                      <div class="form-group mb-4">
+                        <label class="font-weight-bold text-dark d-block">${t.vacancies.statusLabel} <span class="text-danger">*</span></label>
+                        <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                          <label class="btn btn-outline-success font-weight-bold active flex-fill py-2" id="lbl-status-published">
+                            <input type="radio" name="status" id="radio_status_published" value="published" checked>
+                            <i class="fas fa-check-circle mr-1"></i> ${t.vacancies.statusPublished}
+                          </label>
+                          <label class="btn btn-outline-warning font-weight-bold flex-fill py-2 text-dark" id="lbl-status-draft">
+                            <input type="radio" name="status" id="radio_status_draft" value="draft">
+                            <i class="fas fa-pencil-alt mr-1"></i> ${t.vacancies.statusDraft}
+                          </label>
+                          <label class="btn btn-outline-secondary font-weight-bold flex-fill py-2" id="lbl-status-closed">
+                            <input type="radio" name="status" id="radio_status_closed" value="closed">
+                            <i class="fas fa-ban mr-1"></i> ${t.vacancies.statusClosed}
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.publishedAtLabel}</label>
+                          <input type="text" name="published_at" id="input_published_at" class="form-control" placeholder="YYYY-MM-DD HH:mm:ss (空欄で現在日時)">
+                          <small class="text-muted">${lang === 'en' ? 'Leave empty to auto-set to current date upon publish.' : '空欄の場合は公開保存時に自動で現在日時が記録されます。'}</small>
+                        </div>
+                        <div class="col-md-6 form-group">
+                          <label class="font-weight-bold text-dark">${t.vacancies.closedAtLabel}</label>
+                          <input type="text" name="closed_at" id="input_closed_at" class="form-control" placeholder="YYYY-MM-DD HH:mm:ss">
+                          <small class="text-muted">${lang === 'en' ? 'Optional closing timestamp.' : '募集を特定の日時で締め切る場合に入力します。'}</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer bg-light d-flex justify-content-between">
+              <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                <i class="fas fa-times mr-1"></i>${t.actions.cancel}
+              </button>
+              <button type="submit" class="btn btn-primary font-weight-bold px-4 shadow-sm" id="btn_save_vacancy">
+                <i class="fas fa-save mr-1"></i>${t.actions.save}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const scripts = `
+    <script>
+      let respIndex = 0;
+      let reqIndex = 0;
+      let benIndex = 0;
+
+      function filterVacancyList(filter, btn) {
+        document.querySelectorAll('.vacancy-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const rows = document.querySelectorAll('#vacancies_table .vacancy-row');
+        rows.forEach(row => {
+          const status = row.getAttribute('data-status');
+          if (filter === 'all' || status === filter) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+
+      function updateCounterBadges() {
+        const respCount = document.querySelectorAll('#responsibilities_container .repeater-item').length;
+        const reqCount = document.querySelectorAll('#requirements_container .repeater-item').length;
+        const benCount = document.querySelectorAll('#benefits_container .repeater-item').length;
+
+        document.getElementById('badge-resp-count').textContent = respCount;
+        document.getElementById('badge-req-count').textContent = reqCount;
+        document.getElementById('badge-ben-count').textContent = benCount;
+      }
+
+      function addResponsibilityRow(data = {}) {
+        respIndex++;
+        const container = document.getElementById('responsibilities_container');
+        const div = document.createElement('div');
+        div.className = 'card card-body bg-light border p-3 mb-2 repeater-item resp-item';
+        div.innerHTML = \`
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge badge-primary px-2 py-1"><i class="fas fa-tasks mr-1"></i>\${'${lang === 'en' ? 'Duty #' : '業務 #'}'} <span class="row-num">\${respIndex}</span></span>
+            <button type="button" class="btn btn-tool text-danger" onclick="this.closest('.repeater-item').remove(); updateCounterBadges();" title="${t.actions.delete}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group mb-2">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.respTitleJa} <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm resp-title-ja" value="\${escapeHtml(data.title_ja || '')}" required placeholder="${lang === 'en' ? 'e.g. Recruitment & Matching Management' : '例: 海外人材の募集・マッチング管理'}">
+            </div>
+            <div class="col-md-6 form-group mb-2">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.respTitleEn} <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm resp-title-en" value="\${escapeHtml(data.title_en || '')}" required placeholder="${lang === 'en' ? 'e.g. Recruitment & Matching Management' : 'Recruitment & Matching Management'}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.respDescJa}</label>
+              <textarea class="form-control form-control-sm resp-desc-ja" rows="2" placeholder="${lang === 'en' ? 'Detailed tasks' : '詳細な業務内容や担当範囲'}">\${escapeHtml(data.description_ja || '')}</textarea>
+            </div>
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.respDescEn}</label>
+              <textarea class="form-control form-control-sm resp-desc-en" rows="2" placeholder="${lang === 'en' ? 'Task breakdown' : 'Detailed responsibilities in English'}">\${escapeHtml(data.description_en || '')}</textarea>
+            </div>
+          </div>
+        \`;
+        container.appendChild(div);
+        updateCounterBadges();
+      }
+
+      function addRequirementRow(data = {}) {
+        reqIndex++;
+        const container = document.getElementById('requirements_container');
+        const div = document.createElement('div');
+        div.className = 'card card-body bg-light border p-3 mb-2 repeater-item req-item';
+        const type = data.type || 'required';
+
+        div.innerHTML = \`
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="form-inline">
+              <span class="badge badge-info px-2 py-1 mr-2"><i class="fas fa-clipboard-check mr-1"></i>\${'${lang === 'en' ? 'Requirement #' : '応募要件 #'}'} <span class="row-num">\${reqIndex}</span></span>
+              <select class="form-control form-control-sm req-type font-weight-bold">
+                <option value="required" \${type === 'required' ? 'selected' : ''}>${t.vacancies.reqRequired}</option>
+                <option value="preferred" \${type === 'preferred' ? 'selected' : ''}>${t.vacancies.reqPreferred}</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-tool text-danger" onclick="this.closest('.repeater-item').remove(); updateCounterBadges();" title="${t.actions.delete}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.reqDescJa} <span class="text-danger">*</span></label>
+              <textarea class="form-control form-control-sm req-desc-ja" rows="2" required placeholder="${lang === 'en' ? 'e.g. JLPT N3 or higher' : '例: 専門学校修了者、JLPT N3以上、Excel実務スキル'}">\${escapeHtml(data.description_ja || '')}</textarea>
+            </div>
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.reqDescEn} <span class="text-danger">*</span></label>
+              <textarea class="form-control form-control-sm req-desc-en" rows="2" required placeholder="${lang === 'en' ? 'e.g. JLPT N3 or equivalent' : 'Requirement in English'}">\${escapeHtml(data.description_en || '')}</textarea>
+            </div>
+          </div>
+        \`;
+        container.appendChild(div);
+        updateCounterBadges();
+      }
+
+      function addBenefitRow(data = {}) {
+        benIndex++;
+        const container = document.getElementById('benefits_container');
+        const div = document.createElement('div');
+        div.className = 'card card-body bg-light border p-3 mb-2 repeater-item ben-item';
+
+        div.innerHTML = \`
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge badge-success px-2 py-1"><i class="fas fa-gift mr-1"></i>\${'${lang === 'en' ? 'Benefit #' : '福利厚生 #'}'} <span class="row-num">\${benIndex}</span></span>
+            <button type="button" class="btn btn-tool text-danger" onclick="this.closest('.repeater-item').remove(); updateCounterBadges();" title="${t.actions.delete}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group mb-2">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.benTitleJa} <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm ben-title-ja" value="\${escapeHtml(data.title_ja || '')}" required placeholder="${lang === 'en' ? 'e.g. Full Social Insurance' : '例: 各種社会保険完備、交通費全額支給'}">
+            </div>
+            <div class="col-md-6 form-group mb-2">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.benTitleEn} <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm ben-title-en" value="\${escapeHtml(data.title_en || '')}" required placeholder="${lang === 'en' ? 'e.g. Social Insurance' : 'Social Insurance'}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.benDescJa}</label>
+              <input type="text" class="form-control form-control-sm ben-desc-ja" value="\${escapeHtml(data.description_ja || '')}" placeholder="${lang === 'en' ? 'Details' : '健康保険、厚生年金、雇用保険、労災保険'}">
+            </div>
+            <div class="col-md-6 form-group mb-0">
+              <label class="font-weight-bold text-xs text-secondary mb-1">${t.vacancies.benDescEn}</label>
+              <input type="text" class="form-control form-control-sm ben-desc-en" value="\${escapeHtml(data.description_en || '')}" placeholder="${lang === 'en' ? 'Details in English' : 'Health insurance, pension, etc.'}">
+            </div>
+          </div>
+        \`;
+        container.appendChild(div);
+        updateCounterBadges();
+      }
+
+      function openCreateVacancyModal() {
+        document.getElementById('vacancy_form').reset();
+        document.getElementById('vacancy_form_id').value = '';
+        document.getElementById('vacancy_modal_title').innerHTML = '<i class="fas fa-plus-circle mr-2"></i>${t.vacancies.modalCreateTitle}';
+        document.getElementById('vacancy_form').action = '/admin/vacancies';
+
+        // Auto-generate code if empty
+        const nextCode = 'MIR-' + (new Date().getFullYear()) + '-' + String(Math.floor(Math.random() * 900) + 100);
+        document.getElementById('input_job_code').value = nextCode;
+
+        // Default location
+        document.getElementById('input_location_ja').value = '東京都小金井市東町4-8-14 アクトレジデンス新小金井201号室';
+        document.getElementById('input_location_en').value = 'Room 201, 4-8-14 Higashicho, Koganei-shi, Tokyo 184-0011, Japan';
+
+        document.getElementById('responsibilities_container').innerHTML = '';
+        document.getElementById('requirements_container').innerHTML = '';
+        document.getElementById('benefits_container').innerHTML = '';
+
+        // Add 1 default row for each
+        addResponsibilityRow();
+        addRequirementRow({ type: 'required' });
+        addRequirementRow({ type: 'preferred' });
+        addBenefitRow();
+
+        // Switch to first tab
+        $('#vacancyTabs a[href="#tab-basic"]').tab('show');
+        $('#modal-vacancy-editor').modal('show');
+      }
+
+      function openEditVacancyModal(v) {
+        document.getElementById('vacancy_form').reset();
+        document.getElementById('vacancy_form_id').value = v.id;
+        document.getElementById('vacancy_modal_title').innerHTML = '<i class="fas fa-edit mr-2"></i>${t.vacancies.modalEditTitle} [' + (v.job_code || '') + ']';
+        document.getElementById('vacancy_form').action = '/admin/vacancies/' + v.id;
+
+        document.getElementById('input_job_code').value = v.job_code || '';
+        document.getElementById('input_employment_type').value = v.employment_type || 'full_time';
+        document.getElementById('input_sort_order').value = v.sort_order || 0;
+        document.getElementById('input_title_ja').value = v.title_ja || '';
+        document.getElementById('input_title_en').value = v.title_en || '';
+        document.getElementById('input_location_ja').value = v.location_ja || '';
+        document.getElementById('input_location_en').value = v.location_en || '';
+
+        document.getElementById('input_salary_type').value = v.salary_type || 'monthly';
+        document.getElementById('input_salary_min').value = v.salary_min || '';
+        document.getElementById('input_salary_max').value = v.salary_max || '';
+        document.getElementById('input_salary_note_ja').value = v.salary_note_ja || '';
+        document.getElementById('input_salary_note_en').value = v.salary_note_en || '';
+
+        document.getElementById('input_working_hours_ja').value = v.working_hours_ja || '';
+        document.getElementById('input_working_hours_en').value = v.working_hours_en || '';
+        document.getElementById('input_holidays_ja').value = v.holidays_ja || '';
+        document.getElementById('input_holidays_en').value = v.holidays_en || '';
+
+        document.getElementById('input_description_ja').value = v.description_ja || '';
+        document.getElementById('input_description_en').value = v.description_en || '';
+
+        // Status
+        const status = v.status || 'draft';
+        if (status === 'published') {
+          document.getElementById('radio_status_published').checked = true;
+          document.getElementById('lbl-status-published').classList.add('active');
+          document.getElementById('lbl-status-draft').classList.remove('active');
+          document.getElementById('lbl-status-closed').classList.remove('active');
+        } else if (status === 'closed') {
+          document.getElementById('radio_status_closed').checked = true;
+          document.getElementById('lbl-status-closed').classList.add('active');
+          document.getElementById('lbl-status-published').classList.remove('active');
+          document.getElementById('lbl-status-draft').classList.remove('active');
+        } else {
+          document.getElementById('radio_status_draft').checked = true;
+          document.getElementById('lbl-status-draft').classList.add('active');
+          document.getElementById('lbl-status-published').classList.remove('active');
+          document.getElementById('lbl-status-closed').classList.remove('active');
+        }
+
+        document.getElementById('input_published_at').value = v.published_at || '';
+        document.getElementById('input_closed_at').value = v.closed_at || '';
+
+        // Populate Repeaters
+        document.getElementById('responsibilities_container').innerHTML = '';
+        if (v.responsibilities && v.responsibilities.length > 0) {
+          v.responsibilities.forEach(r => addResponsibilityRow(r));
+        } else {
+          addResponsibilityRow();
+        }
+
+        document.getElementById('requirements_container').innerHTML = '';
+        if (v.requirements && v.requirements.length > 0) {
+          v.requirements.forEach(r => addRequirementRow(r));
+        } else {
+          addRequirementRow({ type: 'required' });
+        }
+
+        document.getElementById('benefits_container').innerHTML = '';
+        if (v.benefits && v.benefits.length > 0) {
+          v.benefits.forEach(b => addBenefitRow(b));
+        } else {
+          addBenefitRow();
+        }
+
+        $('#vacancyTabs a[href="#tab-basic"]').tab('show');
+        $('#modal-vacancy-editor').modal('show');
+      }
+
+      function prepareVacancyFormSubmit(e) {
+        // Collect responsibilities
+        const respItems = [];
+        document.querySelectorAll('#responsibilities_container .resp-item').forEach((el, idx) => {
+          const tJa = el.querySelector('.resp-title-ja')?.value.trim() || '';
+          const tEn = el.querySelector('.resp-title-en')?.value.trim() || '';
+          const dJa = el.querySelector('.resp-desc-ja')?.value.trim() || '';
+          const dEn = el.querySelector('.resp-desc-en')?.value.trim() || '';
+          if (tJa || tEn) {
+            respItems.push({ title_ja: tJa, title_en: tEn, description_ja: dJa, description_en: dEn, sort_order: idx + 1 });
+          }
+        });
+        document.getElementById('vacancy_responsibilities_json').value = JSON.stringify(respItems);
+
+        // Collect requirements
+        const reqItems = [];
+        document.querySelectorAll('#requirements_container .req-item').forEach((el, idx) => {
+          const type = el.querySelector('.req-type')?.value || 'required';
+          const dJa = el.querySelector('.req-desc-ja')?.value.trim() || '';
+          const dEn = el.querySelector('.req-desc-en')?.value.trim() || '';
+          if (dJa || dEn) {
+            reqItems.push({ type, description_ja: dJa, description_en: dEn, sort_order: idx + 1 });
+          }
+        });
+        document.getElementById('vacancy_requirements_json').value = JSON.stringify(reqItems);
+
+        // Collect benefits
+        const benItems = [];
+        document.querySelectorAll('#benefits_container .ben-item').forEach((el, idx) => {
+          const tJa = el.querySelector('.ben-title-ja')?.value.trim() || '';
+          const tEn = el.querySelector('.ben-title-en')?.value.trim() || '';
+          const dJa = el.querySelector('.ben-desc-ja')?.value.trim() || '';
+          const dEn = el.querySelector('.ben-desc-en')?.value.trim() || '';
+          if (tJa || tEn) {
+            benItems.push({ title_ja: tJa, title_en: tEn, description_ja: dJa, description_en: dEn, sort_order: idx + 1 });
+          }
+        });
+        document.getElementById('vacancy_benefits_json').value = JSON.stringify(benItems);
+
+        return true;
+      }
+
+      function quickSetVacancyStatus(id, newStatus, event) {
+        if (event) event.preventDefault();
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/vacancies/' + id + '/status';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'status';
+        input.value = newStatus;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      function duplicateVacancyItem(id) {
+        if (!confirm('${t.vacancies.duplicateConfirm}')) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/vacancies/' + id + '/duplicate';
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      function deleteVacancyItem(id) {
+        if (!confirm('${t.actions.confirmDelete}')) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/vacancies/' + id + '/delete';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    </script>
+  `;
+
+  return { body, modals, scripts };
+}

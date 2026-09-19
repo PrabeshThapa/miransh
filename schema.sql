@@ -152,3 +152,70 @@ INSERT INTO `services` (`id`, `number_label`, `title_en`, `title_ja`, `desc_en`,
   '["ネパール・海外の教育機関との提携", "日本語学校への入学支援", "専門学校・大学等への進学支援", "日本留学に関する相談", "入学準備サポート"]',
   2
 );
+
+-- Internal Vacancies for MIRANSH
+CREATE TABLE IF NOT EXISTS `job_vacancies` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `job_code` VARCHAR(50) UNIQUE NOT NULL,
+  `title_ja` VARCHAR(255) NOT NULL,
+  `title_en` VARCHAR(255) NOT NULL,
+  `employment_type` VARCHAR(50) NOT NULL DEFAULT 'full_time',
+  `location_ja` VARCHAR(255) NOT NULL,
+  `location_en` VARCHAR(255) NOT NULL,
+  `salary_min` INTEGER NULL,
+  `salary_max` INTEGER NULL,
+  `salary_type` VARCHAR(20) DEFAULT 'monthly',
+  `salary_note_ja` TEXT NULL,
+  `salary_note_en` TEXT NULL,
+  `working_hours_ja` TEXT NULL,
+  `working_hours_en` TEXT NULL,
+  `holidays_ja` TEXT NULL,
+  `holidays_en` TEXT NULL,
+  `description_ja` TEXT NOT NULL,
+  `description_en` TEXT NOT NULL,
+  `status` VARCHAR(20) DEFAULT 'draft',
+  `sort_order` INTEGER DEFAULT 0,
+  `published_at` DATETIME NULL,
+  `closed_at` DATETIME NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `job_responsibilities` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `job_vacancy_id` INTEGER NOT NULL,
+  `title_ja` VARCHAR(255) NOT NULL,
+  `title_en` VARCHAR(255) NOT NULL,
+  `description_ja` TEXT NULL,
+  `description_en` TEXT NULL,
+  `sort_order` INTEGER DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`job_vacancy_id`) REFERENCES `job_vacancies`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `job_requirements` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `job_vacancy_id` INTEGER NOT NULL,
+  `type` VARCHAR(20) DEFAULT 'required',
+  `description_ja` TEXT NOT NULL,
+  `description_en` TEXT NOT NULL,
+  `sort_order` INTEGER DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`job_vacancy_id`) REFERENCES `job_vacancies`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `job_benefits` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `job_vacancy_id` INTEGER NOT NULL,
+  `title_ja` VARCHAR(255) NOT NULL,
+  `title_en` VARCHAR(255) NOT NULL,
+  `description_ja` TEXT NULL,
+  `description_en` TEXT NULL,
+  `sort_order` INTEGER DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`job_vacancy_id`) REFERENCES `job_vacancies`(`id`) ON DELETE CASCADE
+);
+

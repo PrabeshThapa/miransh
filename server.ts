@@ -18,8 +18,10 @@ import {
   renderFaqsContent,
   renderInquiriesContent,
   renderPasswordContent,
-  renderAiContent
+  renderAiContent,
+  renderVacanciesContent
 } from './src/admin/pages.ts';
+import { renderCareersIndexHtml, renderCareersDetailHtml } from './src/public/careers.ts';
 import { i18n, AdminLang } from './src/admin/i18n.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -240,6 +242,51 @@ function getInquiries(): any[] {
   return db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all();
 }
 
+function getVacancies(includeAll: boolean = true): any[] {
+  try {
+    const query = includeAll 
+      ? 'SELECT * FROM job_vacancies ORDER BY sort_order ASC, id DESC'
+      : "SELECT * FROM job_vacancies WHERE status = 'published' ORDER BY sort_order ASC, id DESC";
+    const rows = db.prepare(query).all();
+    
+    const respStmt = db.prepare('SELECT * FROM job_responsibilities WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC');
+    const reqStmt = db.prepare('SELECT * FROM job_requirements WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC');
+    const benStmt = db.prepare('SELECT * FROM job_benefits WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC');
+
+    return rows.map((v: any) => ({
+      ...v,
+      responsibilities: respStmt.all(v.id),
+      requirements: reqStmt.all(v.id),
+      benefits: benStmt.all(v.id)
+    }));
+  } catch (err) {
+    console.error('Error fetching vacancies:', err);
+    return [];
+  }
+}
+
+function getVacancyByCodeOrId(codeOrId: string | number): any | null {
+  try {
+    let row: any = null;
+    if (typeof codeOrId === 'number' || /^\d+$/.test(String(codeOrId))) {
+      row = db.prepare('SELECT * FROM job_vacancies WHERE id = ?').get(codeOrId);
+    }
+    if (!row) {
+      row = db.prepare('SELECT * FROM job_vacancies WHERE job_code = ?').get(String(codeOrId));
+    }
+    if (!row) return null;
+
+    row.responsibilities = db.prepare('SELECT * FROM job_responsibilities WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC').all(row.id);
+    row.requirements = db.prepare('SELECT * FROM job_requirements WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC').all(row.id);
+    row.benefits = db.prepare('SELECT * FROM job_benefits WHERE job_vacancy_id = ? ORDER BY sort_order ASC, id ASC').all(row.id);
+
+    return row;
+  } catch (err) {
+    console.error('Error fetching vacancy by code/id:', err);
+    return null;
+  }
+}
+
 // Simple Blade-like HTML Template Engine
 function escapeHtml(text: any): string {
   if (text === null || text === undefined) return '';
@@ -310,6 +357,7 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                 <li><a href="${prefix}#services" class="nav-link"><span class="lang-ja">事業内容</span><span class="lang-en">Services</span></a></li>
                 <li><a href="${prefix}#strengths" class="nav-link"><span class="lang-ja">当社の強み</span><span class="lang-en">Strengths</span></a></li>
                 <li><a href="${prefix}#industries" class="nav-link"><span class="lang-ja">対応分野</span><span class="lang-en">Industries</span></a></li>
+                <li><a href="/careers" class="nav-link ${activePage === 'careers' ? 'active' : ''}"><span class="lang-ja">採用情報</span><span class="lang-en">Careers</span></a></li>
                 <li><a href="${prefix}#stories" class="nav-link"><span class="lang-ja">採用事例</span><span class="lang-en">Stories</span></a></li>
                 <li><a href="${prefix}#faq" class="nav-link"><span class="lang-ja">FAQ</span><span class="lang-en">FAQ</span></a></li>
                 <li><a href="${prefix}#company" class="nav-link"><span class="lang-ja">会社概要</span><span class="lang-en">Profile</span></a></li>
@@ -366,6 +414,11 @@ function renderHeader(company: any, activePage: string = 'home'): string {
                 <a href="${prefix}#industries" class="mobile-nav-link" onclick="toggleMobileNav()">
                     <span class="lang-ja">🌐 対応分野 (Industries)</span>
                     <span class="lang-en">🌐 Industries</span>
+                    <span>→</span>
+                </a>
+                <a href="/careers" class="mobile-nav-link" onclick="toggleMobileNav()">
+                    <span class="lang-ja">👥 自社採用情報 (Careers)</span>
+                    <span class="lang-en">👥 Careers at MIRANSH</span>
                     <span>→</span>
                 </a>
                 <a href="${prefix}#stories" class="mobile-nav-link" onclick="toggleMobileNav()">
@@ -1900,6 +1953,145 @@ app.post('/contact', async (req: Request, res: Response) => {
 });
 
 // ----------------------------------------------------
+// Public Careers & Job Vacancy Routes (MIRANSH Internal Hiring)
+// ----------------------------------------------------
+const CAREERS_PUBLIC_ROUTES = [
+  '/careers', '/jobs', '/recruitment',
+  '/ja/careers', '/en/careers',
+  '/careers/ja', '/careers/en'
+];
+
+app.get(CAREERS_PUBLIC_ROUTES, (req: Request, res: Response) => {
+  const company = getCompanyInfo();
+  // Get active published vacancies only
+  const vacancies = getVacancies(false);
+  
+  // Determine language preference
+  let lang = 'ja';
+  if (req.path.includes('/en') || req.query.lang === 'en' || req.cookies?.app_locale === 'en' || req.cookies?.admin_lang === 'en') {
+    lang = 'en';
+  }
+
+  const html = renderCareersIndexHtml(
+    vacancies,
+    company,
+    renderHeader,
+    renderFooter,
+    renderSakanaWidget,
+    lang
+  );
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
+
+app.get(['/careers/:codeOrId', '/jobs/:codeOrId', '/recruitment/:codeOrId'], (req: Request, res: Response) => {
+  const codeOrId = req.params.codeOrId;
+  const company = getCompanyInfo();
+  const vacancy = getVacancyByCodeOrId(codeOrId);
+
+  // If not found or draft (and not logged in as admin), redirect to careers list
+  const isAdmin = !!(req.session as any)?.user;
+  if (!vacancy || (vacancy.status !== 'published' && !isAdmin)) {
+    return res.redirect('/careers');
+  }
+
+  let lang = 'ja';
+  if (req.query.lang === 'en' || req.cookies?.app_locale === 'en' || req.cookies?.admin_lang === 'en') {
+    lang = 'en';
+  }
+
+  const html = renderCareersDetailHtml(
+    vacancy,
+    company,
+    renderHeader,
+    renderFooter,
+    renderSakanaWidget,
+    lang
+  );
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
+
+// Career Application Submission API & Form Handler
+app.post(['/careers/apply', '/api/careers/apply'], async (req: Request, res: Response) => {
+  const { job_code, job_title, name, email, phone, visa_status, message, website_url } = req.body;
+
+  // Anti-Spam Check: Honeypot field must be empty
+  if (website_url) {
+    console.warn('Spam application detected and blocked (honeypot triggered)');
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ success: false, error: 'Spam validation failed' });
+    }
+    return res.redirect('/careers');
+  }
+
+  if (!name || !email || !message) {
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ success: false, error: 'Name, email, and message/cover letter are required.' });
+    }
+    return res.redirect('/careers?error=missing_fields');
+  }
+
+  try {
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const posTitle = job_title ? `${job_title} [${job_code || 'Direct'}]` : `[${job_code || 'Direct'}] Job Vacancy Application`;
+    const fullMessage = [
+      `【MIRANSH 自社求人応募エントリー】`,
+      `応募職種: ${job_title || '総合職'} (求人コード: ${job_code || 'N/A'})`,
+      `氏名: ${name}`,
+      `メールアドレス: ${email}`,
+      `電話番号: ${phone || '未入力'}`,
+      `在留資格・国籍: ${visa_status || '未入力'}`,
+      ``,
+      `--- 志望動機・自己PR・職務経歴 ---`,
+      message
+    ].join('\n');
+
+    // Store in inquiries database
+    const stmt = db.prepare(`
+      INSERT INTO inquiries (name, company_name, email, phone, service_interest, inquiry_type, message, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'unread', ?, ?)
+    `);
+    stmt.run(
+      name,
+      `応募者 (在留資格: ${visa_status || '要確認'})`,
+      email,
+      phone || '',
+      `求人応募: ${job_code || '自社採用'}`,
+      'Job Application',
+      fullMessage,
+      now,
+      now
+    );
+
+    // Send email notification to company and confirmation to applicant
+    sendInquiryEmails({
+      name,
+      company_name: `求人応募: ${job_title || job_code || 'MIRANSH自社採用'}`,
+      email,
+      phone: phone || '',
+      service_interest: `自社採用応募 [${job_code || 'MIRANSH'}]`,
+      message: fullMessage,
+    }).catch(err => {
+      console.error('[Career Application Mail Error]', err);
+    });
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({ success: true, message: 'Application submitted successfully.' });
+    }
+    return res.redirect('/careers?applied=true');
+  } catch (err: any) {
+    console.error('Career application submit error:', err);
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    return res.redirect('/careers?error=server_error');
+  }
+});
+
+// ----------------------------------------------------
 // Sakana AI API Endpoints (Bilingual AI Assistant)
 // ----------------------------------------------------
 const DEFAULT_SAKANA_KEY = 'fish_5417ad43dff635f79be276f1b13e9a7e0259b1faeb16238692809e320d3eb84e';
@@ -2327,6 +2519,12 @@ const SERVICES_ROUTES = [
   '/admin/services/en', '/admin/services/ja',
   '/en/admin/services', '/ja/admin/services'
 ];
+const VACANCIES_ROUTES = [
+  '/admin/vacancies',
+  '/admin/en/vacancies', '/admin/ja/vacancies',
+  '/admin/vacancies/en', '/admin/vacancies/ja',
+  '/en/admin/vacancies', '/ja/admin/vacancies'
+];
 const STORIES_ROUTES = [
   '/admin/stories',
   '/admin/en/stories', '/admin/ja/stories',
@@ -2366,6 +2564,7 @@ app.get(DASHBOARD_ROUTES, requireAdmin, (req: Request, res: Response) => {
     if (tab === 'company') return adminRedirect(res, req, '/admin/company');
     if (tab === 'about') return adminRedirect(res, req, '/admin/about');
     if (tab === 'services') return adminRedirect(res, req, '/admin/services');
+    if (tab === 'vacancies') return adminRedirect(res, req, '/admin/vacancies');
     if (tab === 'stories') return adminRedirect(res, req, '/admin/stories');
     if (tab === 'faqs') return adminRedirect(res, req, '/admin/faqs');
     if (tab === 'inquiries') return adminRedirect(res, req, '/admin/inquiries');
@@ -2472,6 +2671,33 @@ app.get(SERVICES_ROUTES, requireAdmin, (req: Request, res: Response) => {
   const html = renderAdminLTELayout({
     pageTitle: t.nav.services,
     activePage: 'services',
+    lang,
+    unreadCount,
+    company,
+    user: (req.session as any).user,
+    bodyContent: content.body,
+    modalsContent: content.modals,
+    extraScripts: content.scripts,
+    flash: getAdminFlash(req, lang)
+  });
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
+
+// 4.5. Internal Job Vacancies Management Page
+app.get(VACANCIES_ROUTES, requireAdmin, (req: Request, res: Response) => {
+  const lang = getAdminLang(req, res);
+  const t = i18n[lang];
+  const company = getCompanyInfo();
+  const vacancies = getVacancies(true);
+  const inquiries = getInquiries();
+  const unreadCount = inquiries.filter((i: any) => i.status !== 'resolved').length;
+  const content = renderVacanciesContent(vacancies, lang);
+
+  const html = renderAdminLTELayout({
+    pageTitle: t.nav.vacancies,
+    activePage: 'vacancies',
     lang,
     unreadCount,
     company,
@@ -3012,6 +3238,273 @@ app.post(['/admin/services/:id/delete', '/admin/services/delete/:id'], (req: Req
   const id = parseInt(req.params.id, 10);
   db.prepare('DELETE FROM services WHERE id = ?').run(id);
   return adminRedirect(res, req, '/admin/services?deleted=true');
+});
+
+// Helper to save child relations for a vacancy
+function saveVacancyChildren(vacancyId: number, respJson: string, reqJson: string, benJson: string) {
+  try {
+    db.prepare('DELETE FROM job_responsibilities WHERE job_vacancy_id = ?').run(vacancyId);
+    db.prepare('DELETE FROM job_requirements WHERE job_vacancy_id = ?').run(vacancyId);
+    db.prepare('DELETE FROM job_benefits WHERE job_vacancy_id = ?').run(vacancyId);
+
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+    // Responsibilities
+    if (respJson && respJson.trim()) {
+      try {
+        const resps = JSON.parse(respJson);
+        const stmt = db.prepare(`
+          INSERT INTO job_responsibilities (job_vacancy_id, title_ja, title_en, description_ja, description_en, sort_order, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        resps.forEach((r: any, idx: number) => {
+          if (r.title_ja || r.title_en) {
+            stmt.run(vacancyId, r.title_ja || '', r.title_en || '', r.description_ja || '', r.description_en || '', r.sort_order || (idx + 1), now, now);
+          }
+        });
+      } catch (e) {
+        console.error('Error parsing responsibilities_json:', e);
+      }
+    }
+
+    // Requirements
+    if (reqJson && reqJson.trim()) {
+      try {
+        const reqs = JSON.parse(reqJson);
+        const stmt = db.prepare(`
+          INSERT INTO job_requirements (job_vacancy_id, type, description_ja, description_en, sort_order, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        reqs.forEach((rq: any, idx: number) => {
+          if (rq.description_ja || rq.description_en) {
+            stmt.run(vacancyId, rq.type || 'required', rq.description_ja || '', rq.description_en || '', rq.sort_order || (idx + 1), now, now);
+          }
+        });
+      } catch (e) {
+        console.error('Error parsing requirements_json:', e);
+      }
+    }
+
+    // Benefits
+    if (benJson && benJson.trim()) {
+      try {
+        const bens = JSON.parse(benJson);
+        const stmt = db.prepare(`
+          INSERT INTO job_benefits (job_vacancy_id, title_ja, title_en, description_ja, description_en, sort_order, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        bens.forEach((b: any, idx: number) => {
+          if (b.title_ja || b.title_en) {
+            stmt.run(vacancyId, b.title_ja || '', b.title_en || '', b.description_ja || '', b.description_en || '', b.sort_order || (idx + 1), now, now);
+          }
+        });
+      } catch (e) {
+        console.error('Error parsing benefits_json:', e);
+      }
+    }
+  } catch (err) {
+    console.error('Error saving vacancy children:', err);
+  }
+}
+
+// Vacancies CRUD Handlers
+app.post(['/admin/vacancies', '/admin/vacancies/create'], requireAdmin, (req: Request, res: Response) => {
+  const {
+    job_code, title_ja, title_en, employment_type,
+    location_ja, location_en, salary_type, salary_min, salary_max,
+    salary_note_ja, salary_note_en, working_hours_ja, working_hours_en,
+    holidays_ja, holidays_en, description_ja, description_en,
+    status, sort_order, published_at, closed_at,
+    responsibilities_json, requirements_json, benefits_json
+  } = req.body;
+
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const finalStatus = status || 'draft';
+  const finalPublishedAt = (finalStatus === 'published' && (!published_at || !published_at.trim())) ? now : (published_at || null);
+  const finalCode = (job_code && job_code.trim()) || `MIR-${new Date().getFullYear()}-${Math.floor(Math.random() * 900) + 100}`;
+
+  const info = db.prepare(`
+    INSERT INTO job_vacancies (
+      job_code, title_ja, title_en, employment_type,
+      location_ja, location_en, salary_min, salary_max, salary_type,
+      salary_note_ja, salary_note_en, working_hours_ja, working_hours_en,
+      holidays_ja, holidays_en, description_ja, description_en,
+      status, sort_order, published_at, closed_at, created_at, updated_at
+    ) VALUES (
+      ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?,
+      ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?
+    )
+  `).run(
+    finalCode, title_ja || '新規職種', title_en || 'New Position', employment_type || 'full_time',
+    location_ja || '', location_en || '',
+    salary_min ? parseInt(salary_min, 10) : null,
+    salary_max ? parseInt(salary_max, 10) : null,
+    salary_type || 'monthly',
+    salary_note_ja || '', salary_note_en || '',
+    working_hours_ja || '', working_hours_en || '',
+    holidays_ja || '', holidays_en || '',
+    description_ja || '', description_en || '',
+    finalStatus, parseInt(sort_order, 10) || 0,
+    finalPublishedAt, closed_at || null,
+    now, now
+  );
+
+  const vacancyId = Number(info.lastInsertRowid);
+  saveVacancyChildren(vacancyId, responsibilities_json, requirements_json, benefits_json);
+
+  return adminRedirect(res, req, '/admin/vacancies?saved=true');
+});
+
+app.post(['/admin/vacancies/:id', '/admin/vacancies/:id/update', '/admin/vacancies/update/:id'], requireAdmin, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  const {
+    job_code, title_ja, title_en, employment_type,
+    location_ja, location_en, salary_type, salary_min, salary_max,
+    salary_note_ja, salary_note_en, working_hours_ja, working_hours_en,
+    holidays_ja, holidays_en, description_ja, description_en,
+    status, sort_order, published_at, closed_at,
+    responsibilities_json, requirements_json, benefits_json
+  } = req.body;
+
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const existing = db.prepare('SELECT * FROM job_vacancies WHERE id = ?').get(id) as any;
+  if (!existing) {
+    return adminRedirect(res, req, '/admin/vacancies?error=not_found');
+  }
+
+  const finalStatus = status || existing.status || 'draft';
+  let finalPublishedAt = published_at || existing.published_at;
+  if (finalStatus === 'published' && !finalPublishedAt) {
+    finalPublishedAt = now;
+  }
+
+  db.prepare(`
+    UPDATE job_vacancies SET
+      job_code = ?, title_ja = ?, title_en = ?, employment_type = ?,
+      location_ja = ?, location_en = ?, salary_min = ?, salary_max = ?, salary_type = ?,
+      salary_note_ja = ?, salary_note_en = ?, working_hours_ja = ?, working_hours_en = ?,
+      holidays_ja = ?, holidays_en = ?, description_ja = ?, description_en = ?,
+      status = ?, sort_order = ?, published_at = ?, closed_at = ?, updated_at = ?
+    WHERE id = ?
+  `).run(
+    job_code || existing.job_code, title_ja, title_en, employment_type || 'full_time',
+    location_ja || '', location_en || '',
+    salary_min ? parseInt(salary_min, 10) : null,
+    salary_max ? parseInt(salary_max, 10) : null,
+    salary_type || 'monthly',
+    salary_note_ja || '', salary_note_en || '',
+    working_hours_ja || '', working_hours_en || '',
+    holidays_ja || '', holidays_en || '',
+    description_ja || '', description_en || '',
+    finalStatus, parseInt(sort_order, 10) || 0,
+    finalPublishedAt, closed_at || null,
+    now,
+    id
+  );
+
+  saveVacancyChildren(id, responsibilities_json, requirements_json, benefits_json);
+
+  return adminRedirect(res, req, '/admin/vacancies?saved=true');
+});
+
+app.post(['/admin/vacancies/:id/status', '/admin/vacancies/status/:id'], requireAdmin, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  const { status } = req.body;
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const existing = db.prepare('SELECT * FROM job_vacancies WHERE id = ?').get(id) as any;
+  if (existing) {
+    let publishedAt = existing.published_at;
+    if (status === 'published' && !publishedAt) {
+      publishedAt = now;
+    }
+    db.prepare('UPDATE job_vacancies SET status = ?, published_at = ?, updated_at = ? WHERE id = ?').run(
+      status, publishedAt, now, id
+    );
+  }
+  return adminRedirect(res, req, '/admin/vacancies?updated=true');
+});
+
+app.post(['/admin/vacancies/:id/duplicate', '/admin/vacancies/duplicate/:id'], requireAdmin, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  const orig = db.prepare('SELECT * FROM job_vacancies WHERE id = ?').get(id) as any;
+  if (!orig) return adminRedirect(res, req, '/admin/vacancies?error=not_found');
+
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const newCode = `${orig.job_code}-COPY-${Math.floor(Math.random() * 900) + 100}`;
+  const info = db.prepare(`
+    INSERT INTO job_vacancies (
+      job_code, title_ja, title_en, employment_type,
+      location_ja, location_en, salary_min, salary_max, salary_type,
+      salary_note_ja, salary_note_en, working_hours_ja, working_hours_en,
+      holidays_ja, holidays_en, description_ja, description_en,
+      status, sort_order, published_at, closed_at, created_at, updated_at
+    ) VALUES (
+      ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?,
+      ?, ?, ?, ?,
+      'draft', ?, null, null, ?, ?
+    )
+  `).run(
+    newCode,
+    `${orig.title_ja}（コピー）`,
+    `${orig.title_en} (Copy)`,
+    orig.employment_type,
+    orig.location_ja, orig.location_en,
+    orig.salary_min, orig.salary_max, orig.salary_type,
+    orig.salary_note_ja, orig.salary_note_en,
+    orig.working_hours_ja, orig.working_hours_en,
+    orig.holidays_ja, orig.holidays_en,
+    orig.description_ja, orig.description_en,
+    (orig.sort_order || 0) + 1,
+    now, now
+  );
+
+  const newId = Number(info.lastInsertRowid);
+
+  // Copy responsibilities
+  const resps = db.prepare('SELECT * FROM job_responsibilities WHERE job_vacancy_id = ?').all(id);
+  const respStmt = db.prepare(`
+    INSERT INTO job_responsibilities (job_vacancy_id, title_ja, title_en, description_ja, description_en, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  resps.forEach((r: any) => {
+    respStmt.run(newId, r.title_ja, r.title_en, r.description_ja, r.description_en, r.sort_order, now, now);
+  });
+
+  // Copy requirements
+  const reqs = db.prepare('SELECT * FROM job_requirements WHERE job_vacancy_id = ?').all(id);
+  const reqStmt = db.prepare(`
+    INSERT INTO job_requirements (job_vacancy_id, type, description_ja, description_en, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  reqs.forEach((rq: any) => {
+    reqStmt.run(newId, rq.type, rq.description_ja, rq.description_en, rq.sort_order, now, now);
+  });
+
+  // Copy benefits
+  const bens = db.prepare('SELECT * FROM job_benefits WHERE job_vacancy_id = ?').all(id);
+  const benStmt = db.prepare(`
+    INSERT INTO job_benefits (job_vacancy_id, title_ja, title_en, description_ja, description_en, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  bens.forEach((b: any) => {
+    benStmt.run(newId, b.title_ja, b.title_en, b.description_ja, b.description_en, b.sort_order, now, now);
+  });
+
+  return adminRedirect(res, req, '/admin/vacancies?saved=true');
+});
+
+app.post(['/admin/vacancies/:id/delete', '/admin/vacancies/delete/:id'], requireAdmin, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  db.prepare('DELETE FROM job_responsibilities WHERE job_vacancy_id = ?').run(id);
+  db.prepare('DELETE FROM job_requirements WHERE job_vacancy_id = ?').run(id);
+  db.prepare('DELETE FROM job_benefits WHERE job_vacancy_id = ?').run(id);
+  db.prepare('DELETE FROM job_vacancies WHERE id = ?').run(id);
+  return adminRedirect(res, req, '/admin/vacancies?deleted=true');
 });
 
 // FAQs CRUD Handlers

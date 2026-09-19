@@ -282,6 +282,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="/admin/vacancies?lang={{ $currLang }}" class="nav-link {{ request()->is('admin/vacancies*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-user-tie"></i>
+                            <p>{{ $isEn ? 'Job Vacancies' : '自社求人情報管理' }}</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('admin.stories', ['lang' => $currLang]) }}" class="nav-link {{ request()->routeIs('admin.stories') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-newspaper"></i>
                             <p>{{ $isEn ? 'Stories & Case Studies' : '採用事例・実績管理' }}</p>

@@ -259,6 +259,7 @@ export function renderAdminLTELayout(opts: LayoutOptions): string {
     { id: 'company', href: `/admin/company${langSuffix}`, icon: 'fas fa-building', label: t.nav.company, badge: '' },
     { id: 'about', href: `/admin/about${langSuffix}`, icon: 'fas fa-award', label: t.nav.about, badge: '' },
     { id: 'services', href: `/admin/services${langSuffix}`, icon: 'fas fa-concierge-bell', label: t.nav.services, badge: '' },
+    { id: 'vacancies', href: `/admin/vacancies${langSuffix}`, icon: 'fas fa-user-tie', label: t.nav.vacancies, badge: '' },
     { id: 'stories', href: `/admin/stories${langSuffix}`, icon: 'fas fa-book-open', label: t.nav.stories, badge: '' },
     { id: 'faqs', href: `/admin/faqs${langSuffix}`, icon: 'fas fa-question-circle', label: t.nav.faqs, badge: '' },
     { id: 'inquiries', href: `/admin/inquiries${langSuffix}`, icon: 'fas fa-envelope', label: t.nav.inquiries, badge: unreadCount > 0 ? `<span class="badge badge-warning right font-weight-bold">${unreadCount}</span>` : '' },
