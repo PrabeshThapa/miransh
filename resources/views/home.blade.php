@@ -1390,7 +1390,7 @@
                                 </span>
 
                                 <span class="fw-bolder fs-6">
-                                    500,000円
+                                    5,000,000円
                                 </span>
 
                             </div>
@@ -1403,7 +1403,7 @@
                                 </span>
 
                                 <span class="fw-bolder fs-6">
-                                    ¥500,000
+                                    ¥5,000,000
                                 </span>
 
                             </div>
