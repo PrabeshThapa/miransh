@@ -256,7 +256,7 @@ class AdminController extends Controller
             $company = new CompanyInfo();
         }
 
-        $inputData = $request->except(['_token', 'ceo_image_file', 'hero_image_file']);
+        $inputData = $request->except(['_token', 'ceo_image_file', 'lang','hero_image_file']);
 
         // Check if CEO image file was directly uploaded with the form
         if ($request->hasFile('ceo_image_file')) {
